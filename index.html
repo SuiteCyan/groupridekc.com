@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Group Ride KC – Kansas City Group Shuttle Service</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    /* ─── Variables ─────────────────────────────────── */
+    :root {
+      --red:    #E31837;
+      --red-dk: #b8102a;
+      --gold:   #FFB81C;
+      --gold-lt:#ffd06e;
+      --dark:   #0a0a0a;
+      --card:   #141414;
+      --card2:  #1c1c1c;
+      --border: rgba(255,255,255,0.08);
+      --text-muted: rgba(255,255,255,0.55);
+    }
+
+    /* ─── Utility ───────────────────────────────────── */
+    .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 28px; border-radius: 8px; font-weight: 700;
+      font-size: 0.95rem; cursor: pointer; border: none; transition: all .2s;
+      white-space: nowrap;
+    }
+    .btn-primary   { background: var(--red);  color: #fff; }
+    .btn-primary:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(227,24,55,.4); }
+    .btn-gold      { background: var(--gold); color: #1a1a1a; }
+    .btn-gold:hover { background: var(--gold-lt); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,184,28,.35); }
+    .btn-outline   { background: transparent; color: #fff; border: 2px solid var(--border); }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+    .section-label {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 12px;
+    }
+    .section-title { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; line-height: 1.15; }
+    .section-sub   { color: var(--text-muted); margin-top: 12px; font-size: 1.05rem; max-width: 580px; }
+    .tag {
+      display: inline-block; font-size: 0.7rem; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px;
+      border-radius: 100px; background: rgba(255,184,28,.15); color: var(--gold);
+    }
+
+    /* ─── Navbar ────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+      background: rgba(10,10,10,.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 68px; gap: 24px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem;
+    }
+    .nav-logo .logo-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--red), #ff4d6a);
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    }
+    .logo-text span { color: var(--gold); }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { font-size: 0.82rem; font-weight: 500; color: var(--text-muted); transition: color .2s; white-space: nowrap; }
+    .nav-links a:hover { color: #fff; }
+    .nav-cta { display: flex; gap: 8px; }
+    .nav-cta .btn { padding: 11px 20px; font-size: 0.85rem; white-space: nowrap; }
+    @media(max-width:768px) {
+      .nav-links { display: none; }
+      .nav-cta .btn-outline { display: none; }
+    }
+
+    /* ─── Hero ──────────────────────────────────────── */
+    #hero {
+      min-height: 100vh; display: flex; align-items: center;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(227,24,55,.22) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 90% 80%, rgba(255,184,28,.1) 0%, transparent 60%),
+        #0a0a0a;
+      padding-top: 68px;
+    }
+    .hero-inner {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 60px; align-items: center; padding: 80px 0;
+    }
+    /* ─── Hero Van Logo ─────────────────────────────── */
+    .hero-van-logo {
+      margin-bottom: 28px;
+    }
+    .hero-van-logo img {
+      max-width: 420px;
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 12px 40px rgba(0,0,0,0.6));
+      animation: vanFloat 4s ease-in-out infinite;
+    }
+    @keyframes vanFloat {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-8px); }
+    }
+    @media(max-width: 900px) {
+      .hero-van-logo img { max-width: 320px; }
+    }
+
+    .hero-eyebrow {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+    }
+    .hero-h1 {
+      font-size: clamp(2.4rem, 5.5vw, 4rem); font-weight: 900; line-height: 1.05;
+      margin-bottom: 20px;
+    }
+    .hero-h1 .accent { color: var(--gold); }
+    .hero-h1 .red    { color: var(--red); }
+    .hero-sub { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 36px; max-width: 480px; }
+    .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 48px; }
+    .hero-stats { display: flex; gap: 32px; flex-wrap: wrap; }
+    .stat-item {}
+    .stat-num { font-size: 1.8rem; font-weight: 800; color: var(--gold); }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+    .hero-visual {
+      position: relative; display: flex; flex-direction: column; gap: 16px;
+    }
+    .vehicle-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 24px; display: flex; align-items: center; gap: 20px;
+      transition: border-color .2s, transform .2s;
+    }
+    .vehicle-card:hover { border-color: var(--gold); transform: translateX(-4px); }
+    .vehicle-card.featured { border-color: var(--red); }
+    .vehicle-icon { font-size: 2.5rem; flex-shrink: 0; }
+    .vehicle-name { font-weight: 700; font-size: 1.05rem; }
+    .vehicle-cap  { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+    .vehicle-price { margin-left: auto; text-align: right; }
+    .price-from   { font-size: 0.75rem; color: var(--text-muted); }
+    .price-num    { font-size: 1.4rem; font-weight: 800; color: var(--gold); }
+    .hero-badge {
+      position: absolute; top: -16px; right: -16px;
+      background: var(--gold); color: #1a1a1a; border-radius: 12px;
+      padding: 10px 14px; font-weight: 800; font-size: 0.8rem; text-align: center;
+      box-shadow: 0 4px 20px rgba(255,184,28,.4); line-height: 1.3;
+    }
+
+    @media(max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-visual { display: block; }
+    }
+
+    /* ─── How It Works ──────────────────────────────── */
+    #how-it-works { padding: 100px 0; background: var(--card); }
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 32px; margin-top: 56px;
+    }
+    .step-card {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 32px; position: relative; transition: border-color .2s;
+    }
+    .step-card:hover { border-color: var(--red); }
+    .step-num {
+      font-size: 3rem; font-weight: 900; color: var(--border);
+      line-height: 1; margin-bottom: 20px;
+    }
+    .step-icon { font-size: 2rem; margin-bottom: 12px; }
+    .step-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; }
+    .step-desc  { font-size: 0.88rem; color: var(--text-muted); }
+    .step-connector {
+      position: absolute; right: -17px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold); font-size: 1.2rem; z-index: 1;
+    }
+    @media(max-width: 900px) { .step-connector { display: none; } }
+
+    /* ─── Services ──────────────────────────────────── */
+    #services { padding: 100px 0; }
+    .services-header { text-align: center; margin-bottom: 60px; }
+    .services-header .section-sub { margin: 12px auto 0; }
+    .services-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+    }
+    @media(max-width: 768px) { .services-grid { grid-template-columns: 1fr; } }
+    .service-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 40px; position: relative; overflow: hidden;
+      transition: transform .25s, border-color .25s;
+    }
+    .service-card:hover { transform: translateY(-6px); }
+    .service-card.popular { border-color: var(--gold); }
+    .popular-badge {
+      position: absolute; top: 20px; right: 20px;
+      background: var(--gold); color: #1a1a1a;
+      font-size: 0.7rem; font-weight: 800; letter-spacing: .06em;
+      text-transform: uppercase; padding: 4px 12px; border-radius: 100px;
+    }
+    .service-icon { font-size: 3rem; margin-bottom: 20px; }
+    .service-name { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
+    .service-cap  { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 24px; }
+    .service-price {
+      font-size: 2.4rem; font-weight: 900; color: var(--gold);
+      margin-bottom: 4px; line-height: 1;
+    }
+    .service-price sup { font-size: 1.2rem; vertical-align: super; }
+    .service-price-note { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 28px; }
+    .service-features { list-style: none; margin-bottom: 32px; }
+    .service-features li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.9rem; padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .service-features li:last-child { border-bottom: none; }
+    .service-features li .check { color: var(--gold); font-weight: 700; flex-shrink: 0; }
+    .service-glow {
+      position: absolute; bottom: -60px; right: -60px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,184,28,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ─── Booking Form ──────────────────────────────── */
+    #booking {
+      padding: 100px 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 100%, rgba(227,24,55,.12) 0%, transparent 70%),
+        var(--card);
+    }
+    .booking-inner {
+      display: grid; grid-template-columns: 1fr 1.4fr; gap: 60px; align-items: start;
+    }
+    @media(max-width: 900px) { .booking-inner { grid-template-columns: 1fr; } }
+    .booking-info {}
+    .booking-info .section-sub { max-width: 380px; }
+    .booking-features { margin-top: 36px; display: flex; flex-direction: column; gap: 20px; }
+    .booking-feat {
+      display: flex; align-items: flex-start; gap: 16px;
+    }
+    .booking-feat-icon {
+      width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(255,184,28,.12); display: flex; align-items: center;
+      justify-content: center; font-size: 1.2rem;
+    }
+    .booking-feat-title { font-weight: 600; margin-bottom: 3px; }
+    .booking-feat-desc  { font-size: 0.83rem; color: var(--text-muted); }
+
+    .booking-form-card {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 36px;
+    }
+    .form-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
+    .form-sub   { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 28px; }
+    .form-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-size: 0.82rem; font-weight: 600;
+      color: rgba(255,255,255,.7); margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%; background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px; color: #fff; font-family: inherit;
+      font-size: 0.9rem; transition: border-color .2s;
+      -webkit-appearance: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none; border-color: var(--gold);
+    }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+    .vehicle-selector { display: flex; gap: 12px; }
+    .vehicle-opt {
+      flex: 1; border: 2px solid var(--border); border-radius: 10px;
+      padding: 14px 10px; text-align: center; cursor: pointer; transition: all .2s;
+    }
+    .vehicle-opt:hover { border-color: rgba(255,184,28,.5); }
+    .vehicle-opt.selected { border-color: var(--gold); background: rgba(255,184,28,.07); }
+    .vehicle-opt .vo-icon { font-size: 1.6rem; margin-bottom: 4px; }
+    .vehicle-opt .vo-name { font-size: 0.8rem; font-weight: 600; }
+    .vehicle-opt .vo-cap  { font-size: 0.72rem; color: var(--text-muted); }
+    .form-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+    .form-total {
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(255,184,28,.06); border-radius: 10px; padding: 14px 18px;
+      margin-bottom: 20px;
+    }
+    .form-total-label { font-size: 0.85rem; color: var(--text-muted); }
+    .form-total-price { font-size: 1.3rem; font-weight: 800; color: var(--gold); }
+    .form-submit { width: 100%; padding: 16px; font-size: 1rem; border-radius: 10px; }
+
+    /* ─── Payment Section ───────────────────────────── */
+    #payment { padding: 100px 0; }
+    .payment-inner {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start;
+    }
+    @media(max-width: 900px) { .payment-inner { grid-template-columns: 1fr; } }
+    .payment-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 36px;
+    }
+    .payment-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
+    .payment-card .pay-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 28px; }
+    .pay-methods { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+    .pay-method {
+      background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 16px; font-size: 0.82rem; font-weight: 600;
+      display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all .2s;
+    }
+    .pay-method:hover, .pay-method.active { border-color: var(--gold); color: var(--gold); }
+    .pay-field-group { margin-bottom: 16px; }
+    .pay-field-group label {
+      display: block; font-size: 0.8rem; font-weight: 600;
+      color: rgba(255,255,255,.65); margin-bottom: 6px;
+    }
+    .pay-field {
+      width: 100%; background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px; color: #fff; font-family: inherit;
+      font-size: 0.9rem; transition: border-color .2s;
+    }
+    .pay-field:focus { outline: none; border-color: var(--gold); }
+    .pay-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .pay-secure {
+      display: flex; align-items: center; gap: 8px; font-size: 0.78rem;
+      color: var(--text-muted); margin-top: 16px;
+    }
+    .secure-icon { color: var(--gold); }
+    .pay-btn { width: 100%; padding: 16px; font-size: 1rem; border-radius: 10px; margin-top: 20px; }
+    .powered-by {
+      text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 12px;
+    }
+    .powered-by span { color: var(--gold); font-weight: 600; }
+
+    .payment-info { }
+    .payment-steps { margin-top: 28px; display: flex; flex-direction: column; gap: 20px; }
+    .pay-step {
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .pay-step-num {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--red);
+      color: #fff; font-weight: 800; font-size: 0.85rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .pay-step-title { font-weight: 600; margin-bottom: 4px; }
+    .pay-step-desc  { font-size: 0.83rem; color: var(--text-muted); }
+
+    /* ─── Reviews ───────────────────────────────────── */
+    #reviews {
+      padding: 100px 0;
+      background:
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255,184,28,.07) 0%, transparent 70%),
+        var(--card);
+    }
+    .reviews-header { text-align: center; margin-bottom: 60px; }
+    .reviews-rating {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      margin-top: 16px;
+    }
+    .stars { color: var(--gold); font-size: 1.4rem; letter-spacing: 2px; }
+    .rating-num { font-size: 2rem; font-weight: 800; }
+    .rating-count { font-size: 0.85rem; color: var(--text-muted); }
+    .reviews-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;
+    }
+    .review-card {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px; transition: border-color .2s;
+    }
+    .review-card:hover { border-color: rgba(255,184,28,.3); }
+    .review-stars { color: var(--gold); margin-bottom: 14px; }
+    .review-text { font-size: 0.9rem; color: rgba(255,255,255,.8); margin-bottom: 20px; font-style: italic; }
+    .reviewer {
+      display: flex; align-items: center; gap: 12px; padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .reviewer-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
+    }
+    .reviewer-name { font-weight: 600; font-size: 0.88rem; }
+    .reviewer-trip { font-size: 0.78rem; color: var(--text-muted); }
+
+    /* ─── Feedback Form ─────────────────────────────── */
+    #feedback { padding: 80px 0; }
+    .feedback-inner {
+      max-width: 640px; margin: 0 auto; text-align: center;
+    }
+    .feedback-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 40px; margin-top: 40px; text-align: left;
+    }
+    .rating-select {
+      display: flex; gap: 10px; margin-bottom: 20px; justify-content: center;
+    }
+    .star-btn {
+      font-size: 2rem; background: none; border: none; cursor: pointer;
+      color: var(--border); transition: color .15s; line-height: 1;
+    }
+    .star-btn.active, .star-btn:hover { color: var(--gold); }
+    .feedback-submit { width: 100%; padding: 14px; border-radius: 10px; margin-top: 20px; }
+
+    /* ─── Contact Strip ─────────────────────────────── */
+    #contact {
+      padding: 80px 0;
+      background: linear-gradient(135deg, var(--red) 0%, #b8102a 100%);
+    }
+    .contact-inner {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 32px; flex-wrap: wrap;
+    }
+    .contact-text h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 800; }
+    .contact-text p { color: rgba(255,255,255,.75); margin-top: 8px; }
+    .contact-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-white  { background: #fff; color: var(--red); font-weight: 700; }
+    .btn-white:hover { background: #f0f0f0; transform: translateY(-2px); }
+    .btn-clear  { background: rgba(255,255,255,.15); color: #fff; border: 2px solid rgba(255,255,255,.4); }
+    .btn-clear:hover { background: rgba(255,255,255,.25); }
+
+    /* ─── Footer ────────────────────────────────────── */
+    footer {
+      background: #050505; border-top: 1px solid var(--border); padding: 60px 0 30px;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px;
+    }
+    @media(max-width: 900px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+    @media(max-width: 500px) { .footer-grid { grid-template-columns: 1fr; } }
+    .footer-brand .nav-logo { margin-bottom: 14px; }
+    .footer-brand p { font-size: 0.85rem; color: var(--text-muted); max-width: 260px; line-height: 1.7; }
+    .footer-socials { display: flex; gap: 12px; margin-top: 20px; }
+    .social-btn {
+      width: 38px; height: 38px; border-radius: 8px; background: var(--card2);
+      border: 1px solid var(--border); display: flex; align-items: center;
+      justify-content: center; font-size: 1rem; transition: all .2s; cursor: pointer;
+    }
+    .social-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .footer-col h4 { font-weight: 700; margin-bottom: 16px; font-size: 0.88rem; letter-spacing: .04em; }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 10px; }
+    .footer-col ul li a {
+      font-size: 0.85rem; color: var(--text-muted); transition: color .2s;
+    }
+    .footer-col ul li a:hover { color: #fff; }
+    .footer-bottom {
+      border-top: 1px solid var(--border); padding-top: 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .footer-copy { font-size: 0.8rem; color: var(--text-muted); }
+    .footer-legal { display: flex; gap: 20px; }
+    .footer-legal a { font-size: 0.8rem; color: var(--text-muted); transition: color .2s; }
+    .footer-legal a:hover { color: #fff; }
+
+    /* ─── Modal ─────────────────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,.8); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 20px; max-width: 480px; width: 100%;
+      padding: 36px; position: relative; animation: slideUp .3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      background: none; border: none; color: var(--text-muted);
+      font-size: 1.4rem; cursor: pointer; line-height: 1; transition: color .2s;
+    }
+    .modal-close:hover { color: #fff; }
+    .modal-icon { font-size: 3rem; margin-bottom: 16px; text-align: center; }
+    .modal h3 { font-size: 1.4rem; font-weight: 700; text-align: center; margin-bottom: 10px; }
+    .modal p  { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+    .modal .btn { width: 100%; }
+
+    /* ─── Scroll reveal ──────────────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(28px); transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── Autocomplete ───────────────────────────────── */
+    .autocomplete-wrapper { position: relative; }
+    .autocomplete-dropdown {
+      display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
+      background: #1e1e1e; border: 1px solid var(--gold);
+      border-radius: 0 0 10px 10px; overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    }
+    .autocomplete-dropdown.open { display: block; }
+    .ac-item {
+      padding: 10px 14px; font-size: 0.82rem; cursor: pointer;
+      border-bottom: 1px solid var(--border); transition: background .15s;
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .ac-item:last-child { border-bottom: none; }
+    .ac-item:hover { background: rgba(255,184,28,.1); }
+    .ac-icon { color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+    .ac-name { font-weight: 500; color: #fff; }
+    .ac-addr { color: var(--text-muted); font-size: 0.75rem; }
+
+    /* ─── Availability Badge ─────────────────────────── */
+    #avail-status {
+      border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+      font-size: 0.82rem; font-weight: 600; display: flex;
+      align-items: center; gap: 8px;
+    }
+    #avail-status.avail-ok   { background: rgba(40,200,120,.12); border: 1px solid rgba(40,200,120,.3); color: #4ce0a0; }
+    #avail-status.avail-no   { background: rgba(227,24,55,.12);  border: 1px solid rgba(227,24,55,.3);  color: #ff6b7a; }
+    #avail-status.avail-load { background: rgba(255,184,28,.08); border: 1px solid rgba(255,184,28,.2); color: var(--gold); }
+    .avail-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .avail-ok .avail-dot   { background: #4ce0a0; box-shadow: 0 0 6px #4ce0a0; }
+    .avail-no .avail-dot   { background: #ff6b7a; box-shadow: 0 0 6px #ff6b7a; }
+    .avail-load .avail-dot { background: var(--gold); animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ─── Route Info Bar ─────────────────────────────── */
+    #route-info {
+      background: rgba(255,184,28,.07); border: 1px solid rgba(255,184,28,.2);
+      border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .ri-item { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; }
+    .ri-label { color: var(--text-muted); }
+    .ri-value { font-weight: 700; color: var(--gold); }
+
+    /* ─── Price Breakdown ────────────────────────────── */
+    .price-breakdown {
+      background: rgba(255,255,255,.04); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;
+    }
+    .pb-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.82rem; padding: 4px 0;
+    }
+    .pb-row span:first-child { color: var(--text-muted); }
+    .pb-row span:last-child  { font-weight: 600; }
+    .pb-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+    .pb-total {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.95rem; padding: 2px 0;
+    }
+    .pb-total span:first-child { font-weight: 600; }
+    .pb-total span:last-child  { font-size: 1.4rem; font-weight: 800; color: var(--gold); }
+    .pb-note { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
+    .pb-cal-note {
+      margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
+      font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ─── Lake of the Ozarks Section ────────────────── */
+    :root { --lake: #1a9fc0; --lake-dk: #127a96; --lake-lt: #5dcce8; }
+
+    #loto {
+      padding: 100px 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(26,159,192,.14) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 10% 100%, rgba(26,159,192,.07) 0%, transparent 60%),
+        #0a0a0a;
+    }
+    .loto-header { text-align: center; margin-bottom: 56px; }
+    .loto-header .section-label { color: var(--lake-lt); }
+    .loto-header .section-sub   { margin: 12px auto 0; }
+
+    /* Trip type selector */
+    .trip-type-selector {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin-bottom: 32px;
+    }
+    @media(max-width: 600px) { .trip-type-selector { grid-template-columns: 1fr; } }
+
+    .trip-type-opt {
+      border: 2px solid var(--border); border-radius: 14px;
+      padding: 20px 16px; text-align: center; cursor: pointer;
+      transition: all .2s; background: var(--card);
+      position: relative; overflow: hidden;
+    }
+    .trip-type-opt:hover { border-color: rgba(26,159,192,.5); transform: translateY(-3px); }
+    .trip-type-opt.selected {
+      border-color: var(--lake); background: rgba(26,159,192,.08);
+      box-shadow: 0 0 0 1px var(--lake), 0 8px 24px rgba(26,159,192,.15);
+    }
+    .trip-type-opt .tt-icon  { font-size: 2rem; margin-bottom: 8px; }
+    .trip-type-opt .tt-name  { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+    .trip-type-opt .tt-desc  { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
+    .trip-type-opt .tt-badge {
+      position: absolute; top: 10px; right: 10px;
+      background: var(--lake); color: #fff; font-size: 0.62rem;
+      font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 100px;
+    }
+
+    /* LOTO layout */
+    .loto-inner {
+      display: grid; grid-template-columns: 1fr 1.35fr; gap: 60px; align-items: start;
+    }
+    @media(max-width: 900px) { .loto-inner { grid-template-columns: 1fr; } }
+
+    .loto-info {}
+    .loto-highlights {
+      margin-top: 36px; display: flex; flex-direction: column; gap: 18px;
+    }
+    .loto-highlight {
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .loto-hl-icon {
+      width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(26,159,192,.12);
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    }
+    .loto-hl-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
+    .loto-hl-desc  { font-size: 0.82rem; color: var(--text-muted); }
+
+    .loto-distance-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: rgba(26,159,192,.1); border: 1px solid rgba(26,159,192,.25);
+      border-radius: 10px; padding: 12px 16px; margin-top: 28px;
+      font-size: 0.82rem; color: var(--lake-lt);
+    }
+    .loto-distance-badge strong { font-size: 1.1rem; color: #fff; }
+
+    /* LOTO form card */
+    .loto-form-card {
+      background: var(--card2); border: 1px solid rgba(26,159,192,.2);
+      border-radius: 20px; padding: 36px;
+      box-shadow: 0 0 40px rgba(26,159,192,.06);
+      position: relative; overflow: hidden;
+    }
+    .loto-circle-logo {
+      position: absolute; bottom: -20px; left: -20px;
+      width: 200px; height: 200px; object-fit: contain;
+      opacity: 0.13; pointer-events: none;
+      filter: drop-shadow(0 0 20px rgba(26,159,192,.4));
+    }
+    .loto-form-card .form-title { color: var(--lake-lt); }
+
+    /* Return date row — hidden unless multi-day */
+    .return-row { display: none; }
+    .return-row.visible { display: grid; }
+
+    /* Price breakdown lake accent */
+    .loto-price-breakdown {
+      background: rgba(26,159,192,.05); border: 1px solid rgba(26,159,192,.18);
+      border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;
+    }
+    .loto-price-breakdown .pb-total span:last-child { color: var(--lake-lt); }
+    .loto-price-breakdown .pb-row span:last-child.surcharge { color: var(--lake-lt); }
+
+    .btn-lake { background: var(--lake); color: #fff; }
+    .btn-lake:hover { background: var(--lake-dk); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,159,192,.4); }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ NAVBAR ══════════════ -->
+<nav>
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <div class="logo-text">Group Ride <span>KC</span></div>
+      </a>
+      <div class="nav-links">
+        <a href="#how-it-works">How It Works</a>
+        <a href="#services">Services</a>
+        <a href="#loto" style="color:var(--lake-lt);">🏖️ Lake Ozarks</a>
+        <a href="#reviews">Reviews</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="nav-cta">
+<a href="#booking" class="btn btn-outline">Get a Quote</a>
+        <a href="#booking" class="btn btn-primary">Book Now →</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-van-logo">
+          <img src="images/grkc-logo-van.png" alt="Group Ride KC" />
+        </div>
+        <div class="hero-eyebrow">
+          <span class="tag">⚽ Kansas City 2026</span>
+          <span class="tag">Kansas City</span>
+        </div>
+        <h1 class="hero-h1">
+          Your Group.<br>
+          <span class="accent">One Ride.</span><br>
+          <span class="red">Zero Hassle.</span>
+        </h1>
+        <p class="hero-sub">
+          Premium group shuttle service for the biggest soccer event in Kansas City history. Book a private Suburban for up to 5 guests or a 10-passenger van for your full crew — door to door, on your schedule.
+        </p>
+        <div class="hero-btns">
+          <a href="#booking" class="btn btn-primary">Book a Ride →</a>
+          <a href="#services" class="btn btn-outline">View Services</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-num">24/7</div>
+            <div class="stat-label">Availability</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">1–10</div>
+            <div class="stat-label">Passengers</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">KC</div>
+            <div class="stat-label">Soccer Host City 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="booking-form-card" id="quote-form" style="position:relative;">
+          <div class="form-title">Get a Quote</div>
+          <div class="form-sub">Live pricing · Availability check · Instant estimate</div>
+
+          <form id="bookingForm" onsubmit="submitBooking(event)">
+
+            <!-- Vehicle Selection -->
+            <div class="form-group">
+              <label>Select Vehicle</label>
+              <div class="vehicle-selector">
+                <div class="vehicle-opt selected" id="opt-suburban" onclick="selectVehicle('suburban')">
+                  <div class="vo-icon">🚙</div>
+                  <div class="vo-name">Suburban</div>
+                  <div class="vo-cap">1–5 people</div>
+                </div>
+                <div class="vehicle-opt" id="opt-van" onclick="selectVehicle('van')">
+                  <div class="vo-icon">🚐</div>
+                  <div class="vo-name">Van</div>
+                  <div class="vo-cap">6–10 people</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Date & Time -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="pickup-date">Pickup Date</label>
+                <input type="date" id="pickup-date" required oninput="onDateTimeChange()" />
+              </div>
+              <div class="form-group">
+                <label for="pickup-time">Pickup Time</label>
+                <input type="time" id="pickup-time" required oninput="onDateTimeChange()" />
+              </div>
+            </div>
+
+            <!-- Availability Status -->
+            <div id="avail-status" style="display:none;">
+              <div class="avail-dot"></div>
+              <span id="avail-text"></span>
+            </div>
+
+            <!-- Pickup Address with Autocomplete -->
+            <div class="form-group autocomplete-wrapper">
+              <label for="pickup-loc">Pickup Location</label>
+              <input type="text" id="pickup-loc" placeholder="Address, hotel, or landmark"
+                     required autocomplete="off" oninput="debounceGeocode(this,'pickup')" />
+              <div class="autocomplete-dropdown" id="pickup-dropdown"></div>
+            </div>
+
+            <!-- Dropoff Address with Autocomplete -->
+            <div class="form-group autocomplete-wrapper">
+              <label for="dropoff-loc">Drop-off Location</label>
+              <input type="text" id="dropoff-loc" placeholder="Stadium, KCI Airport, hotel, etc."
+                     required autocomplete="off" oninput="debounceGeocode(this,'dropoff')" />
+              <div class="autocomplete-dropdown" id="dropoff-dropdown"></div>
+            </div>
+
+            <!-- Route Info Bar (shown after both addresses resolved) -->
+            <div id="route-info" style="display:none;">
+              <div class="ri-item">📍 <span class="ri-label">Distance:</span>&nbsp;<span class="ri-value" id="ri-dist">--</span></div>
+              <div class="ri-item">⏱ <span class="ri-label">Drive time:</span>&nbsp;<span class="ri-value" id="ri-time">--</span></div>
+            </div>
+
+            <!-- Passengers & Phone -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="passengers">Passengers</label>
+                <select id="passengers" required>
+                  <option value="">Select…</option>
+                  <option>1</option><option>2</option><option>3</option>
+                  <option>4</option><option>5</option><option>6</option>
+                  <option>7</option><option>8</option><option>9</option><option>10</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="phone-hero">Phone Number</label>
+                <input type="tel" id="phone-hero" placeholder="(816) 552-6669" required oninput="formatPhone(this)" maxlength="14" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email-hero">Email Address</label>
+              <input type="email" id="email-hero" placeholder="you@example.com" required />
+            </div>
+
+            <!-- Price Breakdown -->
+            <div class="price-breakdown">
+              <div class="pb-row">
+                <span>Base fare</span>
+                <span id="pb-base">$65</span>
+              </div>
+              <div class="pb-row" id="pb-dist-row" style="display:none;">
+                <span id="pb-dist-label">Distance (-- mi × $2.25)</span>
+                <span id="pb-dist-val">--</span>
+              </div>
+              <div class="pb-row" id="pb-surge-row" style="display:none;">
+                <span id="pb-surge-label" style="color:var(--gold);">⚡ Surge pricing</span>
+                <span id="pb-surge-val" style="color:var(--gold);"></span>
+              </div>
+              <hr class="pb-divider" />
+              <div class="pb-total">
+                <span>Estimated Total</span>
+                <span id="price-display">$65</span>
+              </div>
+              <hr class="pb-divider" />
+              <div class="pb-row" style="color:var(--gold); font-weight:700;">
+                <span>25% Deposit Due Now</span>
+                <span id="pb-deposit">$17</span>
+              </div>
+              <div class="pb-row">
+                <span>Remaining balance (due on ride day)</span>
+                <span id="pb-remaining">$48</span>
+              </div>
+              <div class="pb-note">Submit your request to unlock the secure deposit payment below.</div>
+              <div class="pb-cal-note">📅 <span>Availability via Google Calendar · <a href="#" style="color:var(--gold);">Connect your calendar</a></span></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary form-submit" id="submit-btn">Request This Ride →</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ HOW IT WORKS ══════════════ -->
+<section id="how-it-works">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Simple Process</div>
+      <h2 class="section-title">Book Your Ride in Minutes</h2>
+      <p class="section-sub">No app download required. Schedule your KC soccer shuttle in three easy steps.</p>
+    </div>
+    <div class="steps-grid reveal">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">🗓️</div>
+        <div class="step-title">Choose Date & Time</div>
+        <div class="step-desc">Select your pickup date, time, and location. We cover all match days and surrounding events in Kansas City.</div>
+        <div class="step-connector">→</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">🚐</div>
+        <div class="step-title">Pick Your Vehicle</div>
+        <div class="step-desc">Choose a Suburban for groups of 1–5, or our 10-passenger van for groups of 6–10. All vehicles are clean, comfortable, and well-equipped.</div>
+        <div class="step-connector">→</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">💳</div>
+        <div class="step-title">Confirm & Pay Securely</div>
+        <div class="step-desc">Pay with card, Apple Pay, or Google Pay. Receive an instant confirmation and driver details before your ride.</div>
+        <div class="step-connector">→</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-icon">📍</div>
+        <div class="step-title">Track & Ride</div>
+        <div class="step-desc">Track your driver in real time, receive SMS updates, and arrive at the stadium or venue relaxed — your group together, on time.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ SERVICES ══════════════ -->
+<section id="services">
+  <div class="container">
+    <div class="services-header reveal">
+      <div class="section-label">Our Fleet</div>
+      <h2 class="section-title">Choose Your Vehicle</h2>
+      <p class="section-sub">Whether it's just your family or your whole crew, we have the right vehicle for every group size.</p>
+    </div>
+    <div class="services-grid reveal">
+
+      <!-- Suburban -->
+      <div class="service-card">
+        <div class="service-icon">🚙</div>
+        <div class="service-name">Chevy Suburban</div>
+        <div class="service-cap">Ideal for groups of 1 to 5 passengers</div>
+        <div class="service-price"><sup>$</sup>65</div>
+        <div class="service-price-note">base fare · per trip · pricing varies by distance</div>
+        <ul class="service-features">
+          <li><span class="check">✦</span> Up to 5 passengers comfortably</li>
+          <li><span class="check">✦</span> Spacious luggage &amp; gear storage</li>
+          <li><span class="check">✦</span> Climate-controlled cabin</li>
+          <li><span class="check">✦</span> USB charging at every seat</li>
+          <li><span class="check">✦</span> Professional, licensed driver</li>
+          <li><span class="check">✦</span> Live GPS tracking included</li>
+          <li><span class="check">✦</span> Direct airport &amp; stadium routes</li>
+        </ul>
+        <a href="#quote-form" class="btn btn-outline" style="width:100%; justify-content:center;">Book Suburban →</a>
+        <div class="service-glow"></div>
+      </div>
+
+      <!-- Van -->
+      <div class="service-card popular">
+        <div class="popular-badge">Most Popular</div>
+        <div class="service-icon">🚐</div>
+        <div class="service-name">10-Passenger Van</div>
+        <div class="service-cap">Perfect for groups of 6 to 10 passengers</div>
+        <div class="service-price"><sup>$</sup>95</div>
+        <div class="service-price-note">base fare · per trip · pricing varies by distance</div>
+        <ul class="service-features">
+          <li><span class="check">✦</span> Up to 10 passengers — full group</li>
+          <li><span class="check">✦</span> Oversized luggage capacity</li>
+          <li><span class="check">✦</span> Premium rear A/C &amp; heating</li>
+          <li><span class="check">✦</span> USB &amp; 12V power at every row</li>
+          <li><span class="check">✦</span> Professional, licensed driver</li>
+          <li><span class="check">✦</span> Live GPS tracking included</li>
+          <li><span class="check">✦</span> Direct airport &amp; stadium routes</li>
+        </ul>
+        <a href="#quote-form" class="btn btn-gold" style="width:100%; justify-content:center;">Book the Van →</a>
+        <div class="service-glow"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ LAKE OF THE OZARKS ══════════════ -->
+<section id="loto">
+  <div class="container">
+
+    <div class="loto-header reveal">
+      <div class="section-label">🏖️ Lake Getaway Shuttles</div>
+      <h2 class="section-title">Lake of the Ozarks Day Trips</h2>
+      <p class="section-sub">Door-to-door group shuttles from Kansas City to the Lake — one-way, same-day, or multi-day. We handle the drive so your group can start the party early.</p>
+    </div>
+
+    <div class="loto-inner reveal">
+
+      <!-- Left: info panel -->
+      <div class="loto-info">
+        <div class="section-label">Why Ride With Us</div>
+        <h3 class="section-title" style="font-size:clamp(1.4rem,3vw,2rem);">Skip the Convoy.<br>Arrive Together.</h3>
+        <p class="section-sub" style="max-width:100%;">No one wants to coordinate three separate cars 160 miles down I-70. Let your group relax, enjoy the ride, and arrive at Bagnell Dam — or anywhere on the lake — stress-free.</p>
+
+        <div class="loto-highlights">
+          <div class="loto-highlight">
+            <div class="loto-hl-icon">🚐</div>
+            <div>
+              <div class="loto-hl-title">Door-to-Door Service</div>
+              <div class="loto-hl-desc">We pick up from any KC address and drop off at Bagnell Dam, your lakehouse, resort, or marina.</div>
+            </div>
+          </div>
+          <div class="loto-highlight">
+            <div class="loto-hl-icon">🔄</div>
+            <div>
+              <div class="loto-hl-title">Flexible Trip Types</div>
+              <div class="loto-hl-desc">One-way drop-off, same-day turnaround, or multi-day — we'll be there when you're ready to head back.</div>
+            </div>
+          </div>
+          <div class="loto-highlight">
+            <div class="loto-hl-icon">🍺</div>
+            <div>
+              <div class="loto-hl-title">Drink Up, Ride Safely</div>
+              <div class="loto-hl-desc">Nobody has to be the designated driver. Our licensed pros handle the road while your crew handles the cooler.</div>
+            </div>
+          </div>
+          <div class="loto-highlight">
+            <div class="loto-hl-icon">📍</div>
+            <div>
+              <div class="loto-hl-title">Bagnell Dam & Beyond</div>
+              <div class="loto-hl-desc">Drop at the Dam strip, Party Cove area, Osage Beach, or any address on the lake — $3/mi from there.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="loto-distance-badge">
+          <span>🗺️</span>
+          <span>KC → Bagnell Dam: approx. <strong>~160 miles</strong> · ~2 hr 30 min</span>
+        </div>
+      </div>
+
+      <!-- Right: quote form -->
+      <div class="loto-form-card" id="loto-quote-form">
+        <div class="form-title">Lake Ozarks Quote</div>
+        <div class="form-sub">Live pricing · Availability check · Instant estimate</div>
+
+        <!-- Trip Type Selector -->
+        <div class="form-group">
+          <label>Trip Type</label>
+          <div class="trip-type-selector">
+            <div class="trip-type-opt selected" id="loto-tt-oneway" onclick="selectTripType('oneway')">
+              <div class="tt-icon">➡️</div>
+              <div class="tt-name">One-Way</div>
+              <div class="tt-desc">Drop-off at the lake, no return needed</div>
+            </div>
+            <div class="trip-type-opt" id="loto-tt-sameday" onclick="selectTripType('sameday')">
+              <div class="tt-icon">🔄</div>
+              <div class="tt-name">Same-Day Round Trip</div>
+              <div class="tt-desc">Out and back the same day</div>
+              <div class="tt-badge">Popular</div>
+            </div>
+            <div class="trip-type-opt" id="loto-tt-multiday" onclick="selectTripType('multiday')">
+              <div class="tt-icon">🌙</div>
+              <div class="tt-name">Multi-Day Round Trip</div>
+              <div class="tt-desc">Stay overnight, we'll pick you up later</div>
+            </div>
+          </div>
+        </div>
+
+        <form id="lotoForm" onsubmit="submitLoto(event)">
+
+          <!-- Vehicle -->
+          <div class="form-group">
+            <label>Select Vehicle</label>
+            <div class="vehicle-selector">
+              <div class="vehicle-opt selected" id="loto-opt-suburban" onclick="selectLotoVehicle('suburban')">
+                <div class="vo-icon">🚙</div>
+                <div class="vo-name">Suburban</div>
+                <div class="vo-cap">1–5 people</div>
+              </div>
+              <div class="vehicle-opt" id="loto-opt-van" onclick="selectLotoVehicle('van')">
+                <div class="vo-icon">🚐</div>
+                <div class="vo-name">Van</div>
+                <div class="vo-cap">6–10 people</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Departure Date & Time -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="loto-date">Departure Date</label>
+              <input type="date" id="loto-date" required oninput="lotoOnDateTimeChange()" />
+            </div>
+            <div class="form-group">
+              <label for="loto-time">Departure Time</label>
+              <input type="time" id="loto-time" required oninput="lotoOnDateTimeChange()" />
+            </div>
+          </div>
+
+          <!-- Return Date & Time (multi-day only) -->
+          <div class="form-row return-row" id="loto-return-row">
+            <div class="form-group">
+              <label for="loto-return-date">Return Date</label>
+              <input type="date" id="loto-return-date" oninput="lotoRecalcPrice()" />
+            </div>
+            <div class="form-group">
+              <label for="loto-return-time">Return Pickup Time</label>
+              <input type="time" id="loto-return-time" value="10:00" oninput="lotoRecalcPrice()" />
+            </div>
+          </div>
+
+          <!-- Availability -->
+          <div id="loto-avail-status" style="display:none;">
+            <div class="avail-dot"></div>
+            <span id="loto-avail-text"></span>
+          </div>
+
+          <!-- Pickup Address -->
+          <div class="form-group autocomplete-wrapper">
+            <label for="loto-pickup-loc">Pickup Location (Kansas City area)</label>
+            <input type="text" id="loto-pickup-loc" placeholder="Hotel, address, or KC landmark"
+                   required autocomplete="off" oninput="debounceGeocodeFor(this,'loto-pickup')" />
+            <div class="autocomplete-dropdown" id="loto-pickup-dropdown"></div>
+          </div>
+
+          <!-- Drop-off Address — pre-filled to Bagnell Dam -->
+          <div class="form-group autocomplete-wrapper">
+            <label for="loto-dropoff-loc">Drop-off Location</label>
+            <input type="text" id="loto-dropoff-loc"
+                   value="Bagnell Dam, Lake Ozark, MO 65049"
+                   required autocomplete="off" oninput="debounceGeocodeFor(this,'loto-dropoff')" />
+            <div class="autocomplete-dropdown" id="loto-dropoff-dropdown"></div>
+          </div>
+
+          <!-- Route Info -->
+          <div id="loto-route-info" style="display:none; background:rgba(26,159,192,.07); border:1px solid rgba(26,159,192,.2); border-radius:8px; padding:10px 14px; margin-bottom:14px; gap:16px; flex-wrap:wrap;">
+            <div class="ri-item">📍 <span class="ri-label">Distance:</span>&nbsp;<span class="ri-value" id="loto-ri-dist">--</span></div>
+            <div class="ri-item">⏱ <span class="ri-label">Drive time:</span>&nbsp;<span class="ri-value" id="loto-ri-time">--</span></div>
+          </div>
+
+          <!-- Passengers & Phone -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="loto-passengers">Passengers</label>
+              <select id="loto-passengers" required>
+                <option value="">Select…</option>
+                <option>1</option><option>2</option><option>3</option>
+                <option>4</option><option>5</option><option>6</option>
+                <option>7</option><option>8</option><option>9</option><option>10</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="loto-phone">Phone Number</label>
+              <input type="tel" id="loto-phone" placeholder="(816) 552-6669" required oninput="formatPhone(this)" maxlength="14" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="loto-email">Email Address</label>
+            <input type="email" id="loto-email" placeholder="you@example.com" required />
+          </div>
+
+          <!-- Local Area Transport Add-on -->
+          <div class="form-group" style="margin-bottom:10px;">
+            <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; font-weight:400;">
+              <input type="checkbox" id="loto-local-transport" onchange="lotoRecalcPrice()"
+                     style="width:17px; height:17px; margin-top:2px; accent-color:var(--lake); flex-shrink:0;">
+              <span>
+                <strong style="color:var(--lake-lt);">Local Area Transport</strong>
+                <span style="color:var(--text-muted); font-size:0.85rem;"> +$250</span>
+                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:3px;">Driver stays at the lake — Party Cove, Osage Beach, marinas &amp; more</div>
+              </span>
+            </label>
+          </div>
+
+          <!-- Price Breakdown -->
+          <div class="loto-price-breakdown price-breakdown">
+            <div class="pb-row">
+              <span id="loto-pb-trip-label">One-Way Flat Rate</span>
+              <span id="loto-pb-base">$500</span>
+            </div>
+            <div class="pb-row" id="loto-pb-local-row" style="display:none;">
+              <span style="color:var(--lake-lt);">+ Local Area Transport</span>
+              <span id="loto-pb-local-val" style="color:var(--lake-lt);">+$250</span>
+            </div>
+            <div class="pb-row" id="loto-pb-dist-row" style="display:none; font-size:0.8rem; opacity:0.6;">
+              <span id="loto-pb-dist-label">Route info</span>
+              <span id="loto-pb-dist-val"></span>
+            </div>
+            <hr class="pb-divider" />
+            <div class="pb-total">
+              <span>Estimated Total</span>
+              <span id="loto-price-display">$500</span>
+            </div>
+            <hr class="pb-divider" />
+            <div class="pb-row" style="color:var(--lake-lt); font-weight:700;">
+              <span>25% Deposit Due Now</span>
+              <span id="loto-pb-deposit">$125</span>
+            </div>
+            <div class="pb-row">
+              <span>Remaining balance (due on ride day)</span>
+              <span id="loto-pb-remaining">$375</span>
+            </div>
+            <div class="pb-note">Submit your request to unlock the secure deposit payment below.</div>
+          </div>
+
+          <button type="submit" class="btn btn-lake form-submit" id="loto-submit-btn">Request Lake Ride →</button>
+        </form>
+        <img src="images/grkc-logo-circle.png" alt="" class="loto-circle-logo" aria-hidden="true">
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ WHY BOOK WITH US ══════════════ -->
+<section id="booking" style="padding: 80px 0; background: radial-gradient(ellipse 70% 50% at 50% 100%, rgba(227,24,55,.12) 0%, transparent 70%), var(--card);">
+  <div class="container">
+    <div class="reveal" style="text-align:center; margin-bottom: 48px;">
+      <div class="section-label">Why Choose Us</div>
+      <h2 class="section-title">Everything Your Group Needs</h2>
+      <p class="section-sub" style="margin: 12px auto 0;">From the moment you book to the minute you arrive — we've got every detail covered.</p>
+    </div>
+    <div class="steps-grid reveal">
+      <div class="step-card">
+        <div class="booking-feat-icon" style="font-size:2rem; margin-bottom:16px;">📅</div>
+        <div class="step-title">Flexible Scheduling</div>
+        <div class="step-desc">Book same-day or weeks in advance. We'll confirm your slot and respond within 30 minutes during business hours.</div>
+      </div>
+      <div class="step-card">
+        <div class="booking-feat-icon" style="font-size:2rem; margin-bottom:16px;">🔒</div>
+        <div class="step-title">Secure Payment</div>
+        <div class="step-desc">Pay with any major card, Apple Pay, or Google Pay. All transactions are encrypted and PCI DSS compliant via Stripe.</div>
+      </div>
+      <div class="step-card">
+        <div class="booking-feat-icon" style="font-size:2rem; margin-bottom:16px;">📲</div>
+        <div class="step-title">Instant Confirmation</div>
+        <div class="step-desc">SMS &amp; email confirmation with your driver's name and contact info sent immediately after payment.</div>
+      </div>
+      <div class="step-card">
+        <div class="booking-feat-icon" style="font-size:2rem; margin-bottom:16px;">🔄</div>
+        <div class="step-title">Free Cancellation</div>
+        <div class="step-desc">Plans change — we get it. Cancel up to 24 hours before your ride for a full refund, no questions asked.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PAYMENT ══════════════ -->
+<section id="payment" style="display:none;">
+  <div class="container">
+    <!-- Unlocked banner -->
+    <div style="background:rgba(40,200,120,.1); border:1px solid rgba(40,200,120,.3); border-radius:12px; padding:16px 24px; margin-bottom:40px; display:flex; align-items:center; gap:14px;">
+      <span style="font-size:1.5rem;">🔓</span>
+      <div>
+        <div style="font-weight:700; color:#4ce0a0;">Reservation Request Received!</div>
+        <div style="font-size:0.83rem; color:var(--text-muted); margin-top:2px;">Pay your 25% deposit below to hold your vehicle. The remaining balance is due on ride day.</div>
+      </div>
+    </div>
+    <div class="payment-inner">
+      <div class="payment-info reveal">
+        <div class="section-label">Secure Deposit</div>
+        <h2 class="section-title">Hold Your<br>Reservation</h2>
+        <p class="section-sub">A 25% deposit is required to confirm your booking. The remaining balance is collected on the day of your ride.</p>
+        <div class="payment-steps">
+          <div class="pay-step">
+            <div class="pay-step-num">1</div>
+            <div>
+              <div class="pay-step-title">Submit Your Request</div>
+              <div class="pay-step-desc">Fill out the booking form and we confirm availability within 30 minutes.</div>
+            </div>
+          </div>
+          <div class="pay-step">
+            <div class="pay-step-num">2</div>
+            <div>
+              <div class="pay-step-title">Receive Secure Invoice</div>
+              <div class="pay-step-desc">You'll get a payment link via email and SMS for the confirmed amount.</div>
+            </div>
+          </div>
+          <div class="pay-step">
+            <div class="pay-step-num">3</div>
+            <div>
+              <div class="pay-step-title">Pay &amp; Get Confirmed</div>
+              <div class="pay-step-desc">Complete checkout in seconds. Driver info sent immediately after payment.</div>
+            </div>
+          </div>
+          <div class="pay-step">
+            <div class="pay-step-num">4</div>
+            <div>
+              <div class="pay-step-title">Ride Day — You're All Set</div>
+              <div class="pay-step-desc">Track your driver, receive SMS updates, and enjoy a stress-free ride to the game.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="payment-card reveal">
+        <h3>Deposit Payment</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,184,28,.08); border:1px solid rgba(255,184,28,.2); border-radius:8px; padding:12px 16px; margin-bottom:20px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">Deposit due now (25%)</div>
+            <div style="font-size:1.6rem; font-weight:900; color:var(--gold);" id="pay-deposit-amt">$17</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:0.75rem; color:var(--text-muted);">Remaining on ride day</div>
+            <div style="font-size:1rem; font-weight:700;" id="pay-remaining-amt">$48</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">Total: <span id="pay-total-amt">$65</span></div>
+          </div>
+        </div>
+        <div class="pay-sub">Secure checkout powered by Stripe. We never store your card information.</div>
+
+        <div class="pay-methods">
+          <div class="pay-method active" onclick="setPayMethod(this)">💳 Credit / Debit</div>
+          <div class="pay-method" onclick="setPayMethod(this)"> Apple Pay</div>
+          <div class="pay-method" onclick="setPayMethod(this)">🇬 Google Pay</div>
+        </div>
+
+        <div class="pay-field-group">
+          <label>Cardholder Name</label>
+          <input class="pay-field" type="text" placeholder="Ashley Bush" />
+        </div>
+        <div class="pay-field-group">
+          <label>Card Number</label>
+          <input class="pay-field" type="text" placeholder="1234  5678  9012  3456" maxlength="19" oninput="formatCard(this)" />
+        </div>
+        <div class="pay-row">
+          <div class="pay-field-group">
+            <label>Expiry Date</label>
+            <input class="pay-field" type="text" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)" />
+          </div>
+          <div class="pay-field-group">
+            <label>CVV</label>
+            <input class="pay-field" type="text" placeholder="•••" maxlength="4" />
+          </div>
+        </div>
+
+        <div class="pay-secure">
+          <span class="secure-icon">🔒</span>
+          256-bit SSL encryption · PCI DSS compliant · Powered by Stripe
+        </div>
+
+        <button class="btn btn-primary pay-btn" onclick="showPayConfirm()">Complete Payment →</button>
+        <div class="powered-by">Secure payments by <span>Stripe</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ REVIEWS ══════════════ -->
+<section id="reviews">
+  <div class="container">
+    <div class="reviews-header reveal">
+      <div class="section-label">Testimonials</div>
+      <h2 class="section-title">What Riders Are Saying</h2>
+      <div class="reviews-rating">
+        <div class="stars">★★★★★</div>
+        <div class="rating-num">4.9</div>
+        <div class="rating-count">out of 5 · 84 reviews</div>
+      </div>
+    </div>
+    <div class="reviews-grid reveal">
+
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"Booked the van for our group of 8 to the Mexico vs. USA match. Driver was early, vehicle was immaculate, and we didn't have to worry about parking for a second. Will use again for every game."</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar" style="background:rgba(227,24,55,.25);color:var(--red);">MR</div>
+          <div>
+            <div class="reviewer-name">Marcus R.</div>
+            <div class="reviewer-trip">Van · Arrowhead Stadium</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"Easy booking, super responsive, showed up right on time. The Suburban was spotless and our driver knew all the best routes around the stadium traffic. Exactly what we needed."</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar" style="background:rgba(255,184,28,.2);color:var(--gold);">JT</div>
+          <div>
+            <div class="reviewer-name">Jamie T.</div>
+            <div class="reviewer-trip">Suburban · KCI Airport</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"We had a group of 10 flying in from different places. Group Ride KC coordinated all three pickups perfectly and had us at the venue together. Stress-free is an understatement."</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar" style="background:rgba(100,180,100,.2);color:#6db46d;">SL</div>
+          <div>
+            <div class="reviewer-name">Sofia L.</div>
+            <div class="reviewer-trip">Van · Multiple Pickups</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">★★★★☆</div>
+        <p class="review-text">"Great experience overall. The van was huge and comfortable. Booking was straightforward and the driver was friendly and knowledgeable about Kansas City. Definitely recommend."</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar" style="background:rgba(130,100,200,.2);color:#9b81d4;">DK</div>
+          <div>
+            <div class="reviewer-name">Daniel K.</div>
+            <div class="reviewer-trip">Van · Downtown KC</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"Used Group Ride KC for both the airport pickup and the match day. Consistent, professional, and affordable for a group our size. Live tracking gave everyone peace of mind."</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar" style="background:rgba(255,100,100,.2);color:#ff7a7a;">PR</div>
+          <div>
+            <div class="reviewer-name">Priya R.</div>
+            <div class="reviewer-trip">Suburban + Van combo</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"Exceptional service. Got an immediate response after booking, clear confirmation, and our driver was waiting for us 10 minutes early. This is the only way to handle group transportation on game day."</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar" style="background:rgba(28,200,200,.2);color:#1cd4d4;">TN</div>
+          <div>
+            <div class="reviewer-name">Tyler N.</div>
+            <div class="reviewer-trip">Suburban · Sprint Center</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FEEDBACK ══════════════ -->
+<section id="feedback">
+  <div class="container">
+    <div class="feedback-inner reveal">
+      <div class="section-label">Leave a Review</div>
+      <h2 class="section-title">How Was Your Ride?</h2>
+      <p class="section-sub" style="margin: 12px auto 0;">Your feedback helps us improve and helps future riders know what to expect.</p>
+      <div class="feedback-card">
+        <div style="text-align:center; margin-bottom: 20px;">
+          <div style="font-size:.85rem; color:var(--text-muted); margin-bottom:10px;">Rate your experience</div>
+          <div class="rating-select" id="starRating">
+            <button class="star-btn" onclick="setRating(1)">★</button>
+            <button class="star-btn" onclick="setRating(2)">★</button>
+            <button class="star-btn" onclick="setRating(3)">★</button>
+            <button class="star-btn" onclick="setRating(4)">★</button>
+            <button class="star-btn" onclick="setRating(5)">★</button>
+          </div>
+        </div>
+        <form onsubmit="submitFeedback(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Your Name</label>
+              <input type="text" placeholder="First name" required />
+            </div>
+            <div class="form-group">
+              <label>Booking Date</label>
+              <input type="date" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Your Review</label>
+            <textarea placeholder="Tell us about your experience — driver, vehicle, timing, etc." style="min-height:110px;"></textarea>
+          </div>
+          <button type="submit" class="btn btn-gold feedback-submit">Submit Review →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CONTACT CTA ══════════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-inner">
+      <div class="contact-text">
+        <h2>Ready to Roll?<br>Let's Get Your Group Moving.</h2>
+        <p>Questions? Call, text, or email us. We respond fast — especially on game days.</p>
+      </div>
+      <div class="contact-actions">
+        <a href="tel:+18165526669" class="btn btn-white">📞 (816) 552-6669</a>
+        <a href="mailto:rides@groupridekc.com" class="btn btn-clear">✉️ rides@groupridekc.com</a>
+        <a href="#booking" class="btn btn-clear">📅 Book Online</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-logo">
+          <img src="images/grkc-logo-van.png" alt="Group Ride KC" style="height:44px; width:auto; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5));">
+          <div class="logo-text">Group Ride <span>KC</span></div>
+        </div>
+        <p>Premium group shuttle service for Kansas City's biggest soccer events in 2026. Safe, reliable, and ready for your crew.</p>
+        <div class="footer-socials">
+          <div class="social-btn">𝕏</div>
+          <div class="social-btn">f</div>
+          <div class="social-btn">📸</div>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#services">Chevy Suburban</a></li>
+          <li><a href="#services">10-Passenger Van</a></li>
+          <li><a href="#loto">Lake of the Ozarks</a></li>
+          <li><a href="#booking">Airport Transfers</a></li>
+          <li><a href="#booking">Stadium Shuttles</a></li>
+          <li><a href="#booking">Hotel Pickups</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#reviews">Reviews</a></li>
+          <li><a href="#feedback">Leave Feedback</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li><a href="#">Driver Portal</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Refund Policy</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 Group Ride KC · groupridekc.com · All rights reserved.</div>
+      <div class="footer-legal">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════ SUCCESS MODAL ══════════════ -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('bookingModal')">✕</button>
+    <div class="modal-icon">🎉</div>
+    <h3>Ride Request Sent!</h3>
+    <p>We've received your booking request and will confirm availability and send your payment link within 30 minutes. Check your email and SMS for next steps.</p>
+    <button class="btn btn-primary" onclick="closeModal('bookingModal')">Got It — Thanks!</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="payModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('payModal')">✕</button>
+    <div class="modal-icon">✅</div>
+    <h3>Payment Confirmed!</h3>
+    <p>Your ride is booked and confirmed. Your driver's name and contact info will be sent to your email and phone within the hour.</p>
+    <button class="btn btn-gold" onclick="closeModal('payModal')">View My Booking</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="feedbackModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('feedbackModal')">✕</button>
+    <div class="modal-icon">⭐</div>
+    <h3>Thanks for Your Review!</h3>
+    <p>Your feedback means a lot to us and helps other riders. We'll feature your review soon. See you at the next game!</p>
+    <button class="btn btn-gold" onclick="closeModal('feedbackModal')">Close</button>
+  </div>
+</div>
+
+<script>
+  /* ═══════════════════════════════════════════════════
+     GROUP RIDE KC – Smart Quote Engine
+     • Address autocomplete  (OpenStreetMap Nominatim)
+     • Route distance        (OSRM routing API)
+     • Availability check    (simulated + Google Calendar hook)
+     • Dynamic pricing       (base + per-mile + surcharges)
+   ═══════════════════════════════════════════════════ */
+
+  /* ── Pricing Config ───────────────────────────── */
+  const PRICING = {
+    suburban: { base: 65,  perMile: 2.25, label: 'Suburban' },
+    van:      { base: 95,  perMile: 3.00, label: '10-Pass Van' }
+  };
+  // Surge rates apply on match days and late-night rides
+  const SURGE_PRICING = { base: 99, perMile: 5.00 };
+  const DEPOSIT_PCT   = 0.25; // 25% deposit to hold reservation
+
+  /* ── KC 2026 Match Days (update with official schedule) ── */
+  const MATCH_DAYS = new Set([
+    '2026-06-12','2026-06-15','2026-06-16','2026-06-19',
+    '2026-06-20','2026-06-23','2026-06-24','2026-06-27',
+    '2026-06-28','2026-07-01','2026-07-02','2026-07-05'
+  ]);
+
+  /* ── Simulated booked calendar slots ─────────────
+     In production: replace checkAvailability() with
+     a Google Calendar API call using your service
+     account or OAuth token.                         */
+  const BOOKED_SLOTS = [
+    { date:'2026-06-15', startH:13, endH:16, vehicle:'suburban' },
+    { date:'2026-06-15', startH:12, endH:17, vehicle:'van'      },
+    { date:'2026-06-20', startH:18, endH:21, vehicle:'suburban' },
+    { date:'2026-07-01', startH:10, endH:13, vehicle:'van'      },
+  ];
+
+  /* ── State ──────────────────────────────────────── */
+  let selectedVehicle = 'suburban';
+  let coords = { pickup: null, dropoff: null };
+  let routeMiles = null;
+  let geocodeTimers = {};
+
+  /* ════════════════════════════════════════════════
+     VEHICLE SELECTOR
+  ════════════════════════════════════════════════ */
+  function selectVehicle(v) {
+    selectedVehicle = v;
+    document.getElementById('opt-suburban').classList.toggle('selected', v === 'suburban');
+    document.getElementById('opt-van').classList.toggle('selected', v === 'van');
+    document.getElementById('pb-base').textContent = '$' + PRICING[v].base;
+    recalcPrice();
+    onDateTimeChange(); // re-check availability for new vehicle
+  }
+
+  /* ════════════════════════════════════════════════
+     AVAILABILITY CHECKER
+     Simulates a Google Calendar read.
+     Replace the inner logic with:
+       fetch('/api/check-availability?date=...&vehicle=...')
+     or a direct Google Calendar API call.
+  ════════════════════════════════════════════════ */
+  function onDateTimeChange() {
+    const date = document.getElementById('pickup-date').value;
+    const time = document.getElementById('pickup-time').value;
+    const el   = document.getElementById('avail-status');
+    const txt  = document.getElementById('avail-text');
+    if (!date || !time) { el.style.display = 'none'; return; }
+
+    // Show loading
+    el.style.display = 'flex';
+    el.className = 'avail-load';
+    txt.textContent = 'Checking availability…';
+
+    // Simulate async calendar lookup (250ms delay)
+    setTimeout(() => {
+      const available = checkAvailability(date, time, selectedVehicle);
+      el.className = available ? 'avail-ok' : 'avail-no';
+      if (available) {
+        const isMatchDay = MATCH_DAYS.has(date);
+        txt.textContent = isMatchDay
+          ? '✓ Available — Match day surcharge applies'
+          : '✓ Available for your selected date & time';
+      } else {
+        txt.textContent = '✗ Unavailable — please choose a different time';
+      }
+      recalcPrice();
+    }, 250);
+  }
+
+  function checkAvailability(date, time, vehicle) {
+    /* ── Google Calendar hook ──────────────────────
+       To connect live: replace this block with:
+         const resp = await fetch(
+           `https://www.googleapis.com/calendar/v3/calendars/YOUR_CAL_ID/events?` +
+           `timeMin=${date}T${time}:00Z&timeMax=...&key=YOUR_API_KEY`
+         );
+         const data = await resp.json();
+         return data.items.length === 0;
+       ─────────────────────────────────────────── */
+    const [h, m] = time.split(':').map(Number);
+    const pickupMins = h * 60 + m;
+    return !BOOKED_SLOTS.some(slot =>
+      slot.date === date &&
+      slot.vehicle === vehicle &&
+      pickupMins >= slot.startH * 60 - 60 &&
+      pickupMins <= slot.endH   * 60 + 60
+    );
+  }
+
+  /* ════════════════════════════════════════════════
+     ADDRESS AUTOCOMPLETE  (OpenStreetMap Nominatim)
+  ════════════════════════════════════════════════ */
+  function debounceGeocode(input, type) {
+    clearTimeout(geocodeTimers[type]);
+    const q = input.value.trim();
+    const dd = document.getElementById(type + '-dropdown');
+    if (q.length < 3) { dd.classList.remove('open'); return; }
+    geocodeTimers[type] = setTimeout(() => geocodeSearch(q, type), 400);
+  }
+
+  async function geocodeSearch(query, type) {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search` +
+        `?q=${encodeURIComponent(query + ' Kansas City Missouri')}` +
+        `&format=json&limit=5&addressdetails=1&accept-language=en`;
+      const res  = await fetch(url);
+      const data = await res.json();
+      showDropdown(data, type);
+    } catch(e) {
+      // silently fail — user can still type manually
+    }
+  }
+
+  function showDropdown(results, type) {
+    const dd = document.getElementById(type + '-dropdown');
+    if (!results.length) { dd.classList.remove('open'); return; }
+    dd.innerHTML = results.map(r => {
+      const name = r.name || r.display_name.split(',')[0];
+      const addr = r.display_name;
+      return `<div class="ac-item"
+                   onclick="selectAddress('${type}', ${r.lat}, ${r.lon}, \`${r.display_name.replace(/`/g,"'")}\`)">
+                <span class="ac-icon">📍</span>
+                <div><div class="ac-name">${name}</div>
+                     <div class="ac-addr">${addr}</div></div>
+              </div>`;
+    }).join('');
+    dd.classList.add('open');
+  }
+
+  function selectAddress(type, lat, lon, label) {
+    document.getElementById(type + '-loc').value = label;
+    document.getElementById(type + '-dropdown').classList.remove('open');
+    coords[type] = { lat: parseFloat(lat), lon: parseFloat(lon) };
+    if (coords.pickup && coords.dropoff) calculateRoute();
+  }
+
+  // Close dropdowns on outside click
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.autocomplete-wrapper')) {
+      document.querySelectorAll('.autocomplete-dropdown').forEach(d => d.classList.remove('open'));
+    }
+  });
+
+  /* ════════════════════════════════════════════════
+     ROUTE DISTANCE  (OSRM open routing engine)
+  ════════════════════════════════════════════════ */
+  async function calculateRoute() {
+    const { pickup, dropoff } = coords;
+    if (!pickup || !dropoff) return;
+
+    const routeBar = document.getElementById('route-info');
+    routeBar.style.display = 'flex';
+    document.getElementById('ri-dist').textContent = '…';
+    document.getElementById('ri-time').textContent = '…';
+
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/` +
+        `${pickup.lon},${pickup.lat};${dropoff.lon},${dropoff.lat}?overview=false`;
+      const res  = await fetch(url);
+      const data = await res.json();
+
+      if (data.code === 'Ok') {
+        const meters  = data.routes[0].distance;
+        const seconds = data.routes[0].duration;
+        routeMiles = meters / 1609.344;
+
+        const miles = routeMiles.toFixed(1);
+        const mins  = Math.round(seconds / 60);
+        const hrs   = Math.floor(mins / 60);
+        const timeStr = hrs > 0 ? `${hrs}h ${mins % 60}m` : `${mins} min`;
+
+        document.getElementById('ri-dist').textContent = miles + ' mi';
+        document.getElementById('ri-time').textContent = timeStr;
+        recalcPrice();
+      }
+    } catch(e) {
+      routeBar.style.display = 'none';
+    }
+  }
+
+  /* ════════════════════════════════════════════════
+     DYNAMIC PRICING ENGINE
+     Standard rates:  base + $perMile/mi
+     Surge rates:     $99 base + $5.00/mi
+       → triggered by match days OR late night (10pm–5am)
+  ════════════════════════════════════════════════ */
+  function isSurge(date, time) {
+    const matchDay  = date && MATCH_DAYS.has(date);
+    const lateNight = time && (() => { const h = parseInt(time.split(':')[0]); return h >= 22 || h < 5; })();
+    return matchDay || lateNight;
+  }
+
+  function recalcPrice() {
+    const p     = PRICING[selectedVehicle];
+    const date  = document.getElementById('pickup-date').value;
+    const time  = document.getElementById('pickup-time').value;
+    const surge = isSurge(date, time);
+
+    const base    = surge ? SURGE_PRICING.base    : p.base;
+    const perMile = surge ? SURGE_PRICING.perMile : p.perMile;
+
+    // Update base fare row
+    document.getElementById('pb-base').textContent = '$' + base;
+
+    // Surge label row
+    const surgeRow = document.getElementById('pb-surge-row');
+    if (surge) {
+      const reasons = [];
+      if (date && MATCH_DAYS.has(date)) reasons.push('Match day');
+      if (time) { const h = parseInt(time.split(':')[0]); if (h >= 22 || h < 5) reasons.push('Late night'); }
+      surgeRow.style.display = 'flex';
+      document.getElementById('pb-surge-label').textContent = '⚡ Surge pricing — ' + reasons.join(' · ');
+      document.getElementById('pb-surge-val').textContent   = '$' + base + ' base · $' + perMile.toFixed(2) + '/mi';
+    } else {
+      surgeRow.style.display = 'none';
+    }
+
+    // Distance cost
+    let distCost = 0;
+    if (routeMiles !== null) {
+      distCost = routeMiles * perMile;
+      document.getElementById('pb-dist-row').style.display = 'flex';
+      document.getElementById('pb-dist-label').textContent =
+        `Distance (${routeMiles.toFixed(1)} mi × $${perMile.toFixed(2)})`;
+      document.getElementById('pb-dist-val').textContent = '$' + distCost.toFixed(2);
+    }
+
+    const total   = Math.ceil(base + distCost);
+    const deposit = Math.ceil(total * DEPOSIT_PCT);
+
+    document.getElementById('price-display').textContent  = '$' + total;
+    document.getElementById('pb-deposit').textContent     = '$' + deposit;
+    document.getElementById('pb-remaining').textContent   = '$' + (total - deposit);
+
+    // Keep payment section deposit amount in sync
+    document.getElementById('pay-deposit-amt').textContent  = '$' + deposit;
+    document.getElementById('pay-total-amt').textContent    = '$' + total;
+    document.getElementById('pay-remaining-amt').textContent = '$' + (total - deposit);
+  }
+
+  /* ════════════════════════════════════════════════
+     FORM SUBMIT  →  unlock deposit payment section
+  ════════════════════════════════════════════════ */
+  function submitBooking(e) {
+    e.preventDefault();
+    const avail = document.getElementById('avail-status');
+    if (avail.classList.contains('avail-no')) {
+      alert('This vehicle is unavailable at the selected time. Please choose a different date or time.');
+      return;
+    }
+
+    // Make sure deposit amounts are current
+    recalcPrice();
+
+    // Reveal the payment section and scroll to it
+    const paySection = document.getElementById('payment');
+    paySection.style.display = 'block';
+    setTimeout(() => paySection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+
+    // Update submit button to show confirmation
+    const btn = document.getElementById('submit-btn');
+    btn.textContent = '✓ Request Submitted — Pay Deposit Below';
+    btn.style.background = '#2a9d5c';
+    btn.disabled = true;
+  }
+
+  /* ════════════════════════════════════════════════
+     MISC HELPERS
+  ════════════════════════════════════════════════ */
+  function showPayConfirm() {
+    document.getElementById('payModal').classList.add('active');
+  }
+  function submitFeedback(e) {
+    e.preventDefault();
+    document.getElementById('feedbackModal').classList.add('active');
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+  function setPayMethod(el) {
+    document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function formatPhone(el) {
+    const digits = el.value.replace(/\D/g, '').substring(0, 10);
+    let formatted = '';
+    if (digits.length > 0) formatted  = '(' + digits.substring(0, 3);
+    if (digits.length >= 4) formatted += ') ' + digits.substring(3, 6);
+    if (digits.length >= 7) formatted += '-' + digits.substring(6, 10);
+    el.value = formatted;
+  }
+
+  function formatCard(el) {
+    let v = el.value.replace(/\D/g,'').substring(0,16);
+    el.value = v.replace(/(.{4})/g,'$1  ').trim();
+  }
+  function formatExpiry(el) {
+    let v = el.value.replace(/\D/g,'').substring(0,4);
+    if(v.length >= 2) v = v.substring(0,2) + ' / ' + v.substring(2);
+    el.value = v;
+  }
+  let selectedRating = 0;
+  function setRating(n) {
+    selectedRating = n;
+    document.querySelectorAll('.star-btn').forEach((b,i) => b.classList.toggle('active', i < n));
+  }
+
+  /* ── Scroll Reveal ── */
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  /* ── Set min date to today ── */
+  const today = new Date().toISOString().split('T')[0];
+  const dateInput = document.getElementById('pickup-date');
+  if(dateInput) dateInput.setAttribute('min', today);
+
+  /* ═══════════════════════════════════════════════════
+     LAKE OF THE OZARKS QUOTE ENGINE
+     • Drop-off defaults to Bagnell Dam (pre-geocoded)
+     • Per-mile rate: $3.00 for both vehicles
+     • Trip types: one-way · same-day RT · multi-day RT
+     • Same deposit / surge logic as main form
+   ═══════════════════════════════════════════════════ */
+
+  /* ── LOTO Pricing ──────────────────────────────── */
+  // Flat-rate pricing — vehicle choice is recorded but does not affect price
+  const LOTO_FLAT_RATES = { oneway: 500, sameday: 700, multiday: 1000 };
+  const LOTO_LOCAL_TRANSPORT_FEE = 250;
+  const LOTO_VEHICLE_LABELS = { suburban: 'Suburban', van: '10-Pass Van' };
+
+  // Bagnell Dam, Lake Ozark MO — pre-geocoded coordinates
+  const BAGNELL_DAM = { lat: 38.0931, lon: -92.6249 };
+
+  /* ── LOTO State ─────────────────────────────────── */
+  let lotoVehicle   = 'suburban';
+  let lotoTripType  = 'oneway';   // 'oneway' | 'sameday' | 'multiday'
+  let lotoCoords    = { pickup: null, dropoff: BAGNELL_DAM };
+  let lotoRouteMiles = null;
+  let lotoGeoTimers = {};
+
+  // Pre-fill Bagnell Dam dropoff coords so route calculates immediately
+  // after pickup is chosen (no need to re-select dropoff)
+
+  /* ── Trip Type Selector ─────────────────────────── */
+  function selectTripType(type) {
+    lotoTripType = type;
+    ['oneway','sameday','multiday'].forEach(t => {
+      document.getElementById('loto-tt-' + t).classList.toggle('selected', t === type);
+    });
+    // Show/hide return date row
+    const returnRow = document.getElementById('loto-return-row');
+    if (type === 'multiday') {
+      returnRow.classList.add('visible');
+      const retDateEl = document.getElementById('loto-return-date');
+      if (!retDateEl.value) {
+        // default return to day after departure
+        const dep = document.getElementById('loto-date').value;
+        if (dep) {
+          const d = new Date(dep); d.setDate(d.getDate() + 1);
+          retDateEl.value = d.toISOString().split('T')[0];
+        }
+      }
+    } else {
+      returnRow.classList.remove('visible');
+    }
+    lotoRecalcPrice();
+  }
+
+  /* ── LOTO Vehicle Selector ──────────────────────── */
+  function selectLotoVehicle(v) {
+    lotoVehicle = v;
+    document.getElementById('loto-opt-suburban').classList.toggle('selected', v === 'suburban');
+    document.getElementById('loto-opt-van').classList.toggle('selected', v === 'van');
+    lotoRecalcPrice();
+    lotoOnDateTimeChange();
+  }
+
+  /* ── LOTO Availability ──────────────────────────── */
+  function lotoOnDateTimeChange() {
+    const date = document.getElementById('loto-date').value;
+    const time = document.getElementById('loto-time').value;
+    const el   = document.getElementById('loto-avail-status');
+    const txt  = document.getElementById('loto-avail-text');
+    if (!date || !time) { el.style.display = 'none'; return; }
+
+    el.style.display = 'flex';
+    el.className = 'avail-load';
+    txt.textContent = 'Checking availability…';
+
+    setTimeout(() => {
+      const available = checkAvailability(date, time, lotoVehicle);
+      el.className = available ? 'avail-ok' : 'avail-no';
+      if (available) {
+        const isMatchDay = MATCH_DAYS.has(date);
+        txt.textContent = isMatchDay
+          ? '✓ Available — Match day surcharge applies'
+          : '✓ Available for your selected date & time';
+      } else {
+        txt.textContent = '✗ Unavailable — please choose a different time';
+      }
+      lotoRecalcPrice();
+    }, 250);
+
+    // Set minimum return date = departure date
+    if (date) {
+      const retEl = document.getElementById('loto-return-date');
+      retEl.setAttribute('min', date);
+    }
+  }
+
+  /* ── LOTO Address Autocomplete ──────────────────── */
+  function debounceGeocodeFor(input, type) {
+    clearTimeout(lotoGeoTimers[type]);
+    const q = input.value.trim();
+    const dd = document.getElementById(type + '-dropdown');
+    if (q.length < 3) { dd.classList.remove('open'); return; }
+    lotoGeoTimers[type] = setTimeout(() => geocodeSearchFor(q, type), 400);
+  }
+
+  async function geocodeSearchFor(query, type) {
+    // For pickup: bias toward KC. For dropoff: bias toward Lake Ozark.
+    const bias = type === 'loto-pickup'
+      ? ' Kansas City Missouri'
+      : ' Lake Ozark Missouri';
+    try {
+      const url = `https://nominatim.openstreetmap.org/search` +
+        `?q=${encodeURIComponent(query + bias)}` +
+        `&format=json&limit=5&addressdetails=1&accept-language=en`;
+      const res  = await fetch(url);
+      const data = await res.json();
+      showLotoDropdown(data, type);
+    } catch(e) {}
+  }
+
+  function showLotoDropdown(results, type) {
+    const dd = document.getElementById(type + '-dropdown');
+    if (!results.length) { dd.classList.remove('open'); return; }
+    dd.innerHTML = results.map(r => {
+      const name = r.name || r.display_name.split(',')[0];
+      const addr = r.display_name;
+      return `<div class="ac-item"
+                   onclick="selectLotoAddress('${type}', ${r.lat}, ${r.lon}, \`${r.display_name.replace(/`/g,"'")}\`)">
+                <span class="ac-icon">📍</span>
+                <div><div class="ac-name">${name}</div>
+                     <div class="ac-addr">${addr}</div></div>
+              </div>`;
+    }).join('');
+    dd.classList.add('open');
+  }
+
+  function selectLotoAddress(type, lat, lon, label) {
+    const fieldId = type === 'loto-pickup' ? 'loto-pickup-loc' : 'loto-dropoff-loc';
+    document.getElementById(fieldId).value = label;
+    document.getElementById(type + '-dropdown').classList.remove('open');
+    const key = type === 'loto-pickup' ? 'pickup' : 'dropoff';
+    lotoCoords[key] = { lat: parseFloat(lat), lon: parseFloat(lon) };
+    if (lotoCoords.pickup && lotoCoords.dropoff) lotoCalculateRoute();
+  }
+
+  // If user clears or types into the pre-filled Bagnell Dam field,
+  // watch for address selection to update dropoff coords.
+  // On page load, ensure Bagnell Dam coords are pre-set.
+  (function initLotoBagnell() {
+    // Bagnell Dam is already in lotoCoords.dropoff.
+    // If user selects a pickup, route will calculate automatically.
+    const loDate = document.getElementById('loto-date');
+    const loRetDate = document.getElementById('loto-return-date');
+    if (loDate) loDate.setAttribute('min', today);
+    if (loRetDate) loRetDate.setAttribute('min', today);
+  })();
+
+  /* ── LOTO Route Calculator ──────────────────────── */
+  async function lotoCalculateRoute() {
+    const { pickup, dropoff } = lotoCoords;
+    if (!pickup || !dropoff) return;
+
+    const routeBar = document.getElementById('loto-route-info');
+    routeBar.style.display = 'flex';
+    document.getElementById('loto-ri-dist').textContent = '…';
+    document.getElementById('loto-ri-time').textContent = '…';
+
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/` +
+        `${pickup.lon},${pickup.lat};${dropoff.lon},${dropoff.lat}?overview=false`;
+      const res  = await fetch(url);
+      const data = await res.json();
+      if (data.code === 'Ok') {
+        const meters  = data.routes[0].distance;
+        const seconds = data.routes[0].duration;
+        lotoRouteMiles = meters / 1609.344;
+
+        const miles   = lotoRouteMiles.toFixed(1);
+        const mins    = Math.round(seconds / 60);
+        const hrs     = Math.floor(mins / 60);
+        const timeStr = hrs > 0 ? `${hrs}h ${mins % 60}m` : `${mins} min`;
+
+        document.getElementById('loto-ri-dist').textContent = miles + ' mi';
+        document.getElementById('loto-ri-time').textContent = timeStr;
+        lotoRecalcPrice();
+      }
+    } catch(e) {
+      routeBar.style.display = 'none';
+    }
+  }
+
+  /* ── LOTO Pricing Engine (flat-rate) ───────────── */
+  function lotoRecalcPrice() {
+    // Flat rate by trip type — vehicle does not affect price
+    const flatRate = LOTO_FLAT_RATES[lotoTripType];
+    const tripLabels = {
+      oneway:   'One-Way Flat Rate',
+      sameday:  'Same-Day Round Trip',
+      multiday: 'Multi-Day Round Trip'
+    };
+    document.getElementById('loto-pb-trip-label').textContent = tripLabels[lotoTripType];
+    document.getElementById('loto-pb-base').textContent = '$' + flatRate;
+
+    // Local Area Transport add-on
+    const localChecked = document.getElementById('loto-local-transport')?.checked;
+    const localFee = localChecked ? LOTO_LOCAL_TRANSPORT_FEE : 0;
+    const localRow = document.getElementById('loto-pb-local-row');
+    if (localFee > 0) {
+      localRow.style.display = 'flex';
+      document.getElementById('loto-pb-local-val').textContent = '+$' + localFee;
+    } else {
+      localRow.style.display = 'none';
+    }
+
+    // Route info — informational only, does not affect price
+    if (lotoRouteMiles !== null) {
+      document.getElementById('loto-pb-dist-row').style.display = 'flex';
+      document.getElementById('loto-pb-dist-label').textContent = `Route: ~${lotoRouteMiles.toFixed(0)} mi each way`;
+      document.getElementById('loto-pb-dist-val').textContent = '';
+    } else {
+      document.getElementById('loto-pb-dist-row').style.display = 'none';
+    }
+
+    // Total, deposit, remaining
+    const total   = flatRate + localFee;
+    const deposit = Math.ceil(total * DEPOSIT_PCT);
+
+    document.getElementById('loto-price-display').textContent = '$' + total;
+    document.getElementById('loto-pb-deposit').textContent    = '$' + deposit;
+    document.getElementById('loto-pb-remaining').textContent  = '$' + (total - deposit);
+  }
+
+  /* ── LOTO Form Submit ───────────────────────────── */
+  function submitLoto(e) {
+    e.preventDefault();
+    const avail = document.getElementById('loto-avail-status');
+    if (avail.classList.contains('avail-no')) {
+      alert('This vehicle is unavailable at the selected time. Please choose a different date or time.');
+      return;
+    }
+    if (lotoTripType === 'multiday') {
+      const dep = document.getElementById('loto-date').value;
+      const ret = document.getElementById('loto-return-date').value;
+      if (!ret || ret <= dep) {
+        alert('Please select a return date that is after your departure date.');
+        return;
+      }
+    }
+
+    lotoRecalcPrice();
+
+    // Reveal the payment section and scroll to it
+    const paySection = document.getElementById('payment');
+    paySection.style.display = 'block';
+
+    // Update deposit amounts in payment section
+    const total   = parseInt(document.getElementById('loto-price-display').textContent.replace('$',''));
+    const deposit = parseInt(document.getElementById('loto-pb-deposit').textContent.replace('$',''));
+    document.getElementById('pay-deposit-amt').textContent   = '$' + deposit;
+    document.getElementById('pay-total-amt').textContent     = '$' + total;
+    document.getElementById('pay-remaining-amt').textContent = '$' + (total - deposit);
+
+    setTimeout(() => paySection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+
+    const btn = document.getElementById('loto-submit-btn');
+    btn.textContent = '✓ Request Submitted — Pay Deposit Below';
+    btn.style.background = '#2a9d5c';
+    btn.disabled = true;
+  }
+
+  // Trigger route calculation immediately if user has pickup address
+  // but Bagnell Dam is already set as dropoff
+  document.getElementById('loto-pickup-loc').addEventListener('blur', function() {
+    if (this.value.trim().length > 5 && !lotoCoords.pickup) {
+      // User typed something but didn't select from dropdown — try geocoding it
+      geocodeSearchFor(this.value.trim(), 'loto-pickup');
+    }
+  });
+</script>
+</body>
+</html>
