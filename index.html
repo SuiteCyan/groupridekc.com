@@ -1415,6 +1415,28 @@
       if (error) throw error;
       activeBooking = { id: data[0].id, type: 'loto' };
 
+      // Fire-and-forget: create Google Calendar event
+      if (window.createCalendarEvent) {
+        window.createCalendarEvent({
+          booking_id:      data[0].id,
+          booking_type:    'loto',
+          vehicle:         lotoVehicle,
+          trip_type:       lotoTripType,
+          pickup_date:     booking.departure_date,
+          pickup_time:     booking.departure_time,
+          pickup_address:  booking.pickup_address,
+          dropoff_address: booking.dropoff_address,
+          route_miles:     lotoRouteMiles,
+          passengers:      booking.passengers,
+          phone:           booking.phone,
+          email:           booking.email,
+          total_price:     total,
+          deposit_amount:  deposit,
+          payment_status:  'pending',
+          source_page:     'loto',
+        });
+      }
+
       // Reveal the payment section and scroll to it (using quote-engine section)
       const paySection = document.getElementById('qe-payment');
       if(paySection) {
