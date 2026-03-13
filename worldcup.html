@@ -110,6 +110,9 @@
       gap: 60px; align-items: center; padding: 80px 0;
     }
     @media(max-width:900px) { .hero-inner { grid-template-columns: 1fr; } }
+    .hero-van-logo { margin-bottom: 28px; }
+    .hero-van-logo img { max-width: 420px; width: 100%; height: auto; filter: drop-shadow(0 4px 24px rgba(0,0,0,0.5)); }
+    @media(max-width:600px) { .hero-van-logo img { max-width: 320px; } }
     .hero-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
     .hero-h1 {
       font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 900; line-height: 1.08;
@@ -459,6 +462,9 @@
     <div class="hero-inner">
 
       <div class="hero-content reveal">
+        <div class="hero-van-logo">
+          <img src="images/grkc-logo-van.png" alt="Group Ride KC" />
+        </div>
         <div class="hero-eyebrow">
           <span class="tag">⚽ Kansas City 2026</span>
           <span class="tag" style="background:rgba(227,24,55,.15); color:#ff8090;">Private Transportation</span>
