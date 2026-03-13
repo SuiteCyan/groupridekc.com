@@ -42,7 +42,7 @@
       display: block; font-size: 0.82rem; font-weight: 600;
       color: rgba(255,255,255,.7); margin-bottom: 6px;
     }
-    .form-group input,
+    .form-group input:not([type="checkbox"]),
     .form-group select,
     .form-group textarea {
       width: 100%; background: rgba(255,255,255,.05); border: 1px solid var(--border);
@@ -50,10 +50,13 @@
       font-size: 0.9rem; transition: border-color .2s;
       -webkit-appearance: none;
     }
-    .form-group input:focus,
+    .form-group input:not([type="checkbox"]):focus,
     .form-group select:focus,
     .form-group textarea:focus {
       outline: none; border-color: var(--gold);
+    }
+    .form-group input[type="checkbox"] {
+      cursor: pointer;
     }
     .form-group textarea { resize: vertical; min-height: 90px; }
 
