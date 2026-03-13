@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kansas City World Cup Transportation | Private Group Rides | Group Ride KC</title>
+  <meta name="description" content="Private group transportation in Kansas City for World Cup visitors. Airport rides, stadium transportation, and private rides for up to 10 passengers." />
+  <meta name="keywords" content="Kansas City World Cup transportation, World Cup shuttle Kansas City, private group transportation Kansas City, Kansas City airport transportation for groups, stadium transportation Kansas City" />
+  <link rel="canonical" href="https://groupridekc.com/worldcup.html" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    /* ─── Variables ─────────────────────────────────── */
+    :root {
+      --red:    #E31837;
+      --red-dk: #b8102a;
+      --gold:   #FFB81C;
+      --gold-lt:#ffd06e;
+      --dark:   #0a0a0a;
+      --card:   #141414;
+      --card2:  #1c1c1c;
+      --border: rgba(255,255,255,0.08);
+      --text-muted: rgba(255,255,255,0.55);
+    }
+
+    /* ─── Utility ───────────────────────────────────── */
+    .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 28px; border-radius: 8px; font-weight: 700;
+      font-size: 0.95rem; cursor: pointer; border: none; transition: all .2s;
+      white-space: nowrap;
+    }
+    .btn-primary   { background: var(--red);  color: #fff; }
+    .btn-primary:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(227,24,55,.4); }
+    .btn-gold      { background: var(--gold); color: #1a1a1a; }
+    .btn-gold:hover { background: var(--gold-lt); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,184,28,.35); }
+    .btn-outline   { background: transparent; color: #fff; border: 2px solid var(--border); }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-white  { background: #fff; color: var(--red); font-weight: 700; }
+    .btn-white:hover { background: #f0f0f0; transform: translateY(-2px); }
+    .btn-clear  { background: rgba(255,255,255,.15); color: #fff; border: 2px solid rgba(255,255,255,.4); }
+    .btn-clear:hover { background: rgba(255,255,255,.25); }
+    .section-label {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 12px;
+    }
+    .section-title { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; line-height: 1.15; }
+    .section-sub   { color: var(--text-muted); margin-top: 12px; font-size: 1.05rem; max-width: 580px; }
+    .tag {
+      display: inline-block; font-size: 0.7rem; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px;
+      border-radius: 100px; background: rgba(255,184,28,.15); color: var(--gold);
+    }
+
+    /* ─── Navbar ────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+      background: rgba(10,10,10,.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 68px; gap: 24px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem;
+    }
+    .logo-text span { color: var(--gold); }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { font-size: 0.82rem; font-weight: 500; color: var(--text-muted); transition: color .2s; white-space: nowrap; }
+    .nav-links a:hover { color: #fff; }
+    .nav-links a.active { color: var(--gold); }
+    .nav-cta { display: flex; gap: 8px; }
+    .nav-cta .btn { padding: 11px 20px; font-size: 0.85rem; white-space: nowrap; }
+    @media(max-width:768px) {
+      .nav-links { display: none; }
+      .nav-cta .btn-outline { display: none; }
+    }
+
+    /* ─── Reveal ─────────────────────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(28px); transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── Hero ──────────────────────────────────────── */
+    #hero {
+      min-height: 100vh; display: flex; align-items: center;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(227,24,55,.22) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 90% 80%, rgba(255,184,28,.1) 0%, transparent 60%),
+        #0a0a0a;
+      padding-top: 68px;
+    }
+    .hero-inner {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 60px; align-items: center; padding: 80px 0;
+    }
+    @media(max-width:900px) { .hero-inner { grid-template-columns: 1fr; } }
+    .hero-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .hero-h1 {
+      font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 900; line-height: 1.08;
+      margin-bottom: 20px;
+    }
+    .hero-h1 .accent { color: var(--gold); }
+    .hero-h1 .red    { color: var(--red); }
+    .hero-sub { font-size: 1.05rem; color: var(--text-muted); margin-bottom: 32px; max-width: 500px; }
+    .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 40px; }
+    .hero-bullets { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .hero-bullets li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.92rem; color: rgba(255,255,255,.75);
+    }
+    .hero-bullets li .bul { color: var(--gold); font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+
+    /* Hero right — contact card */
+    .wc-contact-card {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 36px;
+    }
+    .wc-contact-card .form-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
+    .wc-contact-card .form-sub   { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 28px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-size: 0.82rem; font-weight: 600;
+      color: rgba(255,255,255,.7); margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%; background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px; color: #fff; font-family: inherit;
+      font-size: 0.9rem; transition: border-color .2s; -webkit-appearance: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { outline: none; border-color: var(--gold); }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      cursor: pointer;
+      opacity: 0.55;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width:600px) { .form-row { grid-template-columns: 1fr; } }
+    .form-submit { width: 100%; padding: 16px; font-size: 1rem; border-radius: 10px; }
+    .form-note { font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 12px; }
+
+    /* Phone CTA band */
+    .phone-band {
+      background: rgba(255,184,28,.07); border: 1px solid rgba(255,184,28,.2);
+      border-radius: 10px; padding: 14px 18px; margin-top: 16px;
+      display: flex; align-items: center; gap: 12px;
+      font-size: 0.88rem; color: var(--text-muted);
+    }
+    .phone-band a { color: var(--gold); font-weight: 700; font-size: 1rem; }
+
+    /* ─── Intro / Banner ─────────────────────────────── */
+    #intro {
+      padding: 80px 0;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+    }
+    .intro-inner {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+    }
+    @media(max-width:900px) { .intro-inner { grid-template-columns: 1fr; } }
+    .intro-text .section-sub { max-width: 100%; }
+    .intro-text p { color: var(--text-muted); font-size: 0.97rem; line-height: 1.75; margin-top: 16px; }
+    .early-booking-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: rgba(227,24,55,.1); border: 1px solid rgba(227,24,55,.25);
+      border-radius: 10px; padding: 12px 18px; margin-top: 24px;
+      font-size: 0.85rem; color: rgba(255,255,255,.8);
+    }
+    .early-booking-badge strong { color: #ff6b7a; }
+    .intro-stats { display: flex; flex-direction: column; gap: 20px; }
+    .stat-card {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 24px; transition: border-color .2s;
+    }
+    .stat-card:hover { border-color: rgba(255,184,28,.3); }
+    .stat-card .s-num { font-size: 2.2rem; font-weight: 900; color: var(--gold); line-height: 1; }
+    .stat-card .s-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* ─── Services ──────────────────────────────────── */
+    #services {
+      padding: 100px 0;
+    }
+    .services-header { text-align: center; margin-bottom: 60px; }
+    .services-header .section-sub { margin: 12px auto 0; }
+    .wc-services-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px;
+    }
+    .wc-service-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; padding: 32px; transition: all .25s; position: relative; overflow: hidden;
+    }
+    .wc-service-card:hover { transform: translateY(-6px); border-color: rgba(255,184,28,.35); }
+    .wc-service-card.featured { border-color: var(--red); }
+    .wcs-icon { font-size: 2.4rem; margin-bottom: 18px; }
+    .wcs-name { font-size: 1.15rem; font-weight: 800; margin-bottom: 8px; }
+    .wcs-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; }
+    .wcs-features { list-style: none; }
+    .wcs-features li {
+      font-size: 0.84rem; padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,.75);
+    }
+    .wcs-features li:last-child { border-bottom: none; }
+    .wcs-features li .ck { color: var(--gold); font-weight: 700; flex-shrink: 0; }
+    .wc-service-card .popular-badge {
+      position: absolute; top: 20px; right: 20px;
+      background: var(--gold); color: #1a1a1a;
+      font-size: 0.68rem; font-weight: 800; letter-spacing: .06em;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 100px;
+    }
+
+    /* ─── Why Choose ─────────────────────────────────── */
+    #why {
+      padding: 100px 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 100%, rgba(227,24,55,.1) 0%, transparent 70%),
+        var(--card);
+    }
+    .why-inner {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+    }
+    @media(max-width:900px) { .why-inner { grid-template-columns: 1fr; } }
+    .why-text .section-sub { max-width: 100%; }
+    .why-list { margin-top: 36px; display: flex; flex-direction: column; gap: 18px; }
+    .why-item {
+      display: flex; align-items: flex-start; gap: 16px;
+    }
+    .why-icon {
+      width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(255,184,28,.1); border: 1px solid rgba(255,184,28,.2);
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    }
+    .why-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 3px; }
+    .why-desc  { font-size: 0.84rem; color: var(--text-muted); line-height: 1.55; }
+    .why-visual {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .wv-card {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 22px 24px;
+      display: flex; align-items: center; gap: 16px; transition: border-color .2s;
+    }
+    .wv-card:hover { border-color: rgba(255,184,28,.25); }
+    .wv-num {
+      font-size: 2rem; font-weight: 900; color: var(--border); line-height: 1; flex-shrink: 0;
+    }
+    .wv-label { font-weight: 700; font-size: 0.95rem; }
+    .wv-sub   { font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; }
+
+    /* ─── Ideal For ──────────────────────────────────── */
+    #ideal {
+      padding: 80px 0;
+    }
+    .ideal-inner { text-align: center; }
+    .ideal-inner .section-sub { margin: 12px auto 32px; }
+    .ideal-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; margin-top: 48px;
+    }
+    .ideal-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 28px 20px; text-align: center;
+      transition: all .2s;
+    }
+    .ideal-card:hover { border-color: var(--red); transform: translateY(-4px); }
+    .ideal-icon { font-size: 2.2rem; margin-bottom: 14px; }
+    .ideal-label { font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; }
+    .ideal-desc  { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* ─── Service Area ───────────────────────────────── */
+    #area {
+      padding: 80px 0;
+      background:
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255,184,28,.06) 0%, transparent 70%),
+        var(--card);
+    }
+    .area-inner {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start;
+    }
+    @media(max-width:900px) { .area-inner { grid-template-columns: 1fr; } }
+    .area-text p { font-size: 0.97rem; color: var(--text-muted); line-height: 1.75; margin-top: 16px; }
+    .area-locations {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px;
+    }
+    .area-loc {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.86rem; font-weight: 500; transition: border-color .2s;
+    }
+    .area-loc:hover { border-color: rgba(255,184,28,.3); }
+    .area-loc .pin { color: var(--red); font-size: 1rem; flex-shrink: 0; }
+    .area-cta-box {
+      background: var(--card2); border: 1px solid rgba(227,24,55,.2);
+      border-radius: 20px; padding: 40px; display: flex;
+      flex-direction: column; gap: 20px;
+    }
+    .area-cta-box h3 { font-size: 1.35rem; font-weight: 800; line-height: 1.3; }
+    .area-cta-box p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+    .area-cta-btns { display: flex; flex-direction: column; gap: 12px; }
+    .area-cta-btns .btn { width: 100%; justify-content: center; }
+
+    /* ─── FAQ ────────────────────────────────────────── */
+    #faq { padding: 100px 0; }
+    .faq-inner { max-width: 760px; margin: 0 auto; }
+    .faq-inner .section-sub { margin: 12px 0 48px; }
+    .faq-list { display: flex; flex-direction: column; gap: 12px; }
+    .faq-item {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden; transition: border-color .2s;
+    }
+    .faq-item:hover { border-color: rgba(255,184,28,.25); }
+    .faq-item.open { border-color: rgba(255,184,28,.35); }
+    .faq-q {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px; cursor: pointer; gap: 16px;
+      font-weight: 700; font-size: 0.95rem;
+    }
+    .faq-q .faq-arrow {
+      font-size: 0.9rem; color: var(--gold); flex-shrink: 0;
+      transition: transform .25s;
+    }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height .3s ease, padding .3s ease;
+      font-size: 0.9rem; color: var(--text-muted); line-height: 1.7;
+      padding: 0 24px;
+    }
+    .faq-item.open .faq-a { max-height: 200px; padding: 0 24px 20px; }
+
+    /* ─── Contact Strip ─────────────────────────────── */
+    #contact {
+      padding: 80px 0;
+      background: linear-gradient(135deg, var(--red) 0%, #b8102a 100%);
+    }
+    .contact-inner {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 32px; flex-wrap: wrap;
+    }
+    .contact-text h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 800; }
+    .contact-text p { color: rgba(255,255,255,.75); margin-top: 8px; }
+    .contact-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+
+    /* ─── Footer ────────────────────────────────────── */
+    footer {
+      background: #050505; border-top: 1px solid var(--border); padding: 60px 0 30px;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px;
+    }
+    @media(max-width: 900px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+    @media(max-width: 500px) { .footer-grid { grid-template-columns: 1fr; } }
+    .footer-brand .nav-logo { margin-bottom: 14px; }
+    .footer-brand p { font-size: 0.85rem; color: var(--text-muted); max-width: 260px; line-height: 1.7; }
+    .footer-socials { display: flex; gap: 12px; margin-top: 20px; }
+    .social-btn {
+      width: 38px; height: 38px; border-radius: 8px; background: var(--card2);
+      border: 1px solid var(--border); display: flex; align-items: center;
+      justify-content: center; font-size: 1rem; transition: all .2s; cursor: pointer;
+    }
+    .social-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .footer-col h4 { font-weight: 700; margin-bottom: 16px; font-size: 0.88rem; letter-spacing: .04em; }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 10px; }
+    .footer-col ul li a { font-size: 0.85rem; color: var(--text-muted); transition: color .2s; }
+    .footer-col ul li a:hover { color: #fff; }
+    .footer-bottom {
+      border-top: 1px solid var(--border); padding-top: 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .footer-copy { font-size: 0.8rem; color: var(--text-muted); }
+    .footer-legal { display: flex; gap: 20px; }
+    .footer-legal a { font-size: 0.8rem; color: var(--text-muted); transition: color .2s; }
+    .footer-legal a:hover { color: #fff; }
+
+    /* ─── Modal ─────────────────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,.8); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 20px; max-width: 480px; width: 100%;
+      padding: 36px; position: relative; animation: slideUp .3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      background: none; border: none; color: var(--text-muted);
+      font-size: 1.4rem; cursor: pointer; line-height: 1; transition: color .2s;
+    }
+    .modal-close:hover { color: #fff; }
+    .modal-icon { font-size: 3rem; margin-bottom: 16px; text-align: center; }
+    .modal h3 { font-size: 1.4rem; font-weight: 700; text-align: center; margin-bottom: 10px; }
+    .modal p  { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+    .modal .btn { width: 100%; }
+
+    /* ─── Responsive ─────────────────────────────────── */
+    @media(max-width:600px) {
+      .area-locations { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ NAVBAR ══════════════ -->
+<nav>
+  <div class="container">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="images/grkc-logo-van.png" alt="Group Ride KC" style="height:40px; width:auto; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5));">
+      </a>
+      <div class="nav-links">
+        <a href="index.html#how-it-works">How It Works</a>
+        <a href="index.html#services">Services</a>
+        <a href="index.html#loto" style="color:var(--text-muted);">🏖️ Lake Ozarks</a>
+        <a href="worldcup.html" class="active" style="color:var(--gold);">⚽ World Cup</a>
+        <a href="index.html#reviews">Reviews</a>
+        <a href="index.html#contact">Contact</a>
+      </div>
+      <div class="nav-cta">
+        <a href="#quote" class="btn btn-outline">Get a Quote</a>
+        <a href="tel:+18165526669" class="btn btn-primary">Call Now →</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-inner">
+
+      <div class="hero-content reveal">
+        <div class="hero-eyebrow">
+          <span class="tag">⚽ Kansas City 2026</span>
+          <span class="tag" style="background:rgba(227,24,55,.15); color:#ff8090;">Private Transportation</span>
+        </div>
+        <h1 class="hero-h1">
+          Private Group<br>
+          Transportation<br>
+          <span class="accent">for the World Cup</span><br>
+          <span class="red">in Kansas City</span>
+        </h1>
+        <p class="hero-sub">
+          Airport pickups, stadium rides, and local group transportation for visitors who want a simple, reliable way to get around KC.
+        </p>
+        <div class="hero-btns">
+          <a href="#quote" class="btn btn-primary">Get a Quote →</a>
+          <a href="tel:+18165526669" class="btn btn-outline">📞 Call or Text</a>
+        </div>
+        <ul class="hero-bullets">
+          <li><span class="bul">✓</span> Private rides for up to 10 passengers</li>
+          <li><span class="bul">✓</span> Airport, hotel, stadium, and downtown service</li>
+          <li><span class="bul">✓</span> Ideal for families, friends, and small groups</li>
+          <li><span class="bul">✓</span> No coordinating multiple rideshares</li>
+        </ul>
+      </div>
+
+      <!-- Right: Quote request form -->
+      <div class="wc-contact-card reveal" id="quote">
+        <div class="form-title">Request World Cup Transportation</div>
+        <div class="form-sub">Tell us about your group — we'll get back to you fast.</div>
+        <form id="wcForm" name="worldcup-request" data-netlify="true" onsubmit="submitWC(event)">
+          <div class="form-group">
+            <label for="wc-name">Your Name</label>
+            <input type="text" id="wc-name" name="name" placeholder="First &amp; last name" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="wc-passengers">Passengers</label>
+              <select id="wc-passengers" name="passengers" required>
+                <option value="">Select…</option>
+                <option>1</option><option>2</option><option>3</option><option>4</option>
+                <option>5</option><option>6</option><option>7</option><option>8</option>
+                <option>9</option><option>10</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="wc-luggage">Luggage</label>
+              <select id="wc-luggage" name="luggage">
+                <option value="0">0 pieces</option><option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                <option value="6">6</option><option value="7">7</option><option value="8">8</option>
+                <option value="9">9</option><option value="10">10</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="wc-phone">Phone Number</label>
+            <input type="tel" id="wc-phone" name="phone" placeholder="(816) 552-6669" required oninput="formatPhone(this)" maxlength="14" />
+          </div>
+          <div class="form-group">
+            <label for="wc-email">Email Address</label>
+            <input type="email" id="wc-email" name="email" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label for="wc-date">Travel Date</label>
+            <input type="date" id="wc-date" name="date" required />
+          </div>
+          <div class="form-group">
+            <label for="wc-type">What do you need?</label>
+            <select id="wc-type" name="trip_type" required>
+              <option value="">Select a service…</option>
+              <option>Airport pickup or drop-off</option>
+              <option>Stadium transportation (match day)</option>
+              <option>Hotel / Airbnb transportation</option>
+              <option>Private group charter (full day or custom)</option>
+              <option>Multiple trips / combination</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="wc-notes">Additional Details</label>
+            <textarea id="wc-notes" name="notes" placeholder="Pickup location, match date, special requests, etc."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary form-submit">Send Request →</button>
+        </form>
+        <div class="phone-band">
+          📞 Prefer to call? <a href="tel:+18165526669">(816) 552-6669</a> — call or text anytime
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ INTRO ══════════════ -->
+<section id="intro">
+  <div class="container">
+    <div class="intro-inner">
+      <div class="intro-text reveal">
+        <div class="section-label">Why Group Ride KC</div>
+        <h2 class="section-title">Getting Around KC<br>Just Got Easier</h2>
+        <p>When the World Cup comes to Kansas City, getting around quickly and comfortably matters. Group Ride KC offers private transportation for small groups who want a smoother option than splitting into multiple rideshares or waiting on event traffic.</p>
+        <p>Whether you need an airport pickup, a ride to the match, or help getting around the city for the day — we make group transportation simple.</p>
+        <div class="early-booking-badge">
+          ⏰ <span><strong>Book early.</strong> Demand will be higher during the event — locking in your dates now means one less thing to worry about.</span>
+        </div>
+      </div>
+      <div class="intro-stats reveal">
+        <div class="stat-card">
+          <div class="s-num">1–10</div>
+          <div class="s-label">Passengers per ride — no splitting your group up</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-num">24 / 7</div>
+          <div class="s-label">Available around the clock, including early morning airport runs</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-num">100%</div>
+          <div class="s-label">Private — your group has the vehicle to yourselves</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ SERVICES ══════════════ -->
+<section id="services">
+  <div class="container">
+    <div class="services-header reveal">
+      <div class="section-label">What We Offer</div>
+      <h2 class="section-title">Transportation Options<br>During the World Cup</h2>
+      <p class="section-sub">Whether it's the airport, the stadium, or everywhere in between — we've got your group covered.</p>
+    </div>
+    <div class="wc-services-grid reveal">
+
+      <div class="wc-service-card featured">
+        <div class="popular-badge">Most Requested</div>
+        <div class="wcs-icon">✈️</div>
+        <div class="wcs-name">Airport Pickups</div>
+        <div class="wcs-desc">Private group pickup and drop-off service to and from Kansas City International Airport — no waiting on a rideshare, no splitting your group.</div>
+        <ul class="wcs-features">
+          <li><span class="ck">✓</span> KCI arrivals &amp; departures</li>
+          <li><span class="ck">✓</span> Flight tracking included</li>
+          <li><span class="ck">✓</span> Up to 10 passengers per vehicle</li>
+          <li><span class="ck">✓</span> Private — just your group</li>
+        </ul>
+      </div>
+
+      <div class="wc-service-card">
+        <div class="wcs-icon">🏟️</div>
+        <div class="wcs-name">Stadium Transportation</div>
+        <div class="wcs-desc">Pre-arranged rides to and from the match so your group arrives together and leaves without the chaos of post-game traffic.</div>
+        <ul class="wcs-features">
+          <li><span class="ck">✓</span> Drop-off near the stadium</li>
+          <li><span class="ck">✓</span> Post-match pickups available</li>
+          <li><span class="ck">✓</span> We know the KC traffic patterns</li>
+          <li><span class="ck">✓</span> Flexible pickup windows</li>
+        </ul>
+      </div>
+
+      <div class="wc-service-card">
+        <div class="wcs-icon">🏨</div>
+        <div class="wcs-name">Hotel &amp; Airbnb Rides</div>
+        <div class="wcs-desc">Easy rides between your lodging, restaurants, fan events, and match locations. No rental car, no parking headaches.</div>
+        <ul class="wcs-features">
+          <li><span class="ck">✓</span> Hotel pickups across KC</li>
+          <li><span class="ck">✓</span> Airbnb and short-term rental pickups</li>
+          <li><span class="ck">✓</span> Downtown, Plaza, Midtown</li>
+          <li><span class="ck">✓</span> Schedule around your plans</li>
+        </ul>
+      </div>
+
+      <div class="wc-service-card">
+        <div class="wcs-icon">🗺️</div>
+        <div class="wcs-name">Private Group Charters</div>
+        <div class="wcs-desc">Need transportation for the day or want flexibility around your schedule? Book a private group ride built around your plans.</div>
+        <ul class="wcs-features">
+          <li><span class="ck">✓</span> Custom routes and schedules</li>
+          <li><span class="ck">✓</span> Multi-stop trips available</li>
+          <li><span class="ck">✓</span> Fan events, restaurants, bars</li>
+          <li><span class="ck">✓</span> Full-day availability</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ WHY CHOOSE ══════════════ -->
+<section id="why">
+  <div class="container">
+    <div class="why-inner">
+      <div class="why-text reveal">
+        <div class="section-label">Why Group Ride KC</div>
+        <h2 class="section-title">A Better Way for<br>Groups to Get Around<br>Kansas City</h2>
+        <div class="why-list">
+          <div class="why-item">
+            <div class="why-icon">👥</div>
+            <div>
+              <div class="why-title">Keep Your Whole Group Together</div>
+              <div class="why-desc">One vehicle, one arrival, one bill. No waiting for stragglers who got a different Uber.</div>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">🗺️</div>
+            <div>
+              <div class="why-title">Local KC Knowledge</div>
+              <div class="why-desc">We know the routes, the traffic patterns, and how to get around event congestion. You're not getting a driver using GPS for the first time.</div>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">💬</div>
+            <div>
+              <div class="why-title">Straightforward Process</div>
+              <div class="why-desc">Request online or call/text. We confirm, you show up. No surge pricing surprises, no app hunting, no drama.</div>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">✈️</div>
+            <div>
+              <div class="why-title">Easier Airport &amp; Stadium Planning</div>
+              <div class="why-desc">Pre-arrange your pickup and stop thinking about it. We'll be there when your group lands or when the final whistle blows.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="why-visual reveal">
+        <div class="wv-card">
+          <div class="wv-num">01</div>
+          <div>
+            <div class="wv-label">Choose Suburban or Van</div>
+            <div class="wv-sub">Suburban for groups of 1–5 · Van for groups up to 10</div>
+          </div>
+        </div>
+        <div class="wv-card">
+          <div class="wv-num">02</div>
+          <div>
+            <div class="wv-label">Request Your Ride Online or by Phone</div>
+            <div class="wv-sub">Takes two minutes. We'll confirm within the hour.</div>
+          </div>
+        </div>
+        <div class="wv-card">
+          <div class="wv-num">03</div>
+          <div>
+            <div class="wv-label">Lock It In With a Small Deposit</div>
+            <div class="wv-sub">25% holds your reservation. Balance due on ride day.</div>
+          </div>
+        </div>
+        <div class="wv-card">
+          <div class="wv-num">04</div>
+          <div>
+            <div class="wv-label">Your Driver Shows Up, You Enjoy KC</div>
+            <div class="wv-sub">Clean vehicle, on time, no surprises.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ IDEAL FOR ══════════════ -->
+<section id="ideal">
+  <div class="container">
+    <div class="ideal-inner">
+      <div class="reveal">
+        <div class="section-label">Who We're For</div>
+        <h2 class="section-title">Perfect For</h2>
+        <p class="section-sub">If you're traveling to Kansas City with people, we're probably a good fit.</p>
+      </div>
+      <div class="ideal-grid reveal">
+        <div class="ideal-card">
+          <div class="ideal-icon">👨‍👩‍👧‍👦</div>
+          <div class="ideal-label">Families Traveling Together</div>
+          <div class="ideal-desc">One vehicle, no car seats to haul, everyone arrives at the same time.</div>
+        </div>
+        <div class="ideal-card">
+          <div class="ideal-icon">🎉</div>
+          <div class="ideal-label">Friend Groups Attending Matches</div>
+          <div class="ideal-desc">Keep the party together from the hotel to the stadium and back.</div>
+        </div>
+        <div class="ideal-card">
+          <div class="ideal-icon">💼</div>
+          <div class="ideal-label">Corporate Guests &amp; Clients</div>
+          <div class="ideal-desc">Professional private transportation that makes a good impression.</div>
+        </div>
+        <div class="ideal-card">
+          <div class="ideal-icon">🏠</div>
+          <div class="ideal-label">Airbnb &amp; Hotel Visitors</div>
+          <div class="ideal-desc">We pick up anywhere in the Kansas City area — no rental car needed.</div>
+        </div>
+        <div class="ideal-card">
+          <div class="ideal-icon">🚫</div>
+          <div class="ideal-label">Rideshare-Averse Groups</div>
+          <div class="ideal-desc">Skip the surge pricing, the driver roulette, and the five separate apps.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ SERVICE AREA ══════════════ -->
+<section id="area">
+  <div class="container">
+    <div class="area-inner">
+      <div class="area-text reveal">
+        <div class="section-label">Service Area</div>
+        <h2 class="section-title">Serving Visitors Across<br>the Kansas City Area</h2>
+        <p>We help groups travel between the airport, downtown Kansas City, hotels, match-day destinations, restaurants, and other local stops. If it's in the KC metro, we can get your group there.</p>
+        <div class="area-locations">
+          <div class="area-loc"><span class="pin">📍</span>Kansas City International Airport</div>
+          <div class="area-loc"><span class="pin">📍</span>Downtown Kansas City</div>
+          <div class="area-loc"><span class="pin">📍</span>The Plaza &amp; Midtown</div>
+          <div class="area-loc"><span class="pin">📍</span>Arrowhead Stadium Area</div>
+          <div class="area-loc"><span class="pin">📍</span>Westport &amp; River Market</div>
+          <div class="area-loc"><span class="pin">📍</span>Power &amp; Light District</div>
+          <div class="area-loc"><span class="pin">📍</span>Hotel Districts</div>
+          <div class="area-loc"><span class="pin">📍</span>Short-Term Rentals &amp; Airbnbs</div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="area-cta-box">
+          <h3>Get Your World Cup Transportation Lined Up Early</h3>
+          <p>Big events bring traffic, delays, and limited availability. If your group already knows your travel dates, now is the time to reserve transportation. Early bookings go fast — especially for match days.</p>
+          <div class="area-cta-btns">
+            <a href="#quote" class="btn btn-primary">Request a Quote →</a>
+            <a href="tel:+18165526669" class="btn btn-outline">📞 (816) 552-6669 — Call or Text</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FAQ ══════════════ -->
+<section id="faq">
+  <div class="container">
+    <div class="faq-inner">
+      <div class="reveal">
+        <div class="section-label">Common Questions</div>
+        <h2 class="section-title">World Cup<br>Transportation FAQs</h2>
+        <p class="section-sub">Quick answers to what most groups ask before booking.</p>
+      </div>
+      <div class="faq-list reveal">
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">How many passengers can you accommodate? <span class="faq-arrow">▼</span></div>
+          <div class="faq-a">We can transport groups of up to 10 passengers. A Chevy Suburban works for groups of 1–5, and our 10-passenger van handles groups of 6–10. Just let us know your group size when you request a quote.</div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">Do you offer airport pickups? <span class="faq-arrow">▼</span></div>
+          <div class="faq-a">Yes, we offer private airport transportation for groups arriving in Kansas City. We track your flight, meet your group at KCI, and get you to your hotel, Airbnb, or wherever you're headed — no waiting on a rideshare surge.</div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">Can we schedule a ride to and from the match? <span class="faq-arrow">▼</span></div>
+          <div class="faq-a">Yes, pre-arranged stadium transportation is available. We'll get your group to the stadium before kickoff and have a pickup ready when the match ends. We know the area, so we can navigate the post-game traffic patterns.</div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">Do you pick up from hotels or Airbnbs? <span class="faq-arrow">▼</span></div>
+          <div class="faq-a">Yes, we provide private transportation for visitors staying throughout the Kansas City area — downtown hotels, the Plaza area, Airbnbs, short-term rentals, and beyond. Just provide your address when you request a quote.</div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">Should we book ahead for World Cup transportation? <span class="faq-arrow">▼</span></div>
+          <div class="faq-a">Yes. Demand will be significantly higher during the event, and match day availability fills up first. If you already know your travel dates, booking early is the best way to guarantee your group has a ride locked in.</div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">How does payment work? <span class="faq-arrow">▼</span></div>
+          <div class="faq-a">We collect a 25% deposit to hold your reservation. The remaining balance is due on ride day. Deposits are processed securely online and we'll send you a confirmation once your booking is locked in.</div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">What if my group size changes? <span class="faq-arrow">▼</span></div>
+          <div class="faq-a">No problem. Just let us know ahead of time and we'll adjust the vehicle if needed. The Suburban handles up to 5 passengers, and the van handles up to 10. If your group grows, we'll make sure you have the right ride.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CONTACT ══════════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-inner">
+      <div class="contact-text">
+        <h2>Ready to Book Your Group's Ride?</h2>
+        <p>Fill out the form above or reach out directly. We'll get back to you fast.</p>
+      </div>
+      <div class="contact-actions">
+        <a href="tel:+18165526669" class="btn btn-white">📞 (816) 552-6669</a>
+        <a href="mailto:rides@groupridekc.com" class="btn btn-clear">✉️ rides@groupridekc.com</a>
+        <a href="#quote" class="btn btn-clear">Request a Quote</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-logo" style="margin-bottom:14px;">
+          <img src="images/grkc-logo-van.png" alt="Group Ride KC" style="height:54px; width:auto; filter:drop-shadow(0 2px 10px rgba(0,0,0,0.6));">
+        </div>
+        <p>Private group transportation in Kansas City for World Cup visitors and everyday group travel. Safe, reliable, and ready for your crew.</p>
+        <div class="footer-socials">
+          <div class="social-btn">𝕏</div>
+          <div class="social-btn">f</div>
+          <div class="social-btn">📸</div>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#services">Airport Pickups</a></li>
+          <li><a href="#services">Stadium Transportation</a></li>
+          <li><a href="#services">Hotel &amp; Airbnb Rides</a></li>
+          <li><a href="#services">Private Charters</a></li>
+          <li><a href="index.html#loto">Lake of the Ozarks</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="index.html#reviews">Reviews</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Driver Portal</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Refund Policy</a></li>
+          <li><a href="#">Accessibility</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 Group Ride KC · groupridekc.com · All rights reserved.</div>
+      <div class="footer-legal">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════ SUCCESS MODAL ══════════════ -->
+<div class="modal-overlay" id="wcModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('wcModal')">✕</button>
+    <div class="modal-icon">🎉</div>
+    <h3>Request Sent!</h3>
+    <p>We got your transportation request and will be in touch within 30 minutes to confirm details and next steps. Check your email and phone.</p>
+    <button class="btn btn-primary" onclick="closeModal('wcModal')">Got It — Thanks!</button>
+  </div>
+</div>
+
+<script>
+  /* ── Phone formatter ── */
+  function formatPhone(el) {
+    let v = el.value.replace(/\D/g, '').substring(0, 10);
+    if (v.length >= 6) v = '(' + v.substring(0,3) + ') ' + v.substring(3,6) + '-' + v.substring(6);
+    else if (v.length >= 3) v = '(' + v.substring(0,3) + ') ' + v.substring(3);
+    el.value = v;
+  }
+
+  /* ── Form submit ── */
+  function submitWC(e) {
+    e.preventDefault();
+    const btn = document.getElementById('wcForm').querySelector('button[type="submit"]');
+    btn.textContent = 'Sending…'; btn.disabled = true;
+    setTimeout(() => {
+      document.getElementById('wcModal').classList.add('active');
+      document.getElementById('wcForm').reset();
+      btn.textContent = 'Send Request →'; btn.disabled = false;
+    }, 800);
+  }
+
+  /* ── Modal close ── */
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+  });
+
+  /* ── FAQ accordion ── */
+  function toggleFaq(item) {
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  /* ── Scroll reveal ── */
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  /* ── Min date on date input ── */
+  const today = new Date().toISOString().split('T')[0];
+  document.querySelectorAll('input[type="date"]').forEach(d => d.setAttribute('min', today));
+</script>
+
+</body>
+</html>
