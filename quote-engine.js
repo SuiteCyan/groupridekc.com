@@ -56,7 +56,30 @@
       outline: none; border-color: var(--gold);
     }
     .form-group input[type="checkbox"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-radius: 4px;
+      background: rgba(255,255,255,.05);
       cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all .2s;
+    }
+    .form-group input[type="checkbox"]:checked {
+      background: var(--gold, #f5a623);
+      border-color: var(--gold, #f5a623);
+    }
+    .form-group input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: #000;
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1;
     }
     .form-group textarea { resize: vertical; min-height: 90px; }
 
@@ -266,7 +289,7 @@
         <div id="kc-local-transport-row" class="form-group" style="display:none; margin-bottom:10px;">
           <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; font-weight:400;">
             <input type="checkbox" id="kc-local-transport" onchange="window.recalcPrice()"
-                   style="width:17px; height:17px; margin-top:2px; accent-color:var(--gold); flex-shrink:0;">
+                   style="margin-top:2px;">
             <span>
               <strong style="color:var(--gold);">Local Area Transport</strong>
               <span style="color:var(--text-muted); font-size:0.85rem;"> +$250</span>
@@ -398,7 +421,7 @@
             </div>
           </div>
           <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-top:12px;">
-            <input type="checkbox" id="estimate-ack" style="width:16px; height:16px; accent-color:var(--gold); flex-shrink:0;">
+            <input type="checkbox" id="estimate-ack" style="margin-top:2px;">
             <span style="font-size:0.82rem; color:rgba(255,255,255,.75);">I understand</span>
           </label>
         </div>
@@ -666,7 +689,18 @@
 
   function extractCityFallback(query) {
     const parts = query.split(',').map(s => s.trim()).filter(Boolean);
-    if (parts.length >= 2) return parts.slice(-2).join(', ');
+    if (parts.length >= 2) {
+      // "2990 E. Ridgely Road, Smithville, MO" → "Smithville, MO"
+      // "Smithville, MO" → "Smithville, MO"
+      return parts.slice(-2).join(', ');
+    }
+    // Try splitting on spaces: "2990 E Ridgely Road Smithville MO"
+    // Strip leading numbers (house number) and common road words
+    const stripped = query
+      .replace(/^\d+\s*/, '')
+      .replace(/\b(road|rd|street|st|ave|avenue|blvd|boulevard|dr|drive|ln|lane|ct|court|way|hwy|highway|e\.?|w\.?|n\.?|s\.?)\b\.?\s*/gi, '')
+      .trim();
+    if (stripped.length > 2) return stripped;
     return null;
   }
 
@@ -679,15 +713,45 @@
       let results = normalizePhoton(data.features, false);
       let isFallback = false;
 
-      if (!results.length) {
+      // Check if we got an exact street-level match (has house number)
+      const hasExactMatch = results.some(r => !r.isApproximate);
+
+      // If no results OR no exact match, try city-level fallback
+      if (!results.length || !hasExactMatch) {
         const cityQuery = extractCityFallback(query);
         if (cityQuery) {
           const fbUrl  = `https://photon.komoot.io/api/` +
             `?q=${encodeURIComponent(cityQuery)}&lat=39.0984&lon=-94.5786&limit=3`;
           const fbRes  = await fetch(fbUrl);
-          const fbData = await res.json();
-          results = normalizePhoton(fbData.features, true);
-          isFallback = true;
+          const fbData = await fbRes.json();
+          const cityResults = normalizePhoton(fbData.features, true);
+
+          if (cityResults.length) {
+            // If we had no results at all, use city results only
+            // If we had approximate results, prepend city results (deduped)
+            if (!results.length) {
+              results = cityResults;
+            } else {
+              // Merge: city-level first, then any other results, removing duplicates
+              const seen = new Set(cityResults.map(r => r.display_name));
+              results = [...cityResults, ...results.filter(r => !seen.has(r.display_name))];
+            }
+            isFallback = true;
+          }
+        }
+
+        // If still no results at all, do one more attempt: just the city name
+        if (!results.length) {
+          const words = query.replace(/[0-9]/g, '').split(/[\s,]+/).filter(w => w.length > 2);
+          if (words.length) {
+            const cityOnly = words.slice(-2).join(' ');
+            const coUrl = `https://photon.komoot.io/api/` +
+              `?q=${encodeURIComponent(cityOnly)}&lat=39.0984&lon=-94.5786&limit=3`;
+            const coRes = await fetch(coUrl);
+            const coData = await coRes.json();
+            results = normalizePhoton(coData.features, true);
+            isFallback = true;
+          }
         }
       }
 
