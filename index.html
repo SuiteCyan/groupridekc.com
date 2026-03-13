@@ -1535,10 +1535,10 @@
    ═══════════════════════════════════════════════════ */
   const SUPABASE_URL  = 'https://nysoddktcdzynktrddte.supabase.co';
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55c29kZGt0Y2R6eW5rdHJkZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4ODYwMjAsImV4cCI6MjA1NzQ2MjAyMH0.p5MJ4hhM7jMjCf1GjJAMbqTuxBYGvaoeqpFjaMqqXKY';
-  let supabase = null;
+  let supabaseClient = null;
   try {
     if (window.supabase && window.supabase.createClient) {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     } else {
       console.warn('Supabase SDK not loaded — form submissions will be disabled.');
     }
@@ -2045,7 +2045,7 @@
     };
 
     try {
-      const { data, error } = await supabase.from('bookings').insert([booking]).select();
+      const { data, error } = await supabaseClient.from('bookings').insert([booking]).select();
       if (error) throw error;
       activeBooking = { id: data[0].id, type: 'kc' };
 
@@ -2394,7 +2394,7 @@
     };
 
     try {
-      const { data, error } = await supabase.from('loto_bookings').insert([booking]).select();
+      const { data, error } = await supabaseClient.from('loto_bookings').insert([booking]).select();
       if (error) throw error;
       activeBooking = { id: data[0].id, type: 'loto' };
 
@@ -2472,7 +2472,7 @@
       if (data.url) {
         // Update Supabase with the Stripe session ID
         const table = activeBooking.type === 'loto' ? 'loto_bookings' : 'bookings';
-        await supabase.from(table).update({ stripe_session_id: data.sessionId }).eq('id', activeBooking.id);
+        await supabaseClient.from(table).update({ stripe_session_id: data.sessionId }).eq('id', activeBooking.id);
         // Redirect to Stripe Checkout
         window.location.href = data.url;
       } else {
@@ -2501,7 +2501,7 @@
     if (payment === 'success') {
       // Update payment status in Supabase
       const table = bookingType === 'loto' ? 'loto_bookings' : 'bookings';
-      supabase.from(table)
+      supabaseClient.from(table)
         .update({ payment_status: 'deposit_paid', stripe_payment_id: sessionId })
         .eq('id', bookingId)
         .then(() => {
