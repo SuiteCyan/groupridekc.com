@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Group Ride KC – Kansas City Group Shuttle Service</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <!-- Stripe.js -->
-  <script src="https://js.stripe.com/v3/"></script>
   <style>
     /* ─── Reset & Base ─────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -499,12 +495,12 @@
     .modal p  { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
     .modal .btn { width: 100%; }
 
-    /* ─── Calendar & Clock Icon Colors ──────────────── */
+    /* ─── Calendar & Clock Icon Colors (muted gray to match placeholder text) ── */
     input[type="date"]::-webkit-calendar-picker-indicator,
     input[type="time"]::-webkit-calendar-picker-indicator {
-      filter: brightness(0) saturate(100%) invert(79%) sepia(95%) saturate(680%) hue-rotate(2deg) brightness(105%) contrast(100%);
+      filter: invert(1);
       cursor: pointer;
-      opacity: 1;
+      opacity: 0.55;
     }
 
     /* ─── Scroll reveal ──────────────────────────────── */
@@ -756,23 +752,6 @@
 
           <form id="bookingForm" onsubmit="submitBooking(event)">
 
-            <!-- Vehicle Selection -->
-            <div class="form-group">
-              <label>Select Vehicle</label>
-              <div class="vehicle-selector">
-                <div class="vehicle-opt selected" id="opt-suburban" onclick="selectVehicle('suburban')">
-                  <div class="vo-icon">🚙</div>
-                  <div class="vo-name">Suburban</div>
-                  <div class="vo-cap">1–5 people</div>
-                </div>
-                <div class="vehicle-opt" id="opt-van" onclick="selectVehicle('van')">
-                  <div class="vo-icon">🚐</div>
-                  <div class="vo-name">Van</div>
-                  <div class="vo-cap">6–10 people</div>
-                </div>
-              </div>
-            </div>
-
             <!-- Trip Type -->
             <div class="form-group">
               <label>Trip Type</label>
@@ -843,11 +822,11 @@
               <div class="ri-item">⏱ <span class="ri-label">Drive time:</span>&nbsp;<span class="ri-value" id="ri-time">--</span></div>
             </div>
 
-            <!-- Passengers & Phone -->
+            <!-- Passengers & Luggage -->
             <div class="form-row">
               <div class="form-group">
                 <label for="passengers">Passengers</label>
-                <select id="passengers" required>
+                <select id="passengers" required onchange="autoSelectVehicle()">
                   <option value="">Select…</option>
                   <option>1</option><option>2</option><option>3</option>
                   <option>4</option><option>5</option><option>6</option>
@@ -855,9 +834,20 @@
                 </select>
               </div>
               <div class="form-group">
-                <label for="phone-hero">Phone Number</label>
-                <input type="tel" id="phone-hero" placeholder="(816) 552-6669" required oninput="formatPhone(this)" maxlength="14" />
+                <label for="luggage">Luggage Pieces</label>
+                <select id="luggage" required>
+                  <option value="">Select…</option>
+                  <option>0</option><option>1</option><option>2</option><option>3</option>
+                  <option>4</option><option>5</option><option>6</option><option>7</option>
+                  <option>8</option><option>9</option><option>10</option>
+                </select>
               </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="form-group">
+              <label for="phone-hero">Phone Number</label>
+              <input type="tel" id="phone-hero" placeholder="(816) 552-6669" required oninput="formatPhone(this)" maxlength="14" />
             </div>
 
             <div class="form-group">
@@ -939,28 +929,24 @@
     <div class="steps-grid reveal">
       <div class="step-card">
         <div class="step-num">01</div>
-        <div class="step-icon">🗓️</div>
         <div class="step-title">Choose Date & Time</div>
         <div class="step-desc">Select your pickup date, time, and location. We cover all match days and surrounding events in Kansas City.</div>
         <div class="step-connector">→</div>
       </div>
       <div class="step-card">
         <div class="step-num">02</div>
-        <div class="step-icon">🚐</div>
         <div class="step-title">Pick Your Vehicle</div>
         <div class="step-desc">Choose a Suburban for groups of 1–5, or our 10-passenger van for groups of 6–10. All vehicles are clean, comfortable, and well-equipped.</div>
         <div class="step-connector">→</div>
       </div>
       <div class="step-card">
         <div class="step-num">03</div>
-        <div class="step-icon">💳</div>
         <div class="step-title">Confirm & Pay Securely</div>
         <div class="step-desc">Pay with card, Apple Pay, or Google Pay. Receive an instant confirmation and driver details before your ride.</div>
         <div class="step-connector">→</div>
       </div>
       <div class="step-card">
         <div class="step-num">04</div>
-        <div class="step-icon">📍</div>
         <div class="step-title">Track & Ride</div>
         <div class="step-desc">Track your driver in real time, receive SMS updates, and arrive at the stadium or venue relaxed — your group together, on time.</div>
       </div>
@@ -973,20 +959,17 @@
   <div class="container">
     <div class="services-header reveal">
       <div class="section-label">Our Fleet</div>
-      <h2 class="section-title">Choose Your Vehicle</h2>
-      <p class="section-sub">Whether it's just your family or your whole crew, we have the right vehicle for every group size.</p>
+      <h2 class="section-title">Our Vehicles</h2>
+      <p class="section-sub">Whether it's just your family or your whole crew, we'll match you with the right vehicle based on your group size and luggage needs.</p>
     </div>
     <div class="services-grid reveal">
 
       <!-- Suburban -->
       <div class="service-card">
-        <div class="service-icon">🚙</div>
         <div class="service-name">Chevy Suburban</div>
-        <div class="service-cap">Ideal for groups of 1 to 5 passengers</div>
-        <div class="service-price"><sup>$</sup>65</div>
-        <div class="service-price-note">base fare · per trip · pricing varies by distance</div>
+        <div class="service-cap">Seats up to 5 passengers</div>
         <ul class="service-features">
-          <li><span class="check">✦</span> Up to 5 passengers comfortably</li>
+          <li><span class="check">✦</span> Comfortable seating for 1–5 guests</li>
           <li><span class="check">✦</span> Spacious luggage &amp; gear storage</li>
           <li><span class="check">✦</span> Climate-controlled cabin</li>
           <li><span class="check">✦</span> USB charging at every seat</li>
@@ -994,20 +977,17 @@
           <li><span class="check">✦</span> Live GPS tracking included</li>
           <li><span class="check">✦</span> Direct airport &amp; stadium routes</li>
         </ul>
-        <a href="#quote-form" class="btn btn-outline" style="width:100%; justify-content:center;">Book Suburban →</a>
+        <a href="#quote-form" class="btn btn-outline" style="width:100%; justify-content:center;">Get a Quote →</a>
         <div class="service-glow"></div>
       </div>
 
       <!-- Van -->
       <div class="service-card popular">
         <div class="popular-badge">Most Popular</div>
-        <div class="service-icon">🚐</div>
         <div class="service-name">10-Passenger Van</div>
-        <div class="service-cap">Perfect for groups of 6 to 10 passengers</div>
-        <div class="service-price"><sup>$</sup>95</div>
-        <div class="service-price-note">base fare · per trip · pricing varies by distance</div>
+        <div class="service-cap">Seats up to 10 passengers</div>
         <ul class="service-features">
-          <li><span class="check">✦</span> Up to 10 passengers — full group</li>
+          <li><span class="check">✦</span> Room for your full group of 6–10</li>
           <li><span class="check">✦</span> Oversized luggage capacity</li>
           <li><span class="check">✦</span> Premium rear A/C &amp; heating</li>
           <li><span class="check">✦</span> USB &amp; 12V power at every row</li>
@@ -1015,7 +995,7 @@
           <li><span class="check">✦</span> Live GPS tracking included</li>
           <li><span class="check">✦</span> Direct airport &amp; stadium routes</li>
         </ul>
-        <a href="#quote-form" class="btn btn-gold" style="width:100%; justify-content:center;">Book the Van →</a>
+        <a href="#quote-form" class="btn btn-gold" style="width:100%; justify-content:center;">Get a Quote →</a>
         <div class="service-glow"></div>
       </div>
 
@@ -1110,23 +1090,6 @@
 
         <form id="lotoForm" onsubmit="submitLoto(event)">
 
-          <!-- Vehicle -->
-          <div class="form-group">
-            <label>Select Vehicle</label>
-            <div class="vehicle-selector">
-              <div class="vehicle-opt selected" id="loto-opt-suburban" onclick="selectLotoVehicle('suburban')">
-                <div class="vo-icon">🚙</div>
-                <div class="vo-name">Suburban</div>
-                <div class="vo-cap">1–5 people</div>
-              </div>
-              <div class="vehicle-opt" id="loto-opt-van" onclick="selectLotoVehicle('van')">
-                <div class="vo-icon">🚐</div>
-                <div class="vo-name">Van</div>
-                <div class="vo-cap">6–10 people</div>
-              </div>
-            </div>
-          </div>
-
           <!-- Departure Date & Time -->
           <div class="form-row">
             <div class="form-group">
@@ -1180,7 +1143,7 @@
             <div class="ri-item">⏱ <span class="ri-label">Drive time:</span>&nbsp;<span class="ri-value" id="loto-ri-time">--</span></div>
           </div>
 
-          <!-- Passengers & Phone -->
+          <!-- Passengers & Luggage -->
           <div class="form-row">
             <div class="form-group">
               <label for="loto-passengers">Passengers</label>
@@ -1192,9 +1155,20 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="loto-phone">Phone Number</label>
-              <input type="tel" id="loto-phone" placeholder="(816) 552-6669" required oninput="formatPhone(this)" maxlength="14" />
+              <label for="loto-luggage">Luggage Pieces</label>
+              <select id="loto-luggage" required>
+                <option value="">Select…</option>
+                <option>0</option><option>1</option><option>2</option><option>3</option>
+                <option>4</option><option>5</option><option>6</option><option>7</option>
+                <option>8</option><option>9</option><option>10</option>
+              </select>
             </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="form-group">
+            <label for="loto-phone">Phone Number</label>
+            <input type="tel" id="loto-phone" placeholder="(816) 552-6669" required oninput="formatPhone(this)" maxlength="14" />
           </div>
 
           <div class="form-group">
@@ -1348,32 +1322,20 @@
             <div style="font-size:0.7rem; color:var(--text-muted);">Total: <span id="pay-total-amt">$65</span></div>
           </div>
         </div>
-        <div class="pay-sub">You'll be redirected to Stripe's secure checkout to complete your deposit. We never see or store your card information.</div>
+        <div class="pay-sub">You'll be redirected to Stripe's secure checkout. We never store your card information.</div>
 
-        <div style="background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:24px; margin:20px 0;">
-          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
-            <span style="font-size:1.5rem;">💳</span>
-            <div>
-              <div style="font-weight:700;">Secure Stripe Checkout</div>
-              <div style="font-size:0.82rem; color:var(--text-muted);">Credit card, Apple Pay, Google Pay accepted</div>
-            </div>
-          </div>
-          <div id="stripe-error" style="display:none; background:rgba(227,24,55,.1); border:1px solid rgba(227,24,55,.3); border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:0.85rem; color:#ff6b7a;"></div>
-          <button class="btn btn-primary pay-btn" id="stripe-pay-btn" onclick="redirectToStripe()" style="width:100%;">
-            Pay Deposit → Secure Checkout
-          </button>
-          <div id="stripe-loading" style="display:none; text-align:center; padding:12px; color:var(--text-muted); font-size:0.85rem;">
-            ⏳ Creating secure checkout session...
-          </div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;">
+          <div style="background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:8px 14px; font-size:0.82rem; color:var(--text-muted);">💳 Credit / Debit</div>
+          <div style="background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:8px 14px; font-size:0.82rem; color:var(--text-muted);"> Apple Pay</div>
+          <div style="background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:8px 14px; font-size:0.82rem; color:var(--text-muted);">Google Pay</div>
         </div>
 
         <div class="pay-secure">
           <span class="secure-icon">🔒</span>
           256-bit SSL encryption · PCI DSS compliant · Powered by Stripe
         </div>
-        <div style="text-align:center; margin-top:8px; font-size:0.75rem; color:var(--text-muted);">
-          🧪 Test mode — use card <strong style="color:var(--gold);">4242 4242 4242 4242</strong> with any future expiry
-        </div>
+
+        <button id="pay-deposit-btn" class="btn btn-primary pay-btn" onclick="redirectToStripe()" style="width:100%; padding:18px; font-size:1.05rem;">Pay Deposit Now →</button>
         <div class="powered-by">Secure payments by <span>Stripe</span></div>
       </div>
     </div>
@@ -1557,39 +1519,43 @@
   <div class="modal">
     <button class="modal-close" onclick="closeModal('payModal')">✕</button>
     <div class="modal-icon">✅</div>
-    <h3>Deposit Payment Confirmed!</h3>
-    <p>Your deposit has been received and your ride reservation is confirmed. You'll receive a confirmation email shortly with your driver's details and ride information.</p>
-    <div style="background:rgba(253,185,19,.08); border:1px solid rgba(253,185,19,.2); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:0.85rem;">
-      <div style="color:var(--gold); font-weight:700; margin-bottom:4px;">Booking Reference</div>
-      <div id="pay-booking-ref" style="font-family:monospace; color:var(--text-muted);">—</div>
-    </div>
-    <button class="btn btn-gold" onclick="closeModal('payModal'); window.history.replaceState({}, '', window.location.pathname);">Done</button>
+    <h3>Payment Confirmed!</h3>
+    <p>Your ride is booked and confirmed. Your driver's name and contact info will be sent to your email and phone within the hour.</p>
+    <button class="btn btn-gold" onclick="closeModal('payModal')">View My Booking</button>
   </div>
 </div>
 
 
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
 <script>
   /* ═══════════════════════════════════════════════════
+     SUPABASE & STRIPE CONFIG
+   ═══════════════════════════════════════════════════ */
+  const SUPABASE_URL  = 'https://nysoddktcdzynktrddte.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55c29kZGt0Y2R6eW5rdHJkZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE4ODYwMjAsImV4cCI6MjA1NzQ2MjAyMH0.p5MJ4hhM7jMjCf1GjJAMbqTuxBYGvaoeqpFjaMqqXKY';
+  let supabase = null;
+  try {
+    if (window.supabase && window.supabase.createClient) {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    } else {
+      console.warn('Supabase SDK not loaded — form submissions will be disabled.');
+    }
+  } catch(e) {
+    console.warn('Supabase init failed:', e.message);
+  }
+
+  // Active booking state — stores the booking ID after Supabase insert
+  let activeBooking = { id: null, type: null };
+
+  /* ═══════════════════════════════════════════════════
      GROUP RIDE KC – Smart Quote Engine
-     • Address autocomplete  (Photon / Komoot)
+     • Address autocomplete  (OpenStreetMap Nominatim)
      • Route distance        (OSRM routing API)
      • Availability check    (simulated + Google Calendar hook)
      • Dynamic pricing       (base + per-mile + surcharges)
-     • Supabase database     (booking storage)
-     • Stripe Checkout       (deposit payments)
    ═══════════════════════════════════════════════════ */
-
-  /* ── Supabase Config ─────────────────────────── */
-  const SUPABASE_URL = 'https://nysoddktcdzynktrddte.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55c29kZGt0Y2R6eW5rdHJkZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTYyMzAsImV4cCI6MjA4ODk5MjIzMH0.uj4aEhQ0fWog_6OA6ypx5N8Kou871hw7eipgKPIiIDU';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  /* ── Stripe Config ───────────────────────────── */
-  const STRIPE_PK = 'pk_test_51TACZkQWDWgeQvyfAc79hly3xhGANtJUQLdHSKwIoPTUOwvWGqLo8ODsfEYWQG3TBvBRqVWcbkKyYC9FPLCr6YwQ00QxexwnHE';
-  const stripe = Stripe(STRIPE_PK);
-
-  /* ── Active booking state (set after form submit) ── */
-  let activeBooking = { id: null, type: null, deposit: 0, total: 0, email: '' };
 
   /* ── Pricing Config ───────────────────────────── */
   const PRICING = {
@@ -1627,15 +1593,16 @@
   let geocodeTimers = {};
 
   /* ════════════════════════════════════════════════
-     VEHICLE SELECTOR
+     AUTO VEHICLE SELECTION (based on passenger count)
+     1–5 passengers → Suburban ($65 base)
+     6–10 passengers → Van ($95 base)
   ════════════════════════════════════════════════ */
-  function selectVehicle(v) {
-    selectedVehicle = v;
-    document.getElementById('opt-suburban').classList.toggle('selected', v === 'suburban');
-    document.getElementById('opt-van').classList.toggle('selected', v === 'van');
-    document.getElementById('pb-base').textContent = '$' + PRICING[v].base;
+  function autoSelectVehicle() {
+    const pax = parseInt(document.getElementById('passengers').value) || 0;
+    selectedVehicle = pax >= 6 ? 'van' : 'suburban';
+    document.getElementById('pb-base').textContent = '$' + PRICING[selectedVehicle].base;
     recalcPrice();
-    onDateTimeChange(); // re-check availability for new vehicle
+    onDateTimeChange();
   }
 
   /* ════════════════════════════════════════════════
@@ -1764,6 +1731,7 @@
       const res  = await fetch(url);
       const data = await res.json();
       let results = normalizePhoton(data.features, false);
+      let isFallback = false;
 
       // Fallback — if no results, retry with city/state only (marked approximate)
       if (!results.length) {
@@ -1774,19 +1742,55 @@
           const fbRes  = await fetch(fbUrl);
           const fbData = await fbRes.json();
           results = normalizePhoton(fbData.features, true); // force approximate
+          isFallback = true;
         }
       }
 
-      showDropdown(results, type);
+      showDropdown(results, type, query, isFallback);
     } catch(e) {
-      // silently fail — user can still type manually
+      // Show manual entry option on error
+      showDropdown([], type, query, true);
     }
   }
 
-  function showDropdown(results, type) {
+  function showDropdown(results, type, originalQuery, isFallback) {
     const dd = document.getElementById(type + '-dropdown');
-    if (!results.length) { dd.classList.remove('open'); return; }
-    dd.innerHTML = results.map(r => {
+
+    let html = '';
+
+    // If no results at all, show a helpful message with a "use my address" option
+    if (!results.length) {
+      html = `<div style="padding:12px 14px;">
+                <div style="font-size:0.82rem; color:var(--gold); font-weight:600; margin-bottom:6px;">
+                  We couldn't find that exact address
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px; line-height:1.4;">
+                  This may be a rural or unlisted location. You can select a nearby city below, or use your typed address as-is. We'll confirm the exact location with you.
+                </div>
+                <div class="ac-item" onclick="useManualAddress('${type}', \`${(originalQuery||'').replace(/`/g,"'")}\`)">
+                  <span class="ac-icon">✏️</span>
+                  <div><div class="ac-name">Use "${originalQuery}" as entered</div>
+                       <div class="ac-addr" style="color:var(--gold);">We'll confirm the exact pickup with you</div></div>
+                </div>
+              </div>`;
+      dd.innerHTML = html;
+      dd.classList.add('open');
+      return;
+    }
+
+    // If fallback results (city-level), show a header explaining
+    if (isFallback) {
+      html += `<div style="padding:10px 14px 4px;">
+                 <div style="font-size:0.78rem; color:var(--gold); font-weight:600;">
+                   Exact address not found — select a nearby area:
+                 </div>
+                 <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px; margin-bottom:6px;">
+                   Your fare will be estimated from the city center. We'll confirm the exact distance with you.
+                 </div>
+               </div>`;
+    }
+
+    html += results.map(r => {
       const name    = r.name || r.display_name.split(',')[0];
       const addr    = r.display_name;
       const approx  = r.isApproximate ? 'true' : 'false';
@@ -1799,7 +1803,30 @@
                      <div class="ac-addr">${addr}</div>${hint}</div>
               </div>`;
     }).join('');
+
+    // If fallback, also offer "use as typed" option at the bottom
+    if (isFallback && originalQuery) {
+      html += `<div class="ac-item" style="border-top:1px solid var(--border);"
+                    onclick="useManualAddress('${type}', \`${originalQuery.replace(/`/g,"'")}\`)">
+                 <span class="ac-icon">✏️</span>
+                 <div><div class="ac-name">Use "${originalQuery}" as entered</div>
+                      <div class="ac-addr" style="color:var(--gold);">We'll confirm the exact pickup with you</div></div>
+               </div>`;
+    }
+
+    dd.innerHTML = html;
     dd.classList.add('open');
+  }
+
+  // Allow customer to proceed with their manually typed address
+  function useManualAddress(type, label) {
+    document.getElementById(type + '-loc').value = label;
+    document.getElementById(type + '-dropdown').classList.remove('open');
+    // Use KC metro center as approximate coords for routing estimate
+    coords[type] = { lat: 39.0984, lon: -94.5786 };
+    coordsApproximate[type] = true;
+    updateEstimateDisclaimer();
+    if (coords.pickup && coords.dropoff) calculateRoute();
   }
 
   function selectAddress(type, lat, lon, label, isApproximate) {
@@ -1976,62 +2003,69 @@
     recalcPrice();
 
     const btn = document.getElementById('submit-btn');
-    btn.textContent = 'Submitting...';
+    btn.textContent = 'Submitting…';
     btn.disabled = true;
 
     // Gather form data
-    const totalPrice = parseInt(document.getElementById('price-display').textContent.replace('$',''));
-    const depositAmt = parseInt(document.getElementById('pb-deposit').textContent.replace('$',''));
-    const email = document.getElementById('email-hero').value;
-    const date = document.getElementById('pickup-date').value;
-    const time = document.getElementById('pickup-time').value;
-    const isSurge = document.getElementById('pb-surge-row')?.style.display !== 'none';
-    const localTransport = document.getElementById('kc-local-transport')?.checked || false;
-    const localFee = localTransport ? KC_LOCAL_TRANSPORT_FEE : 0;
+    const totalText   = document.getElementById('price-display').textContent.replace('$','');
+    const depositText = document.getElementById('pb-deposit').textContent.replace('$','');
+    const total   = parseFloat(totalText);
+    const deposit = parseFloat(depositText);
 
-    // Save to Supabase
+    const pickupDate = document.getElementById('pickup-date').value;
+    const pickupTime = document.getElementById('pickup-time').value;
+    const isSurge    = MATCH_DAYS.has(pickupDate) || (function(){
+      if(!pickupTime) return false;
+      const h = parseInt(pickupTime.split(':')[0]);
+      return h >= 22 || h < 5;
+    })();
+
+    const booking = {
+      vehicle:       selectedVehicle,
+      trip_type:     'oneway',
+      pickup_date:   pickupDate,
+      pickup_time:   pickupTime,
+      pickup_address:  document.getElementById('pickup-loc').value,
+      dropoff_address: document.getElementById('dropoff-loc').value,
+      pickup_lat:    coords.pickup?.lat || null,
+      pickup_lon:    coords.pickup?.lon || null,
+      dropoff_lat:   coords.dropoff?.lat || null,
+      dropoff_lon:   coords.dropoff?.lon || null,
+      route_miles:   routeMiles,
+      passengers:    parseInt(document.getElementById('passengers').value),
+      phone:         document.getElementById('phone').value,
+      email:         document.getElementById('email').value,
+      base_fare:     PRICING[selectedVehicle].base,
+      distance_cost: routeMiles ? parseFloat((routeMiles * PRICING[selectedVehicle].perMile).toFixed(2)) : null,
+      surge_applied: isSurge,
+      total_price:   total,
+      deposit_amount: deposit,
+      payment_status: 'pending',
+      booking_status: 'pending'
+    };
+
     try {
-      const { data, error } = await supabase.from('bookings').insert({
-        vehicle: selectedVehicle,
-        trip_type: kcTripType,
-        pickup_date: date,
-        pickup_time: time,
-        pickup_address: document.getElementById('pickup-loc').value,
-        dropoff_address: document.getElementById('dropoff-loc').value,
-        pickup_lat: coords.pickup?.lat || null,
-        pickup_lon: coords.pickup?.lon || null,
-        dropoff_lat: coords.dropoff?.lat || null,
-        dropoff_lon: coords.dropoff?.lon || null,
-        route_miles: routeMiles,
-        passengers: parseInt(document.getElementById('passengers').value),
-        phone: document.getElementById('phone-hero').value,
-        email: email,
-        base_fare: PRICING[selectedVehicle].base,
-        distance_cost: routeMiles ? routeMiles * PRICING[selectedVehicle].perMile : 0,
-        surge_applied: isSurge,
-        local_transport: localTransport,
-        local_transport_fee: localFee,
-        total_price: totalPrice,
-        deposit_amount: depositAmt,
-      }).select().single();
-
+      const { data, error } = await supabase.from('bookings').insert([booking]).select();
       if (error) throw error;
-
-      // Store active booking for Stripe checkout
-      activeBooking = { id: data.id, type: 'kc', deposit: depositAmt, total: totalPrice, email: email };
+      activeBooking = { id: data[0].id, type: 'kc' };
 
       // Reveal the payment section and scroll to it
       const paySection = document.getElementById('payment');
       paySection.style.display = 'block';
+
+      // Update deposit amounts in payment section
+      document.getElementById('pay-deposit-amt').textContent   = '$' + deposit;
+      document.getElementById('pay-total-amt').textContent     = '$' + total;
+      document.getElementById('pay-remaining-amt').textContent = '$' + (total - deposit);
+
       setTimeout(() => paySection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
 
       btn.textContent = '✓ Request Submitted — Pay Deposit Below';
       btn.style.background = '#2a9d5c';
-
-    } catch (err) {
-      console.error('Supabase error:', err);
-      alert('Something went wrong saving your booking. Please try again.');
-      btn.textContent = 'Request This Ride →';
+    } catch(err) {
+      console.error('Supabase insert error:', err);
+      alert('There was an error submitting your booking. Please try again or call us at (816) 552-6669.');
+      btn.textContent = 'Get Your Quote →';
       btn.disabled = false;
     }
   }
@@ -2039,91 +2073,15 @@
   /* ════════════════════════════════════════════════
      MISC HELPERS
   ════════════════════════════════════════════════ */
-  /* ════════════════════════════════════════════════
-     STRIPE CHECKOUT REDIRECT
-  ════════════════════════════════════════════════ */
-  async function redirectToStripe() {
-    if (!activeBooking.id) {
-      alert('Please submit a booking form first.');
-      return;
-    }
-
-    const btn = document.getElementById('stripe-pay-btn');
-    const loading = document.getElementById('stripe-loading');
-    const errEl = document.getElementById('stripe-error');
-    btn.style.display = 'none';
-    loading.style.display = 'block';
-    errEl.style.display = 'none';
-
-    try {
-      const tripLabel = activeBooking.type === 'loto'
-        ? 'Lake of the Ozarks Shuttle — Deposit'
-        : 'KC Group Ride — Deposit';
-
-      const res = await fetch('/.netlify/functions/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount_cents: activeBooking.deposit * 100,
-          booking_id: activeBooking.id,
-          booking_type: activeBooking.type,
-          customer_email: activeBooking.email,
-          description: tripLabel,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.url) throw new Error(data.error || 'Failed to create checkout session');
-
-      // Update Supabase with session ID
-      const table = activeBooking.type === 'loto' ? 'loto_bookings' : 'bookings';
-      await supabase.from(table).update({ stripe_session_id: data.sessionId }).eq('id', activeBooking.id);
-
-      // Redirect to Stripe Checkout
-      window.location.href = data.url;
-
-    } catch (err) {
-      console.error('Stripe error:', err);
-      errEl.textContent = 'Payment error: ' + err.message + '. Please try again.';
-      errEl.style.display = 'block';
-      btn.style.display = 'block';
-      loading.style.display = 'none';
-    }
+  function showPayConfirm() {
+    document.getElementById('payModal').classList.add('active');
   }
-
-  /* ════════════════════════════════════════════════
-     PAYMENT SUCCESS HANDLER
-     Checks URL params when page loads after Stripe redirect
-  ════════════════════════════════════════════════ */
-  (function checkPaymentStatus() {
-    const params = new URLSearchParams(window.location.search);
-    const paymentStatus = params.get('payment');
-    const bookingId = params.get('booking_id');
-    const bookingType = params.get('type');
-    const sessionId = params.get('session_id');
-
-    if (paymentStatus === 'success' && bookingId) {
-      // Update payment status in Supabase
-      const table = bookingType === 'loto' ? 'loto_bookings' : 'bookings';
-      supabase.from(table).update({
-        payment_status: 'deposit_paid',
-        stripe_session_id: sessionId,
-        booking_status: 'confirmed'
-      }).eq('id', bookingId).then(() => {
-        // Show success modal
-        document.getElementById('pay-booking-ref').textContent = bookingId.substring(0, 8).toUpperCase();
-        document.getElementById('payModal').classList.add('active');
-      });
-    }
-
-    if (paymentStatus === 'cancelled') {
-      // User cancelled — show a gentle message
-      alert('Payment was cancelled. Your booking request has been saved — you can return to pay the deposit anytime.');
-    }
-  })();
-
   function closeModal(id) {
     document.getElementById(id).classList.remove('active');
+  }
+  function setPayMethod(el) {
+    document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('active'));
+    el.classList.add('active');
   }
   function formatPhone(el) {
     const digits = el.value.replace(/\D/g, '').substring(0, 10);
@@ -2134,7 +2092,15 @@
     el.value = formatted;
   }
 
-  /* formatCard and formatExpiry removed — now using Stripe hosted checkout */
+  function formatCard(el) {
+    let v = el.value.replace(/\D/g,'').substring(0,16);
+    el.value = v.replace(/(.{4})/g,'$1  ').trim();
+  }
+  function formatExpiry(el) {
+    let v = el.value.replace(/\D/g,'').substring(0,4);
+    if(v.length >= 2) v = v.substring(0,2) + ' / ' + v.substring(2);
+    el.value = v;
+  }
   /* ── Scroll Reveal ── */
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
@@ -2394,61 +2360,59 @@
     lotoRecalcPrice();
 
     const btn = document.getElementById('loto-submit-btn');
-    btn.textContent = 'Submitting...';
+    btn.textContent = 'Submitting…';
     btn.disabled = true;
 
     const total   = parseInt(document.getElementById('loto-price-display').textContent.replace('$',''));
     const deposit = parseInt(document.getElementById('loto-pb-deposit').textContent.replace('$',''));
-    const email   = document.getElementById('loto-email').value;
-    const localTransport = document.getElementById('loto-local-transport')?.checked || false;
-    const localFee = localTransport ? LOTO_LOCAL_TRANSPORT_FEE : 0;
+    const localChecked = document.getElementById('loto-local-transport')?.checked;
+    const localFee = localChecked ? LOTO_LOCAL_TRANSPORT_FEE : 0;
 
-    // Save to Supabase
+    const booking = {
+      vehicle:        lotoVehicle,
+      trip_type:      lotoTripType,
+      departure_date: document.getElementById('loto-date').value,
+      departure_time: document.getElementById('loto-time').value || '06:00',
+      return_date:    lotoTripType === 'multiday' ? document.getElementById('loto-return-date').value : null,
+      pickup_address:  document.getElementById('loto-pickup-loc').value,
+      dropoff_address: document.getElementById('loto-dropoff-loc').value,
+      pickup_lat:     lotoCoords.pickup?.lat || null,
+      pickup_lon:     lotoCoords.pickup?.lon || null,
+      dropoff_lat:    lotoCoords.dropoff?.lat || BAGNELL_DAM.lat,
+      dropoff_lon:    lotoCoords.dropoff?.lon || BAGNELL_DAM.lon,
+      route_miles:    lotoRouteMiles,
+      passengers:     parseInt(document.getElementById('loto-passengers').value),
+      phone:          document.getElementById('loto-phone').value,
+      email:          document.getElementById('loto-email').value,
+      flat_rate:      LOTO_FLAT_RATES[lotoTripType],
+      local_transport: localChecked || false,
+      local_transport_fee: localFee,
+      total_price:    total,
+      deposit_amount: deposit,
+      payment_status: 'pending',
+      booking_status: 'pending'
+    };
+
     try {
-      const { data, error } = await supabase.from('loto_bookings').insert({
-        vehicle: lotoVehicle,
-        trip_type: lotoTripType,
-        departure_date: document.getElementById('loto-date').value,
-        departure_time: document.getElementById('loto-time').value || '06:00',
-        return_date: lotoTripType === 'multiday' ? document.getElementById('loto-return-date').value : null,
-        pickup_address: document.getElementById('loto-pickup-loc').value,
-        dropoff_address: document.getElementById('loto-dropoff-loc').value,
-        pickup_lat: lotoCoords.pickup?.lat || null,
-        pickup_lon: lotoCoords.pickup?.lon || null,
-        dropoff_lat: lotoCoords.dropoff?.lat || null,
-        dropoff_lon: lotoCoords.dropoff?.lon || null,
-        route_miles: lotoRouteMiles,
-        passengers: parseInt(document.getElementById('loto-passengers').value),
-        phone: document.getElementById('loto-phone').value,
-        email: email,
-        flat_rate: LOTO_FLAT_RATES[lotoTripType],
-        local_transport: localTransport,
-        local_transport_fee: localFee,
-        total_price: total,
-        deposit_amount: deposit,
-      }).select().single();
-
+      const { data, error } = await supabase.from('loto_bookings').insert([booking]).select();
       if (error) throw error;
-
-      // Store active booking for Stripe checkout
-      activeBooking = { id: data.id, type: 'loto', deposit: deposit, total: total, email: email };
-
-      // Update deposit amounts in payment section
-      document.getElementById('pay-deposit-amt').textContent   = '$' + deposit;
-      document.getElementById('pay-total-amt').textContent     = '$' + total;
-      document.getElementById('pay-remaining-amt').textContent = '$' + (total - deposit);
+      activeBooking = { id: data[0].id, type: 'loto' };
 
       // Reveal the payment section and scroll to it
       const paySection = document.getElementById('payment');
       paySection.style.display = 'block';
+
+      document.getElementById('pay-deposit-amt').textContent   = '$' + deposit;
+      document.getElementById('pay-total-amt').textContent     = '$' + total;
+      document.getElementById('pay-remaining-amt').textContent = '$' + (total - deposit);
+
       setTimeout(() => paySection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
 
       btn.textContent = '✓ Request Submitted — Pay Deposit Below';
       btn.style.background = '#2a9d5c';
-
-    } catch (err) {
-      console.error('Supabase error:', err);
-      alert('Something went wrong saving your booking. Please try again.');
+    } catch(err) {
+      console.error('Supabase insert error:', err);
+      alert('There was an error submitting your booking. Please try again or call us at (816) 552-6669.');
       btn.textContent = 'Book Lake Trip →';
       btn.disabled = false;
     }
@@ -2462,6 +2426,97 @@
       geocodeSearchFor(this.value.trim(), 'loto-pickup');
     }
   });
+
+  /* ═══════════════════════════════════════════════════
+     STRIPE CHECKOUT — redirect to hosted checkout page
+   ═══════════════════════════════════════════════════ */
+  async function redirectToStripe() {
+    if (!activeBooking.id) {
+      alert('Please submit a booking form first.');
+      return;
+    }
+
+    const depositText = document.getElementById('pay-deposit-amt').textContent.replace('$','');
+    const depositAmt  = parseFloat(depositText);
+    const amountCents = Math.round(depositAmt * 100);
+
+    // Determine customer email from the active form
+    let customerEmail = '';
+    if (activeBooking.type === 'kc') {
+      customerEmail = document.getElementById('email').value;
+    } else {
+      customerEmail = document.getElementById('loto-email').value;
+    }
+
+    const description = activeBooking.type === 'loto'
+      ? 'Group Ride KC — Lake Ozarks Deposit'
+      : 'Group Ride KC — KC Ride Deposit';
+
+    const payBtn = document.getElementById('pay-deposit-btn');
+    if (payBtn) { payBtn.textContent = 'Redirecting to checkout…'; payBtn.disabled = true; }
+
+    try {
+      const res = await fetch('/.netlify/functions/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount_cents:   amountCents,
+          booking_id:     activeBooking.id,
+          booking_type:   activeBooking.type,
+          customer_email: customerEmail,
+          description:    description
+        })
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        // Update Supabase with the Stripe session ID
+        const table = activeBooking.type === 'loto' ? 'loto_bookings' : 'bookings';
+        await supabase.from(table).update({ stripe_session_id: data.sessionId }).eq('id', activeBooking.id);
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+    } catch(err) {
+      console.error('Stripe redirect error:', err);
+      alert('There was an error connecting to payment. Please try again or call us at (816) 552-6669.');
+      if (payBtn) { payBtn.textContent = 'Pay Deposit Now →'; payBtn.disabled = false; }
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     PAYMENT STATUS CHECK — runs on page load
+     Handles return from Stripe Checkout
+   ═══════════════════════════════════════════════════ */
+  (function checkPaymentStatus() {
+    const params = new URLSearchParams(window.location.search);
+    const payment   = params.get('payment');
+    const bookingId = params.get('booking_id');
+    const bookingType = params.get('type') || 'kc';
+    const sessionId = params.get('session_id');
+
+    if (!payment || !bookingId) return;
+
+    if (payment === 'success') {
+      // Update payment status in Supabase
+      const table = bookingType === 'loto' ? 'loto_bookings' : 'bookings';
+      supabase.from(table)
+        .update({ payment_status: 'deposit_paid', stripe_payment_id: sessionId })
+        .eq('id', bookingId)
+        .then(() => {
+          // Show success modal
+          document.getElementById('payModal').classList.add('active');
+        });
+
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (payment === 'cancelled') {
+      alert('Payment was cancelled. Your booking is still saved — you can pay the deposit anytime by calling us at (816) 552-6669.');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  })();
 </script>
+
 </body>
 </html>
