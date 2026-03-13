@@ -1104,6 +1104,14 @@
 <script src="quote-engine.js"></script>
 
 <script>
+  /* ── Scroll Reveal ── */
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+<script>
   /* ═══════════════════════════════════════════════════
      SUPABASE & STRIPE CONFIG
    ═══════════════════════════════════════════════════ */
@@ -1267,6 +1275,7 @@
   (function initLotoBagnell() {
     // Bagnell Dam is already in lotoCoords.dropoff.
     // If user selects a pickup, route will calculate automatically.
+    const today = new Date().toISOString().split('T')[0];
     const loDate = document.getElementById('loto-date');
     const loRetDate = document.getElementById('loto-return-date');
     if (loDate) loDate.setAttribute('min', today);
