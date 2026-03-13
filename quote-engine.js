@@ -960,6 +960,26 @@
       if (error) throw error;
       activeBooking = { id: data[0].id, type: 'kc' };
 
+      // Fire-and-forget: create Google Calendar event for this booking
+      createCalendarEvent({
+        booking_id:      data[0].id,
+        booking_type:    'kc',
+        vehicle:         selectedVehicle,
+        trip_type:       kcTripType,
+        pickup_date:     pickupDate,
+        pickup_time:     pickupTime,
+        pickup_address:  booking.pickup_address,
+        dropoff_address: booking.dropoff_address,
+        route_miles:     routeMiles,
+        passengers:      booking.passengers,
+        phone:           booking.phone,
+        email:           booking.email,
+        total_price:     total,
+        deposit_amount:  deposit,
+        payment_status:  'pending',
+        source_page:     booking.source_page,
+      });
+
       const paySection = document.getElementById('qe-payment');
       paySection.style.display = 'block';
 
@@ -1035,6 +1055,25 @@
       if (payBtn) { payBtn.textContent = 'Pay Deposit Now →'; payBtn.disabled = false; }
     }
   };
+
+  /* ═══════════════════════════════════════════════════════════════
+     GOOGLE CALENDAR INTEGRATION (fire-and-forget)
+     ═══════════════════════════════════════════════════════════════ */
+  async function createCalendarEvent(bookingData) {
+    try {
+      await fetch('/.netlify/functions/create-calendar-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData),
+      });
+      console.log('Calendar event request sent');
+    } catch (err) {
+      // Non-blocking — don't interrupt the booking flow
+      console.warn('Calendar event creation failed (non-critical):', err);
+    }
+  }
+  // Expose for LOTO form to use
+  window.createCalendarEvent = createCalendarEvent;
 
   /* ═══════════════════════════════════════════════════════════════
      PAGE INITIALIZATION
