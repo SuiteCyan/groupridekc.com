@@ -43,7 +43,11 @@ exports.handler = async (event) => {
     // ── Build calendar event ──
     const startDateTime = buildDateTime(booking.pickup_date, booking.pickup_time);
     // Estimate 2-hour event duration (pickup + ride + buffer)
-    const endDateTime = new Date(new Date(startDateTime).getTime() + 2 * 60 * 60 * 1000).toISOString();
+    // Keep same bare-local format as startDateTime (no Z suffix) so Google uses the timeZone field
+    const [datePart, timePart] = startDateTime.split('T');
+    const [hh, mm] = timePart.split(':').map(Number);
+    const endHH = String(hh + 2).padStart(2, '0');
+    const endDateTime = `${datePart}T${endHH}:${String(mm).padStart(2, '0')}:00`;
 
     const vehicleLabel = booking.vehicle === 'van' ? '🚐 10-Passenger Van' : '🚙 Chevy Suburban';
     const tripLabel = booking.trip_type === 'round_trip' ? 'Round Trip' : 'One-Way';
