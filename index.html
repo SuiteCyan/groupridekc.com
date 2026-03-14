@@ -1241,7 +1241,7 @@
     const lon = type === 'loto-pickup' ? -94.5786 : -92.6249;
     try {
       const url = `https://photon.komoot.io/api/` +
-        `?q=${encodeURIComponent(query)}&lat=${lat}&lon=${lon}&limit=5`;
+        `?q=${encodeURIComponent(query)}&lat=${lat}&lon=${lon}&bbox=-100.18,34.75,-88.98,43.45&limit=5`;
       const res  = await fetch(url);
       const data = await res.json();
       showLotoDropdown(normalizePhoton(data.features), type);
