@@ -11,8 +11,11 @@ exports.handler = async (event) => {
   const GOOGLE_PRIVATE_KEY = (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
   const GOOGLE_CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID;
 
+  console.log('ENV CHECK — email:', !!GOOGLE_SERVICE_ACCOUNT_EMAIL, 'key:', !!GOOGLE_PRIVATE_KEY, 'key length:', (GOOGLE_PRIVATE_KEY||'').length, 'calId:', !!GOOGLE_CALENDAR_ID);
+
   if (!GOOGLE_SERVICE_ACCOUNT_EMAIL || !GOOGLE_PRIVATE_KEY || !GOOGLE_CALENDAR_ID) {
     console.warn('Google Calendar credentials not configured — skipping event creation');
+    console.warn('Missing:', !GOOGLE_SERVICE_ACCOUNT_EMAIL ? 'EMAIL' : '', !GOOGLE_PRIVATE_KEY ? 'KEY' : '', !GOOGLE_CALENDAR_ID ? 'CAL_ID' : '');
     return { statusCode: 200, body: JSON.stringify({ skipped: true, reason: 'Calendar not configured' }) };
   }
 
