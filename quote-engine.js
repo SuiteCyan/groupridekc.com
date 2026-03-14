@@ -1019,7 +1019,7 @@
       deposit_amount: deposit,
       payment_status: 'pending',
       booking_status: 'pending',
-      source_page:   window.location.pathname
+      notes:         'Source: ' + window.location.pathname
     };
 
     try {
@@ -1044,7 +1044,7 @@
         total_price:     total,
         deposit_amount:  deposit,
         payment_status:  'pending',
-        source_page:     booking.source_page,
+        source_page:     window.location.pathname,
       });
 
       const paySection = document.getElementById('qe-payment');
@@ -1060,7 +1060,8 @@
       btn.style.background = '#2a9d5c';
     } catch(err) {
       console.error('Supabase insert error:', err);
-      alert('There was an error submitting your booking. Please try again or call us at (816) 552-6669.');
+      const detail = err?.message || err?.details || JSON.stringify(err);
+      alert('Booking error: ' + detail + '\n\nPlease try again or call us at (816) 552-6669.');
       btn.textContent = 'Request This Ride →';
       btn.disabled = false;
     }
