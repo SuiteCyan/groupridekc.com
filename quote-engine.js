@@ -617,6 +617,8 @@
   let routeMiles = null;
   let geocodeTimers = {};
   let activeBooking = { id: null, type: null };
+  // Expose to window so LOTO inline script can access it
+  window.activeBooking = activeBooking;
 
   /* ═══════════════════════════════════════════════════════════════
      PUBLIC FUNCTIONS (exposed to window)
@@ -1110,8 +1112,16 @@
     const depositAmt  = parseFloat(depositText);
     const amountCents = Math.round(depositAmt * 100);
 
-    let customerEmail = document.getElementById('email').value;
-    const description = 'Group Ride KC — KC Ride Deposit';
+    // Determine customer email from the active form
+    let customerEmail = '';
+    if (activeBooking.type === 'kc') {
+      customerEmail = document.getElementById('email')?.value || '';
+    } else {
+      customerEmail = document.getElementById('loto-email')?.value || '';
+    }
+    const description = activeBooking.type === 'loto'
+      ? 'Group Ride KC — Lake Ozarks Deposit'
+      : 'Group Ride KC — KC Ride Deposit';
 
     const payBtn = document.getElementById('pay-deposit-btn');
     if (payBtn) { payBtn.textContent = 'Redirecting to checkout…'; payBtn.disabled = true; }
@@ -1139,7 +1149,8 @@
       }
     } catch(err) {
       console.error('Stripe redirect error:', err);
-      alert('There was an error connecting to payment. Please try again or call us at (816) 552-6669.');
+      const detail = err?.message || JSON.stringify(err);
+      alert('Payment error: ' + detail + '\n\nPlease try again or call us at (816) 552-6669.');
       if (payBtn) { payBtn.textContent = 'Pay Deposit Now →'; payBtn.disabled = false; }
     }
   };
