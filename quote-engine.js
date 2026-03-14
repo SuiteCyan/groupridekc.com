@@ -578,6 +578,20 @@
   const DEPOSIT_PCT = 0.50;
   const KC_LOCAL_TRANSPORT_FEE = 250;
 
+  // KC center (64109) and 300-mile bounding box for geocoder
+  const KC_LAT = 39.0984, KC_LON = -94.5786, MAX_RADIUS_MI = 300;
+  // ~4.35° lat per 300 mi, ~5.6° lon per 300 mi at this latitude
+  const GEO_BBOX = '-100.18,34.75,-88.98,43.45';
+
+  function distFromKC(lat, lon) {
+    // Haversine distance in miles
+    const R = 3958.8;
+    const dLat = (lat - KC_LAT) * Math.PI / 180;
+    const dLon = (lon - KC_LON) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(KC_LAT*Math.PI/180) * Math.cos(lat*Math.PI/180) * Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
   const MATCH_DAYS = new Set([
     '2026-06-12','2026-06-15','2026-06-16','2026-06-19',
     '2026-06-20','2026-06-23','2026-06-24','2026-06-27',
@@ -684,7 +698,8 @@
         lon:           f.geometry.coordinates[0],
         isApproximate: forceApproximate || !hasNumber
       };
-    }).filter(r => r.display_name);
+    }).filter(r => r.display_name)
+      .filter(r => distFromKC(r.lat, r.lon) <= MAX_RADIUS_MI);
   }
 
   function extractCityFallback(query) {
@@ -707,7 +722,7 @@
   async function geocodeSearch(query, type) {
     try {
       const url = `https://photon.komoot.io/api/` +
-        `?q=${encodeURIComponent(query)}&lat=39.0984&lon=-94.5786&limit=5`;
+        `?q=${encodeURIComponent(query)}&lat=${KC_LAT}&lon=${KC_LON}&bbox=${GEO_BBOX}&limit=5`;
       const res  = await fetch(url);
       const data = await res.json();
       let results = normalizePhoton(data.features, false);
@@ -721,7 +736,7 @@
         const cityQuery = extractCityFallback(query);
         if (cityQuery) {
           const fbUrl  = `https://photon.komoot.io/api/` +
-            `?q=${encodeURIComponent(cityQuery)}&lat=39.0984&lon=-94.5786&limit=3`;
+            `?q=${encodeURIComponent(cityQuery)}&lat=${KC_LAT}&lon=${KC_LON}&bbox=${GEO_BBOX}&limit=3`;
           const fbRes  = await fetch(fbUrl);
           const fbData = await fbRes.json();
           const cityResults = normalizePhoton(fbData.features, true);
@@ -746,7 +761,7 @@
           if (words.length) {
             const cityOnly = words.slice(-2).join(' ');
             const coUrl = `https://photon.komoot.io/api/` +
-              `?q=${encodeURIComponent(cityOnly)}&lat=39.0984&lon=-94.5786&limit=3`;
+              `?q=${encodeURIComponent(cityOnly)}&lat=${KC_LAT}&lon=${KC_LON}&bbox=${GEO_BBOX}&limit=3`;
             const coRes = await fetch(coUrl);
             const coData = await coRes.json();
             results = normalizePhoton(coData.features, true);
