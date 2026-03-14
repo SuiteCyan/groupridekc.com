@@ -7,7 +7,8 @@ exports.handler = async (event) => {
   }
 
   const GOOGLE_SERVICE_ACCOUNT_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY;
+  // Netlify stores env vars with literal \n — replace with real newlines
+  const GOOGLE_PRIVATE_KEY = (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
   const GOOGLE_CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID;
 
   if (!GOOGLE_SERVICE_ACCOUNT_EMAIL || !GOOGLE_PRIVATE_KEY || !GOOGLE_CALENDAR_ID) {
@@ -110,7 +111,8 @@ exports.handler = async (event) => {
     };
 
   } catch (err) {
-    console.error('Calendar function error:', err);
+    console.error('Calendar function error:', err.message || err);
+    console.error('Stack:', err.stack || 'no stack');
     // Return 200 anyway so the booking flow isn't blocked by calendar issues
     return {
       statusCode: 200,
