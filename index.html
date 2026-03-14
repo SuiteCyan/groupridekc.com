@@ -1417,7 +1417,7 @@
     try {
       const { data, error } = await supabaseClient.from('loto_bookings').insert([booking]).select();
       if (error) throw error;
-      activeBooking = { id: data[0].id, type: 'loto' };
+      window.activeBooking = { id: data[0].id, type: 'loto' };
 
       // Fire-and-forget: create Google Calendar event
       if (window.createCalendarEvent) {
@@ -1473,62 +1473,8 @@
   });
 
   /* ═══════════════════════════════════════════════════
-     STRIPE CHECKOUT — redirect to hosted checkout page
+     STRIPE CHECKOUT — handled by window.redirectToStripe() in quote-engine.js
    ═══════════════════════════════════════════════════ */
-  async function redirectToStripe() {
-    if (!activeBooking.id) {
-      alert('Please submit a booking form first.');
-      return;
-    }
-
-    const depositText = document.getElementById('pay-deposit-amt').textContent.replace('$','');
-    const depositAmt  = parseFloat(depositText);
-    const amountCents = Math.round(depositAmt * 100);
-
-    // Determine customer email from the active form
-    let customerEmail = '';
-    if (activeBooking.type === 'kc') {
-      customerEmail = document.getElementById('email').value;
-    } else {
-      customerEmail = document.getElementById('loto-email').value;
-    }
-
-    const description = activeBooking.type === 'loto'
-      ? 'Group Ride KC — Lake Ozarks Deposit'
-      : 'Group Ride KC — KC Ride Deposit';
-
-    const payBtn = document.getElementById('pay-deposit-btn');
-    if (payBtn) { payBtn.textContent = 'Redirecting to checkout…'; payBtn.disabled = true; }
-
-    try {
-      const res = await fetch('/.netlify/functions/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount_cents:   amountCents,
-          booking_id:     activeBooking.id,
-          booking_type:   activeBooking.type,
-          customer_email: customerEmail,
-          description:    description
-        })
-      });
-
-      const data = await res.json();
-      if (data.url) {
-        // Update Supabase with the Stripe session ID
-        const table = activeBooking.type === 'loto' ? 'loto_bookings' : 'bookings';
-        await supabaseClient.from(table).update({ stripe_session_id: data.sessionId }).eq('id', activeBooking.id);
-        // Redirect to Stripe Checkout
-        window.location.href = data.url;
-      } else {
-        throw new Error(data.error || 'Failed to create checkout session');
-      }
-    } catch(err) {
-      console.error('Stripe redirect error:', err);
-      alert('There was an error connecting to payment. Please try again or call us at (816) 552-6669.');
-      if (payBtn) { payBtn.textContent = 'Pay Deposit Now →'; payBtn.disabled = false; }
-    }
-  }
 
   /* ═══════════════════════════════════════════════════
      PAYMENT STATUS CHECK — runs on page load
