@@ -495,18 +495,19 @@
             </div>
             <div class="pay-sub">You'll be redirected to Stripe's secure checkout. We never store your card information.</div>
 
-            <div style="display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;">
-              <div style="background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:8px 14px; font-size:0.82rem; color:var(--text-muted);">💳 Credit / Debit</div>
-              <div style="background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:8px 14px; font-size:0.82rem; color:var(--text-muted);"> Apple Pay</div>
-              <div style="background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:8px 14px; font-size:0.82rem; color:var(--text-muted);">Google Pay</div>
+            <button id="pay-deposit-btn" class="btn btn-primary pay-btn" onclick="window.redirectToStripe()" style="width:100%; padding:18px; font-size:1.05rem;">Pay Deposit Now →</button>
+
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin:20px 0 12px; justify-content:center;">
+              <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; width:100%; text-align:center; margin-bottom:4px;">Accepted payment methods</div>
+              <div style="background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:0.78rem; color:var(--text-muted);">💳 Credit / Debit</div>
+              <div style="background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:0.78rem; color:var(--text-muted);"> Apple Pay</div>
+              <div style="background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:0.78rem; color:var(--text-muted);">Google Pay</div>
             </div>
 
             <div class="pay-secure">
               <span class="secure-icon">🔒</span>
               256-bit SSL encryption · PCI DSS compliant · Powered by Stripe
             </div>
-
-            <button id="pay-deposit-btn" class="btn btn-primary pay-btn" onclick="window.redirectToStripe()" style="width:100%; padding:18px; font-size:1.05rem;">Pay Deposit Now →</button>
             <div class="powered-by">Secure payments by <span>Stripe</span></div>
           </div>
         </div>
@@ -548,7 +549,11 @@
   }
 
   container.innerHTML = formHTML;
-  container.insertAdjacentHTML('afterend', paymentHTML);
+
+  // Insert payment section AFTER the hero section so it's full-width
+  const heroSection = container.closest('section') || container.parentElement;
+  heroSection.insertAdjacentHTML('afterend', paymentHTML);
+
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 
   /* ═══════════════════════════════════════════════════════════════
