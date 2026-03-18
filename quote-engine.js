@@ -406,7 +406,6 @@
             <span id="pb-remaining">$32</span>
           </div>
           <div class="pb-note">Submit your request to unlock the secure deposit payment below.</div>
-          <div class="pb-cal-note">📅 <span>Availability via Google Calendar · <a href="#" style="color:var(--gold);">Connect your calendar</a></span></div>
         </div>
 
         <!-- Estimate disclaimer — shown when address is approximate -->
@@ -833,6 +832,14 @@
 
   window.submitBooking = async function(e) {
     e.preventDefault();
+
+    // Prevent double submissions
+    if (activeBooking.id) {
+      document.getElementById('qe-payment').style.display = 'block';
+      document.getElementById('qe-payment').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
     const avail = document.getElementById('avail-status');
     if (avail.classList.contains('avail-no')) {
       alert('This vehicle is unavailable at the selected time. Please choose a different date or time.');
@@ -896,6 +903,7 @@
       const { data, error } = await supabaseClient.from('bookings').insert([booking]).select();
       if (error) throw error;
       activeBooking = { id: data[0].id, type: 'kc' };
+      window.activeBooking = activeBooking;
 
       // Fire-and-forget: create Google Calendar event for this booking
       createCalendarEvent({
@@ -919,6 +927,10 @@
 
       const paySection = document.getElementById('qe-payment');
       paySection.style.display = 'block';
+
+      // Force reveal animations on payment section children
+      // (IntersectionObserver can't see them while parent is display:none)
+      paySection.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
 
       document.getElementById('pay-deposit-amt').textContent   = '$' + deposit;
       document.getElementById('pay-total-amt').textContent     = '$' + total;
