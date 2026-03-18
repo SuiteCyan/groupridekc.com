@@ -716,7 +716,7 @@
         `&q=${encodeURIComponent(query)}` +
         `&countrycodes=us` +
         `&viewbox=${GEO_BBOX_VIEWBOX}&bounded=1` +
-        `&limit=5&dedupe=1&tag=place:city,place:town,place:village,building,highway:*,amenity,tourism`;
+        `&limit=5&dedupe=1`;
       const res  = await fetch(url);
       const data = await res.json();
       let results = Array.isArray(data) ? normalizeLocationIQ(data) : [];
