@@ -689,6 +689,7 @@
         bounds: circle.getBounds(),
         strictBounds: false,
         componentRestrictions: { country: 'us' },
+        types: ['geocode', 'establishment'],
         fields: ['geometry', 'formatted_address', 'name']
       });
 
