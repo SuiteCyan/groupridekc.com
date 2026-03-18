@@ -576,17 +576,18 @@
      ═══════════════════════════════════════════════════════════════ */
 
   const PRICING = {
-    suburban: { base: 65,  perMile: 2.25, label: 'Suburban' },
+    suburban: { base: 95,  perMile: 2.25, label: 'Suburban' },
     van:      { base: 95,  perMile: 3.00, label: '10-Pass Van' }
   };
   const SURGE_PRICING = { base: 99, perMile: 5.00 };
   const DEPOSIT_PCT = 0.50;
   const KC_LOCAL_TRANSPORT_FEE = 250;
 
-  // KC center (64109) and 300-mile bounding box for geocoder
-  const KC_LAT = 39.0984, KC_LON = -94.5786, MAX_RADIUS_MI = 300;
-  // ~4.35° lat per 300 mi, ~5.6° lon per 300 mi at this latitude
-  const GEO_BBOX = '-100.18,34.75,-88.98,43.45';
+  // KC center (64109) and 200-mile radius for geocoder
+  const KC_LAT = 39.0984, KC_LON = -94.5786, MAX_RADIUS_MI = 200;
+  const LOCATIONIQ_KEY = 'pk.ac6de8e6fadffae80b689457f0f754ee';
+  // Bounding box ~200 mi from KC: ~2.9° lat, ~3.7° lon at this latitude
+  const GEO_BBOX_VIEWBOX = '-98.28,36.20,-90.88,41.99';
 
   function distFromKC(lat, lon) {
     // Haversine distance in miles
@@ -689,92 +690,49 @@
     geocodeTimers[type] = setTimeout(() => geocodeSearch(q, type), 400);
   };
 
-  function normalizePhoton(features, forceApproximate) {
-    return features.map(f => {
-      const p = f.properties;
-      const hasNumber  = !!p.housenumber;
-      const street     = hasNumber ? `${p.housenumber} ${p.street || ''}`.trim() : p.street;
-      const parts      = [street, p.city, p.state].filter(Boolean);
-      const display    = p.name && !hasNumber
-        ? [p.name, ...parts].filter(Boolean).join(', ')
-        : parts.join(', ');
+  function normalizeLocationIQ(results) {
+    return results.map(r => {
+      const hasNumber  = /^\d/.test(r.display_name || '');
+      const typeExact  = ['house','building','residential','address'].includes(r.type)
+                         || ['amenity','tourism','shop','leisure','building'].includes(r.class);
+      const isApprox   = !hasNumber && !typeExact;
+      const nameParts  = (r.display_name || '').split(',').map(s => s.trim());
+      const name       = nameParts[0] || '';
       return {
-        name:          hasNumber ? street : (p.name || p.street || p.city || ''),
-        display_name:  display || p.name || '',
-        lat:           f.geometry.coordinates[1],
-        lon:           f.geometry.coordinates[0],
-        isApproximate: forceApproximate || !hasNumber
+        name,
+        display_name:  nameParts.slice(0, 4).join(', '),
+        lat:           parseFloat(r.lat),
+        lon:           parseFloat(r.lon),
+        isApproximate: isApprox
       };
     }).filter(r => r.display_name)
       .filter(r => distFromKC(r.lat, r.lon) <= MAX_RADIUS_MI);
   }
 
-  function extractCityFallback(query) {
-    const parts = query.split(',').map(s => s.trim()).filter(Boolean);
-    if (parts.length >= 2) {
-      // "2990 E. Ridgely Road, Smithville, MO" → "Smithville, MO"
-      // "Smithville, MO" → "Smithville, MO"
-      return parts.slice(-2).join(', ');
-    }
-    // Try splitting on spaces: "2990 E Ridgely Road Smithville MO"
-    // Strip leading numbers (house number) and common road words
-    const stripped = query
-      .replace(/^\d+\s*/, '')
-      .replace(/\b(road|rd|street|st|ave|avenue|blvd|boulevard|dr|drive|ln|lane|ct|court|way|hwy|highway|e\.?|w\.?|n\.?|s\.?)\b\.?\s*/gi, '')
-      .trim();
-    if (stripped.length > 2) return stripped;
-    return null;
-  }
-
   async function geocodeSearch(query, type) {
     try {
-      const url = `https://photon.komoot.io/api/` +
-        `?q=${encodeURIComponent(query)}&lat=${KC_LAT}&lon=${KC_LON}&bbox=${GEO_BBOX}&limit=5`;
+      const url = `https://us1.locationiq.com/v1/autocomplete?` +
+        `key=${LOCATIONIQ_KEY}` +
+        `&q=${encodeURIComponent(query)}` +
+        `&countrycodes=us` +
+        `&viewbox=${GEO_BBOX_VIEWBOX}&bounded=1` +
+        `&limit=5&dedupe=1&tag=place:city,place:town,place:village,building,highway:*,amenity,tourism`;
       const res  = await fetch(url);
       const data = await res.json();
-      let results = normalizePhoton(data.features, false);
+      let results = Array.isArray(data) ? normalizeLocationIQ(data) : [];
       let isFallback = false;
 
-      // Check if we got an exact street-level match (has house number)
-      const hasExactMatch = results.some(r => !r.isApproximate);
-
-      // If no results OR no exact match, try city-level fallback
-      if (!results.length || !hasExactMatch) {
-        const cityQuery = extractCityFallback(query);
-        if (cityQuery) {
-          const fbUrl  = `https://photon.komoot.io/api/` +
-            `?q=${encodeURIComponent(cityQuery)}&lat=${KC_LAT}&lon=${KC_LON}&bbox=${GEO_BBOX}&limit=3`;
-          const fbRes  = await fetch(fbUrl);
-          const fbData = await fbRes.json();
-          const cityResults = normalizePhoton(fbData.features, true);
-
-          if (cityResults.length) {
-            // If we had no results at all, use city results only
-            // If we had approximate results, prepend city results (deduped)
-            if (!results.length) {
-              results = cityResults;
-            } else {
-              // Merge: city-level first, then any other results, removing duplicates
-              const seen = new Set(cityResults.map(r => r.display_name));
-              results = [...cityResults, ...results.filter(r => !seen.has(r.display_name))];
-            }
-            isFallback = true;
-          }
-        }
-
-        // If still no results at all, do one more attempt: just the city name
-        if (!results.length) {
-          const words = query.replace(/[0-9]/g, '').split(/[\s,]+/).filter(w => w.length > 2);
-          if (words.length) {
-            const cityOnly = words.slice(-2).join(' ');
-            const coUrl = `https://photon.komoot.io/api/` +
-              `?q=${encodeURIComponent(cityOnly)}&lat=${KC_LAT}&lon=${KC_LON}&bbox=${GEO_BBOX}&limit=3`;
-            const coRes = await fetch(coUrl);
-            const coData = await coRes.json();
-            results = normalizePhoton(coData.features, true);
-            isFallback = true;
-          }
-        }
+      // If no results with bounded search, try unbounded (US only) as fallback
+      if (!results.length) {
+        const fbUrl = `https://us1.locationiq.com/v1/autocomplete?` +
+          `key=${LOCATIONIQ_KEY}` +
+          `&q=${encodeURIComponent(query)}` +
+          `&countrycodes=us` +
+          `&limit=5&dedupe=1`;
+        const fbRes  = await fetch(fbUrl);
+        const fbData = await fbRes.json();
+        results = Array.isArray(fbData) ? normalizeLocationIQ(fbData) : [];
+        isFallback = results.length > 0;
       }
 
       window.showDropdown(results, type, query, isFallback);
