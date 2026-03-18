@@ -709,6 +709,9 @@
       .filter(r => distFromKC(r.lat, r.lon) <= MAX_RADIUS_MI);
   }
 
+  // Track last successful results so we don't lose them while user keeps typing
+  let lastGoodResults = { pickup: null, dropoff: null };
+
   async function geocodeSearch(query, type) {
     try {
       const url = `https://us1.locationiq.com/v1/autocomplete?` +
@@ -733,6 +736,18 @@
         const fbData = await fbRes.json();
         results = Array.isArray(fbData) ? normalizeLocationIQ(fbData) : [];
         isFallback = results.length > 0;
+      }
+
+      // If we got results, save them
+      if (results.length) {
+        lastGoodResults[type] = { results, query, isFallback };
+      }
+
+      // If still no results but query looks like a full address (has commas or zip),
+      // show the manual entry fallback — don't let the dropdown disappear
+      if (!results.length && (query.includes(',') || /\d{5}/.test(query))) {
+        window.showDropdown([], type, query, true);
+        return;
       }
 
       window.showDropdown(results, type, query, isFallback);
