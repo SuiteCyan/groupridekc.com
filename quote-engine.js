@@ -106,25 +106,25 @@
     .form-total-price { font-size: 1.3rem; font-weight: 800; color: var(--gold); }
     .form-submit { width: 100%; padding: 16px; font-size: 1rem; border-radius: 10px; }
 
-    /* Autocomplete Dropdown */
-    .autocomplete-wrapper { position: relative; }
-    .autocomplete-dropdown {
-      display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
-      background: #1e1e1e; border: 1px solid var(--gold);
-      border-radius: 0 0 10px 10px; overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    /* Google Places Autocomplete — style the dropdown to match dark theme */
+    .pac-container {
+      background: #1e1e1e !important; border: 1px solid var(--gold) !important;
+      border-radius: 0 0 10px 10px !important; box-shadow: 0 8px 24px rgba(0,0,0,.5) !important;
+      z-index: 200 !important; font-family: 'Inter', sans-serif !important;
     }
-    .autocomplete-dropdown.open { display: block; }
-    .ac-item {
-      padding: 10px 14px; font-size: 0.82rem; cursor: pointer;
-      border-bottom: 1px solid var(--border); transition: background .15s;
-      display: flex; align-items: flex-start; gap: 8px;
+    .pac-item {
+      padding: 10px 14px !important; font-size: 0.82rem !important;
+      border-bottom: 1px solid var(--border) !important; cursor: pointer !important;
+      color: #fff !important; background: #1e1e1e !important;
     }
-    .ac-item:last-child { border-bottom: none; }
-    .ac-item:hover { background: rgba(253,185,19,.1); }
-    .ac-icon { color: var(--gold); flex-shrink: 0; margin-top: 1px; }
-    .ac-name { font-weight: 500; color: #fff; }
-    .ac-addr { color: var(--text-muted); font-size: 0.75rem; }
+    .pac-item:hover, .pac-item-selected {
+      background: rgba(253,185,19,.1) !important;
+    }
+    .pac-item-query { color: #fff !important; font-weight: 500 !important; }
+    .pac-matched { color: var(--gold) !important; font-weight: 600 !important; }
+    .pac-item span:not(.pac-item-query) { color: var(--text-muted) !important; font-size: 0.75rem !important; }
+    .pac-icon { display: none !important; }
+    .pac-logo::after { display: none !important; }
 
     /* Availability Badge */
     #avail-status {
@@ -316,20 +316,18 @@
           <span id="avail-text"></span>
         </div>
 
-        <!-- Pickup Address with Autocomplete -->
-        <div class="form-group autocomplete-wrapper">
+        <!-- Pickup Address with Google Autocomplete -->
+        <div class="form-group">
           <label for="pickup-loc">Pickup Location</label>
           <input type="text" id="pickup-loc" placeholder="Address, hotel, or landmark"
-                 required autocomplete="off" oninput="window.debounceGeocode(this,'pickup')" />
-          <div class="autocomplete-dropdown" id="pickup-dropdown"></div>
+                 required autocomplete="off" />
         </div>
 
-        <!-- Dropoff Address with Autocomplete -->
-        <div class="form-group autocomplete-wrapper">
+        <!-- Dropoff Address with Google Autocomplete -->
+        <div class="form-group">
           <label for="dropoff-loc">Drop-off Location</label>
           <input type="text" id="dropoff-loc" placeholder="Stadium, KCI Airport, hotel, etc."
-                 required autocomplete="off" oninput="window.debounceGeocode(this,'dropoff')" />
-          <div class="autocomplete-dropdown" id="dropoff-dropdown"></div>
+                 required autocomplete="off" />
         </div>
 
         <!-- Route Info Bar (shown after both addresses resolved) -->
@@ -585,9 +583,7 @@
 
   // KC center (64109) and 200-mile radius for geocoder
   const KC_LAT = 39.0984, KC_LON = -94.5786, MAX_RADIUS_MI = 200;
-  const LOCATIONIQ_KEY = 'pk.ac6de8e6fadffae80b689457f0f754ee';
-  // Bounding box ~200 mi from KC: ~2.9° lat, ~3.7° lon at this latitude
-  const GEO_BBOX_VIEWBOX = '-98.28,36.20,-90.88,41.99';
+  const GOOGLE_API_KEY = 'AIzaSyDxs2MNUbrggyxygV6LCysyKVhDwoVBsW8';
 
   function distFromKC(lat, lon) {
     // Haversine distance in miles
@@ -616,7 +612,6 @@
   let coords = { pickup: null, dropoff: null };
   let coordsApproximate = { pickup: false, dropoff: false };
   let routeMiles = null;
-  let geocodeTimers = {};
   let activeBooking = { id: null, type: null };
   // Expose to window so LOTO inline script can access it
   window.activeBooking = activeBooking;
@@ -682,194 +677,53 @@
     );
   }
 
-  window.debounceGeocode = function(input, type) {
-    clearTimeout(geocodeTimers[type]);
-    const q = input.value.trim();
-    const dd = document.getElementById(type + '-dropdown');
-    if (q.length < 3) { dd.classList.remove('open'); return; }
-    geocodeTimers[type] = setTimeout(() => geocodeSearch(q, type), 400);
-  };
+  /* ── Google Places Autocomplete Setup ────────────────────────── */
+  function initGoogleAutocomplete() {
+    const kcCenter = new google.maps.LatLng(KC_LAT, KC_LON);
+    // 200 miles ≈ 321,869 meters
+    const circle = new google.maps.Circle({ center: kcCenter, radius: 321869 });
 
-  function normalizeLocationIQ(results) {
-    return results.map(r => {
-      const hasNumber  = /^\d/.test(r.display_name || '');
-      const typeExact  = ['house','building','residential','address'].includes(r.type)
-                         || ['amenity','tourism','shop','leisure','building'].includes(r.class);
-      const isApprox   = !hasNumber && !typeExact;
-      const nameParts  = (r.display_name || '').split(',').map(s => s.trim());
-      const name       = nameParts[0] || '';
-      return {
-        name,
-        display_name:  nameParts.slice(0, 4).join(', '),
-        lat:           parseFloat(r.lat),
-        lon:           parseFloat(r.lon),
-        isApproximate: isApprox
-      };
-    }).filter(r => r.display_name)
-      .filter(r => distFromKC(r.lat, r.lon) <= MAX_RADIUS_MI);
+    ['pickup', 'dropoff'].forEach(type => {
+      const input = document.getElementById(type + '-loc');
+      const ac = new google.maps.places.Autocomplete(input, {
+        bounds: circle.getBounds(),
+        strictBounds: false,
+        componentRestrictions: { country: 'us' },
+        fields: ['geometry', 'formatted_address', 'name']
+      });
+
+      ac.addListener('place_changed', () => {
+        const place = ac.getPlace();
+        if (!place.geometry) {
+          // User pressed Enter without selecting — try the input value as-is
+          coordsApproximate[type] = true;
+          return;
+        }
+        const lat = place.geometry.location.lat();
+        const lon = place.geometry.location.lng();
+        coords[type] = { lat, lon };
+        coordsApproximate[type] = false;
+        if (coords.pickup && coords.dropoff) window.calculateRoute();
+      });
+    });
   }
 
-  // Track last successful results so we don't lose them while user keeps typing
-  let lastGoodResults = { pickup: null, dropoff: null };
-
-  async function geocodeSearch(query, type) {
-    try {
-      const url = `https://us1.locationiq.com/v1/autocomplete?` +
-        `key=${LOCATIONIQ_KEY}` +
-        `&q=${encodeURIComponent(query)}` +
-        `&countrycodes=us` +
-        `&viewbox=${GEO_BBOX_VIEWBOX}&bounded=1` +
-        `&limit=5&dedupe=1`;
-      const res  = await fetch(url);
-      const data = await res.json();
-      let results = Array.isArray(data) ? normalizeLocationIQ(data) : [];
-      let isFallback = false;
-
-      // If no results with bounded search, try unbounded (US only) as fallback
-      if (!results.length) {
-        const fbUrl = `https://us1.locationiq.com/v1/autocomplete?` +
-          `key=${LOCATIONIQ_KEY}` +
-          `&q=${encodeURIComponent(query)}` +
-          `&countrycodes=us` +
-          `&limit=5&dedupe=1`;
-        const fbRes  = await fetch(fbUrl);
-        const fbData = await fbRes.json();
-        results = Array.isArray(fbData) ? normalizeLocationIQ(fbData) : [];
-        isFallback = results.length > 0;
-      }
-
-      // If we got results, save them
-      if (results.length) {
-        lastGoodResults[type] = { results, query, isFallback };
-      }
-
-      // If still no results but query looks like a full address (has commas or zip),
-      // show the manual entry fallback — don't let the dropdown disappear
-      if (!results.length && (query.includes(',') || /\d{5}/.test(query))) {
-        window.showDropdown([], type, query, true);
-        return;
-      }
-
-      window.showDropdown(results, type, query, isFallback);
-    } catch(e) {
-      window.showDropdown([], type, query, true);
-    }
-  }
-
-  window.showDropdown = function(results, type, originalQuery, isFallback) {
-    const dd = document.getElementById(type + '-dropdown');
-    let html = '';
-
-    if (!results.length) {
-      html = `<div style="padding:12px 14px;">
-                <div style="font-size:0.82rem; color:var(--gold); font-weight:600; margin-bottom:6px;">
-                  We couldn't find that exact address
-                </div>
-                <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px; line-height:1.4;">
-                  This may be a rural or unlisted location. You can select a nearby city below, or use your typed address as-is. We'll confirm the exact location with you.
-                </div>
-                <div class="ac-item" onclick="window.useManualAddress('${type}', \`${(originalQuery||'').replace(/`/g,"'")}\`)">
-                  <span class="ac-icon">✏️</span>
-                  <div><div class="ac-name">Use "${originalQuery}" as entered</div>
-                       <div class="ac-addr" style="color:var(--gold);">We'll confirm the exact pickup with you</div></div>
-                </div>
-              </div>`;
-      dd.innerHTML = html;
-      dd.classList.add('open');
+  // Load Google Maps JS API dynamically, then init autocomplete
+  (function loadGoogleMaps() {
+    // If already loaded (e.g. by index.html), just init
+    if (window.google && window.google.maps && window.google.maps.places) {
+      initGoogleAutocomplete();
       return;
     }
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&callback=__initGoogleAC`;
+    script.async = true;
+    script.defer = true;
+    window.__initGoogleAC = function() { initGoogleAutocomplete(); };
+    document.head.appendChild(script);
+  })();
 
-    if (isFallback) {
-      html += `<div style="padding:10px 14px 4px;">
-                 <div style="font-size:0.78rem; color:var(--gold); font-weight:600;">
-                   Exact address not found — select a nearby area:
-                 </div>
-                 <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px; margin-bottom:6px;">
-                   Your fare will be estimated from the city center. We'll confirm the exact distance with you.
-                 </div>
-               </div>`;
-    }
-
-    html += results.map(r => {
-      const name    = r.name || r.display_name.split(',')[0];
-      const addr    = r.display_name;
-      const approx  = r.isApproximate ? 'true' : 'false';
-      const icon    = r.isApproximate ? '🏙️' : '📍';
-      const hint    = r.isApproximate ? '<div style="font-size:0.7rem;color:var(--gold);margin-top:2px;">City-level estimate</div>' : '';
-      return `<div class="ac-item"
-                   onclick="window.selectAddress('${type}', ${r.lat}, ${r.lon}, \`${r.display_name.replace(/`/g,"'")}\`, ${approx})">
-                <span class="ac-icon">${icon}</span>
-                <div><div class="ac-name">${name}</div>
-                     <div class="ac-addr">${addr}</div>${hint}</div>
-              </div>`;
-    }).join('');
-
-    if (isFallback && originalQuery) {
-      html += `<div class="ac-item" style="border-top:1px solid var(--border);"
-                    onclick="window.useManualAddress('${type}', \`${originalQuery.replace(/`/g,"'")}\`)">
-                 <span class="ac-icon">✏️</span>
-                 <div><div class="ac-name">Use "${originalQuery}" as entered</div>
-                      <div class="ac-addr" style="color:var(--gold);">We'll confirm the exact pickup with you</div></div>
-               </div>`;
-    }
-
-    dd.innerHTML = html;
-    dd.classList.add('open');
-  };
-
-  window.useManualAddress = async function(type, label) {
-    document.getElementById(type + '-loc').value = label;
-    document.getElementById(type + '-dropdown').classList.remove('open');
-    coordsApproximate[type] = true;
-
-    // Try forward geocoding to get approximate coords for the typed address
-    try {
-      const geoUrl = `https://us1.locationiq.com/v1/search?` +
-        `key=${LOCATIONIQ_KEY}` +
-        `&q=${encodeURIComponent(label)}` +
-        `&countrycodes=us&format=json&limit=1`;
-      const geoRes  = await fetch(geoUrl);
-      const geoData = await geoRes.json();
-      if (Array.isArray(geoData) && geoData.length) {
-        coords[type] = { lat: parseFloat(geoData[0].lat), lon: parseFloat(geoData[0].lon) };
-      } else {
-        coords[type] = { lat: KC_LAT, lon: KC_LON }; // last resort fallback
-      }
-    } catch(e) {
-      coords[type] = { lat: KC_LAT, lon: KC_LON }; // network error fallback
-    }
-
-    updateEstimateDisclaimer();
-    if (coords.pickup && coords.dropoff) window.calculateRoute();
-  };
-
-  window.selectAddress = function(type, lat, lon, label, isApproximate) {
-    document.getElementById(type + '-loc').value = label;
-    document.getElementById(type + '-dropdown').classList.remove('open');
-    coords[type] = { lat: parseFloat(lat), lon: parseFloat(lon) };
-    coordsApproximate[type] = !!isApproximate;
-    updateEstimateDisclaimer();
-    if (coords.pickup && coords.dropoff) window.calculateRoute();
-  };
-
-  function updateEstimateDisclaimer() {
-    const isApprox = coordsApproximate.pickup || coordsApproximate.dropoff;
-    const disc = document.getElementById('estimate-disclaimer');
-    const cb   = document.getElementById('estimate-ack');
-    if (!disc) return;
-    disc.style.display = isApprox ? 'block' : 'none';
-    if (cb) {
-      cb.required = isApprox;
-      if (!isApprox) cb.checked = false;
-    }
-  }
-
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.autocomplete-wrapper')) {
-      document.querySelectorAll('.autocomplete-dropdown').forEach(d => d.classList.remove('open'));
-    }
-  });
-
+  /* ── Google Directions API for route distance ──────────────── */
   window.calculateRoute = async function() {
     const { pickup, dropoff } = coords;
     if (!pickup || !dropoff) return;
@@ -880,14 +734,17 @@
     document.getElementById('ri-time').textContent = '…';
 
     try {
-      const url = `https://router.project-osrm.org/route/v1/driving/` +
-        `${pickup.lon},${pickup.lat};${dropoff.lon},${dropoff.lat}?overview=false`;
-      const res  = await fetch(url);
-      const data = await res.json();
+      const service = new google.maps.DirectionsService();
+      const result = await service.route({
+        origin:      new google.maps.LatLng(pickup.lat, pickup.lon),
+        destination: new google.maps.LatLng(dropoff.lat, dropoff.lon),
+        travelMode:  google.maps.TravelMode.DRIVING
+      });
 
-      if (data.code === 'Ok') {
-        const meters  = data.routes[0].distance;
-        const seconds = data.routes[0].duration;
+      if (result.routes && result.routes.length) {
+        const leg     = result.routes[0].legs[0];
+        const meters  = leg.distance.value;
+        const seconds = leg.duration.value;
         routeMiles = meters / 1609.344;
 
         const miles = routeMiles.toFixed(1);
