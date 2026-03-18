@@ -817,11 +817,28 @@
     dd.classList.add('open');
   };
 
-  window.useManualAddress = function(type, label) {
+  window.useManualAddress = async function(type, label) {
     document.getElementById(type + '-loc').value = label;
     document.getElementById(type + '-dropdown').classList.remove('open');
-    coords[type] = { lat: 39.0984, lon: -94.5786 };
     coordsApproximate[type] = true;
+
+    // Try forward geocoding to get approximate coords for the typed address
+    try {
+      const geoUrl = `https://us1.locationiq.com/v1/search?` +
+        `key=${LOCATIONIQ_KEY}` +
+        `&q=${encodeURIComponent(label)}` +
+        `&countrycodes=us&format=json&limit=1`;
+      const geoRes  = await fetch(geoUrl);
+      const geoData = await geoRes.json();
+      if (Array.isArray(geoData) && geoData.length) {
+        coords[type] = { lat: parseFloat(geoData[0].lat), lon: parseFloat(geoData[0].lon) };
+      } else {
+        coords[type] = { lat: KC_LAT, lon: KC_LON }; // last resort fallback
+      }
+    } catch(e) {
+      coords[type] = { lat: KC_LAT, lon: KC_LON }; // network error fallback
+    }
+
     updateEstimateDisclaimer();
     if (coords.pickup && coords.dropoff) window.calculateRoute();
   };
