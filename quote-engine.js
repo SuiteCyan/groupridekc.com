@@ -599,12 +599,8 @@
     '2026-06-28','2026-07-01','2026-07-02','2026-07-05'
   ]);
 
-  const BOOKED_SLOTS = [
-    { date:'2026-06-15', startH:13, endH:16, vehicle:'suburban' },
-    { date:'2026-06-15', startH:12, endH:17, vehicle:'van'      },
-    { date:'2026-06-20', startH:18, endH:21, vehicle:'suburban' },
-    { date:'2026-07-01', startH:10, endH:13, vehicle:'van'      },
-  ];
+  // Live bookings fetched from Supabase (replaces hardcoded BOOKED_SLOTS)
+  let liveBookedSlots = [];
 
   let selectedVehicle = 'suburban';
   let kcTripType = 'oneway';
@@ -639,7 +635,7 @@
     window.onDateTimeChange();
   };
 
-  window.onDateTimeChange = function() {
+  window.onDateTimeChange = async function() {
     const date = document.getElementById('pickup-date').value;
     const time = document.getElementById('pickup-time').value;
     const el   = document.getElementById('avail-status');
@@ -650,25 +646,44 @@
     el.className = 'avail-load';
     txt.textContent = 'Checking availability…';
 
-    setTimeout(() => {
-      const available = checkAvailability(date, time, selectedVehicle);
-      el.className = available ? 'avail-ok' : 'avail-no';
-      if (available) {
-        const isMatchDay = MATCH_DAYS.has(date);
-        txt.textContent = isMatchDay
-          ? '✓ Available — Match day surcharge applies'
-          : '✓ Available for your selected date & time';
-      } else {
-        txt.textContent = '✗ Unavailable — please choose a different time';
-      }
-      window.recalcPrice();
-    }, 250);
+    // Fetch real bookings from Supabase, then check
+    await fetchBookedSlots(date);
+    const available = checkAvailability(date, time, selectedVehicle);
+    el.className = available ? 'avail-ok' : 'avail-no';
+    if (available) {
+      const isMatchDay = MATCH_DAYS.has(date);
+      txt.textContent = isMatchDay
+        ? '✓ Available — Match day surcharge applies'
+        : '✓ Available for your selected date & time';
+    } else {
+      txt.textContent = '✗ Unavailable — please choose a different time';
+    }
+    window.recalcPrice();
   };
+
+  // Fetch real bookings from Supabase for a given date
+  async function fetchBookedSlots(date) {
+    if (!supabaseClient) return;
+    try {
+      const { data, error } = await supabaseClient
+        .from('bookings')
+        .select('vehicle, pickup_date, pickup_time')
+        .eq('pickup_date', date)
+        .neq('booking_status', 'cancelled');
+      if (error || !data) return;
+      liveBookedSlots = data.map(b => {
+        const [h] = (b.pickup_time || '00:00').split(':').map(Number);
+        return { date: b.pickup_date, startH: h, endH: h + 2, vehicle: b.vehicle };
+      });
+    } catch(e) {
+      console.warn('Failed to fetch booked slots:', e);
+    }
+  }
 
   function checkAvailability(date, time, vehicle) {
     const [h, m] = time.split(':').map(Number);
     const pickupMins = h * 60 + m;
-    return !BOOKED_SLOTS.some(slot =>
+    return !liveBookedSlots.some(slot =>
       slot.date === date &&
       slot.vehicle === vehicle &&
       pickupMins >= slot.startH * 60 - 60 &&
