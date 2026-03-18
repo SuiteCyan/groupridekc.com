@@ -855,12 +855,6 @@
       return;
     }
 
-    const avail = document.getElementById('avail-status');
-    if (avail.classList.contains('avail-no')) {
-      alert('This vehicle is unavailable at the selected time. Please choose a different date or time.');
-      return;
-    }
-
     const disc = document.getElementById('estimate-disclaimer');
     const ack  = document.getElementById('estimate-ack');
     if (disc && disc.style.display !== 'none' && ack && !ack.checked) {
@@ -870,9 +864,28 @@
       return;
     }
 
+    const btn = document.getElementById('submit-btn');
+    btn.textContent = 'Checking availability…';
+    btn.disabled = true;
+
+    // Re-check availability against Supabase RIGHT NOW (not stale UI state)
+    const pickupDateCheck = document.getElementById('pickup-date').value;
+    const pickupTimeCheck = document.getElementById('pickup-time').value;
+    await fetchBookedSlots(pickupDateCheck);
+    if (!checkAvailability(pickupDateCheck, pickupTimeCheck, selectedVehicle)) {
+      alert('Sorry, this vehicle was just booked for that time. Please choose a different date or time.');
+      btn.textContent = 'Request This Ride →';
+      btn.disabled = false;
+      // Update the UI status too
+      const el  = document.getElementById('avail-status');
+      const txt = document.getElementById('avail-text');
+      el.className = 'avail-no';
+      txt.textContent = '✗ Unavailable — please choose a different time';
+      return;
+    }
+
     window.recalcPrice();
 
-    const btn = document.getElementById('submit-btn');
     btn.textContent = 'Submitting…';
     btn.disabled = true;
 
