@@ -1194,7 +1194,7 @@
   }
 
   /* ── LOTO Availability ──────────────────────────── */
-  function lotoOnDateTimeChange() {
+  async function lotoOnDateTimeChange() {
     const date = document.getElementById('loto-date').value;
     const time = document.getElementById('loto-time').value;
     const el   = document.getElementById('loto-avail-status');
@@ -1205,19 +1205,16 @@
     el.className = 'avail-load';
     txt.textContent = 'Checking availability…';
 
-    setTimeout(() => {
-      const available = checkAvailability(date, time, lotoVehicle);
-      el.className = available ? 'avail-ok' : 'avail-no';
-      if (available) {
-        const isMatchDay = MATCH_DAYS.has(date);
-        txt.textContent = isMatchDay
-          ? '✓ Available — Match day surcharge applies'
-          : '✓ Available for your selected date & time';
-      } else {
-        txt.textContent = '✗ Unavailable — please choose a different time';
-      }
-      lotoRecalcPrice();
-    }, 250);
+    // Fetch real bookings from both KC + LOTO tables, then check
+    await window.fetchBookedSlots(date);
+    const available = window.checkAvailability(date, time);
+    el.className = available ? 'avail-ok' : 'avail-no';
+    if (available) {
+      txt.textContent = '✓ Available for your selected date & time';
+    } else {
+      txt.textContent = '✗ Unavailable — please choose a different time';
+    }
+    lotoRecalcPrice();
 
     // Set minimum return date = departure date
     if (date) {
@@ -1366,7 +1363,7 @@
     e.preventDefault();
     const avail = document.getElementById('loto-avail-status');
     if (avail.classList.contains('avail-no')) {
-      alert('This vehicle is unavailable at the selected time. Please choose a different date or time.');
+      alert('This time slot is unavailable. Please choose a different date or time.');
       return;
     }
     if (lotoTripType === 'multiday') {
@@ -1381,8 +1378,24 @@
     lotoRecalcPrice();
 
     const btn = document.getElementById('loto-submit-btn');
-    btn.textContent = 'Submitting…';
+    btn.textContent = 'Checking availability…';
     btn.disabled = true;
+
+    // Re-check availability against Supabase RIGHT NOW (not stale UI state)
+    const lotoDateCheck = document.getElementById('loto-date').value;
+    const lotoTimeCheck = document.getElementById('loto-time').value || '06:00';
+    console.log('[LOTO-SUBMIT] Re-checking availability for', lotoDateCheck, lotoTimeCheck);
+    await window.fetchBookedSlots(lotoDateCheck);
+    const isAvailable = window.checkAvailability(lotoDateCheck, lotoTimeCheck);
+    if (!isAvailable) {
+      btn.textContent = 'Request This Trip';
+      btn.disabled = false;
+      alert('Sorry, this time slot was just booked. Please choose a different date or time.');
+      await lotoOnDateTimeChange();
+      return;
+    }
+
+    btn.textContent = 'Submitting…';
 
     const total   = parseInt(document.getElementById('loto-price-display').textContent.replace('$',''));
     const deposit = parseInt(document.getElementById('loto-pb-deposit').textContent.replace('$',''));
