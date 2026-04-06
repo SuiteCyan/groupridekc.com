@@ -1,0 +1,17 @@
+# Service account keys and credentials
+*.json
+!package.json
+!package-lock.json
+
+# Environment files
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
