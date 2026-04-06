@@ -648,7 +648,7 @@
 
     // Fetch real bookings from Supabase, then check
     await fetchBookedSlots(date);
-    const available = checkAvailability(date, time, selectedVehicle);
+    const available = checkAvailability(date, time);
     el.className = available ? 'avail-ok' : 'avail-no';
     if (available) {
       const isMatchDay = MATCH_DAYS.has(date);
@@ -661,52 +661,66 @@
     window.recalcPrice();
   };
 
-  // Fetch real bookings from Supabase for a given date
+  // Fetch real bookings from BOTH bookings + loto_bookings tables for a given date
   async function fetchBookedSlots(date) {
     if (!supabaseClient) {
       console.warn('[AVAIL] No Supabase client — cannot check availability');
       return;
     }
     try {
-      const { data, error } = await supabaseClient
-        .from('bookings')
-        .select('vehicle, pickup_date, pickup_time, booking_status')
-        .eq('pickup_date', date);
+      // Query KC bookings and LOTO bookings in parallel
+      const [kcResult, lotoResult] = await Promise.all([
+        supabaseClient
+          .from('bookings')
+          .select('vehicle, pickup_date, pickup_time, booking_status')
+          .eq('pickup_date', date),
+        supabaseClient
+          .from('loto_bookings')
+          .select('vehicle, departure_date, departure_time, booking_status')
+          .eq('departure_date', date)
+      ]);
 
-      console.log('[AVAIL] Supabase query for', date, '→', data, error);
+      console.log('[AVAIL] KC query for', date, '→', kcResult.data, kcResult.error);
+      console.log('[AVAIL] LOTO query for', date, '→', lotoResult.data, lotoResult.error);
 
-      if (error) {
-        console.error('[AVAIL] Supabase error:', error);
-        return;
-      }
-      if (!data || !data.length) {
-        console.log('[AVAIL] No bookings found for', date);
-        liveBookedSlots = [];
-        return;
-      }
+      if (kcResult.error) console.error('[AVAIL] KC Supabase error:', kcResult.error);
+      if (lotoResult.error) console.error('[AVAIL] LOTO Supabase error:', lotoResult.error);
 
-      // Filter out cancelled bookings client-side
-      const active = data.filter(b => b.booking_status !== 'cancelled');
-      console.log('[AVAIL] Active bookings:', active);
+      const kcActive = (kcResult.data || []).filter(b => b.booking_status !== 'cancelled');
+      const lotoActive = (lotoResult.data || []).filter(b => b.booking_status !== 'cancelled');
 
-      liveBookedSlots = active.map(b => {
-        const [h] = (b.pickup_time || '00:00').split(':').map(Number);
-        return { date: b.pickup_date, startH: h, endH: h + 2, vehicle: b.vehicle };
+      console.log('[AVAIL] Active KC bookings:', kcActive);
+      console.log('[AVAIL] Active LOTO bookings:', lotoActive);
+
+      // Normalize both into a common slot format
+      const kcSlots = kcActive.map(b => {
+        const [h, m] = (b.pickup_time || '00:00').split(':').map(Number);
+        return { date: b.pickup_date, startMins: h * 60 + (m || 0), source: 'kc' };
       });
-      console.log('[AVAIL] Booked slots:', liveBookedSlots);
+      const lotoSlots = lotoActive.map(b => {
+        const [h, m] = (b.departure_time || '00:00').split(':').map(Number);
+        return { date: b.departure_date, startMins: h * 60 + (m || 0), source: 'loto' };
+      });
+
+      liveBookedSlots = [...kcSlots, ...lotoSlots];
+      console.log('[AVAIL] Combined booked slots:', liveBookedSlots);
     } catch(e) {
       console.error('[AVAIL] Failed to fetch booked slots:', e);
     }
   }
 
-  function checkAvailability(date, time, vehicle) {
+  // Expose for LOTO inline script
+  window.fetchBookedSlots = fetchBookedSlots;
+  window.checkAvailability = checkAvailability;
+
+  // Block if ANY booking (KC or LOTO, any vehicle) is within 2 hours
+  function checkAvailability(date, time) {
     const [h, m] = time.split(':').map(Number);
     const pickupMins = h * 60 + m;
+    const BUFFER_MINS = 120; // 2-hour buffer
     return !liveBookedSlots.some(slot =>
       slot.date === date &&
-      slot.vehicle === vehicle &&
-      pickupMins >= slot.startH * 60 - 60 &&
-      pickupMins <= slot.endH   * 60 + 60
+      Math.abs(pickupMins - slot.startMins) < BUFFER_MINS
     );
   }
 
@@ -892,7 +906,7 @@
     const pickupTimeCheck = document.getElementById('pickup-time').value;
     console.log('[SUBMIT] Checking availability for', pickupDateCheck, pickupTimeCheck, selectedVehicle);
     await fetchBookedSlots(pickupDateCheck);
-    const isAvailable = checkAvailability(pickupDateCheck, pickupTimeCheck, selectedVehicle);
+    const isAvailable = checkAvailability(pickupDateCheck, pickupTimeCheck);
     console.log('[SUBMIT] Available?', isAvailable, 'Slots:', liveBookedSlots);
     if (!isAvailable) {
       alert('Sorry, this vehicle was just booked for that time. Please choose a different date or time.');
