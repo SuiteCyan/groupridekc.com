@@ -478,7 +478,7 @@
       const hiddenInput = document.getElementById(type + '-loc');
 
       const ac = new google.maps.places.PlaceAutocompleteElement({
-        locationBias: new google.maps.Circle({ center: kcCenter, radius: 321869 }),
+        locationBias: new google.maps.Circle({ center: kcCenter, radius: 50000 }),
         includedRegionCodes: ['us'],
         types: ['geocode', 'establishment']
       });
