@@ -9,7 +9,7 @@
  *
  * Usage:
  *   <div id="quote-form-container"></div>
- *   <script src="quote-engine.js"></scripti can 
+    *    <script src="quote-engine.js"></script>
  *
  * The engine injects:
  *   - All CSS styling (booking form, modal, autocomplete)
