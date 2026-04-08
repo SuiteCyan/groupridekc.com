@@ -50,6 +50,13 @@
       font-size: 0.9rem; transition: border-color .2s;
       -webkit-appearance: none;
     }
+    /* Autocomplete container styling */
+    .ac-container {
+      width: 100%;
+    }
+    .ac-container gmp-place-autocomplete {
+      width: 100%;
+    }
     .form-group input:not([type="checkbox"]):focus,
     .form-group select:focus,
     .form-group textarea:focus {
@@ -106,25 +113,15 @@
     .form-total-price { font-size: 1.3rem; font-weight: 800; color: var(--gold); }
     .form-submit { width: 100%; padding: 16px; font-size: 1rem; border-radius: 10px; }
 
-    /* Google Places Autocomplete — style the dropdown to match dark theme */
-    .pac-container {
-      background: #1e1e1e !important; border: 1px solid var(--gold) !important;
-      border-radius: 0 0 10px 10px !important; box-shadow: 0 8px 24px rgba(0,0,0,.5) !important;
-      z-index: 200 !important; font-family: 'Inter', sans-serif !important;
+    /* Google Places Autocomplete (New API) — style via ::part selectors */
+    gmp-place-autocomplete {
+      --gmp-mat-color-surface: rgba(255,255,255,.05);
+      --gmp-mat-color-on-surface: #fff;
+      --gmp-mat-color-on-surface-variant: rgba(255,255,255,.5);
+      --gmp-mat-shape-corner-extra-small: 8px;
+      font-family: 'Inter', sans-serif;
+      width: 100%;
     }
-    .pac-item {
-      padding: 10px 14px !important; font-size: 0.82rem !important;
-      border-bottom: 1px solid var(--border) !important; cursor: pointer !important;
-      color: #fff !important; background: #1e1e1e !important;
-    }
-    .pac-item:hover, .pac-item-selected {
-      background: rgba(253,185,19,.1) !important;
-    }
-    .pac-item-query { color: #fff !important; font-weight: 500 !important; }
-    .pac-matched { color: var(--gold) !important; font-weight: 600 !important; }
-    .pac-item span:not(.pac-item-query) { color: var(--text-muted) !important; font-size: 0.75rem !important; }
-    .pac-icon { display: none !important; }
-    .pac-logo::after { display: none !important; }
 
     /* Route Info Bar */
     #route-info {
@@ -246,18 +243,18 @@
           </div>
         </div>
 
-        <!-- Pickup Address with Google Autocomplete -->
+        <!-- Pickup Address with Google Autocomplete (New API) -->
         <div class="form-group">
-          <label for="pickup-loc">Pickup Location</label>
-          <input type="text" id="pickup-loc" placeholder="Address, hotel, or landmark"
-                 required autocomplete="off" />
+          <label>Pickup Location</label>
+          <div id="pickup-ac-container" class="ac-container"></div>
+          <input type="hidden" id="pickup-loc" />
         </div>
 
-        <!-- Dropoff Address with Google Autocomplete -->
+        <!-- Dropoff Address with Google Autocomplete (New API) -->
         <div class="form-group">
-          <label for="dropoff-loc">Drop-off Location</label>
-          <input type="text" id="dropoff-loc" placeholder="Stadium, KCI Airport, hotel, etc."
-                 required autocomplete="off" />
+          <label>Drop-off Location</label>
+          <div id="dropoff-ac-container" class="ac-container"></div>
+          <input type="hidden" id="dropoff-loc" />
         </div>
 
         <!-- Route Info Bar (shown after both addresses resolved) -->
@@ -468,33 +465,53 @@
     window.recalcPrice();
   };
 
-  /* ── Google Places Autocomplete Setup ────────────────────────── */
+  /* ── Google Places Autocomplete Setup (New API) ──────────────── */
   function initGoogleAutocomplete() {
-    const kcCenter = new google.maps.LatLng(KC_LAT, KC_LON);
-    // 200 miles ≈ 321,869 meters
-    const circle = new google.maps.Circle({ center: kcCenter, radius: 321869 });
+    const kcCenter = { lat: KC_LAT, lng: KC_LON };
+    const placeholders = {
+      pickup: 'Address, hotel, or landmark',
+      dropoff: 'Stadium, KCI Airport, hotel, etc.'
+    };
 
     ['pickup', 'dropoff'].forEach(type => {
-      const input = document.getElementById(type + '-loc');
-      const ac = new google.maps.places.Autocomplete(input, {
-        bounds: circle.getBounds(),
-        strictBounds: false,
-        componentRestrictions: { country: 'us' },
-        types: ['geocode', 'establishment'],
-        fields: ['geometry', 'formatted_address', 'name']
+      const container = document.getElementById(type + '-ac-container');
+      const hiddenInput = document.getElementById(type + '-loc');
+
+      const ac = new google.maps.places.PlaceAutocompleteElement({
+        locationBias: new google.maps.Circle({ center: kcCenter, radius: 321869 }),
+        includedRegionCodes: ['us'],
+        types: ['geocode', 'establishment']
       });
 
-      ac.addListener('place_changed', () => {
-        const place = ac.getPlace();
-        if (!place.geometry) {
-          // User pressed Enter without selecting — try the input value as-is
+      // Set placeholder via the input inside the shadow DOM
+      ac.setAttribute('placeholder', placeholders[type]);
+
+      // Style the element to fill its container
+      ac.style.width = '100%';
+
+      container.appendChild(ac);
+
+      ac.addEventListener('gmp-select', async ({ placePrediction }) => {
+        if (!placePrediction) {
           coordsApproximate[type] = true;
           return;
         }
-        const lat = place.geometry.location.lat();
-        const lon = place.geometry.location.lng();
+        const place = placePrediction.toPlace();
+        await place.fetchFields({ fields: ['location', 'formattedAddress', 'displayName'] });
+
+        const loc = place.location;
+        if (!loc) {
+          coordsApproximate[type] = true;
+          return;
+        }
+        const lat = loc.lat();
+        const lon = loc.lng();
         coords[type] = { lat, lon };
         coordsApproximate[type] = false;
+
+        // Store the formatted address in the hidden input for form submission
+        hiddenInput.value = place.formattedAddress || place.displayName || '';
+
         if (coords.pickup && coords.dropoff) window.calculateRoute();
       });
     });
@@ -508,7 +525,7 @@
       return;
     }
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&callback=__initGoogleAC`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places&loading=async&callback=__initGoogleAC`;
     script.async = true;
     script.defer = true;
     window.__initGoogleAC = function() { initGoogleAutocomplete(); };
