@@ -9,7 +9,7 @@
  *
  * Usage:
  *   <div id="quote-form-container"></div>
- *   <script src="quote-engine.js"></script>
+ *   <script src="quote-engine.js"></scripti can 
  *
  * The engine injects:
  *   - All CSS styling (booking form, modal, autocomplete)
@@ -413,7 +413,7 @@
 
   // KC center (64109) and 200-mile radius for geocoder
   const KC_LAT = 39.0984, KC_LON = -94.5786, MAX_RADIUS_MI = 200;
-  const GOOGLE_API_KEY = 'AIzaSyDxs2MNUbrggyxygV6LCysyKVhDwoVBsW8';
+  const GOOGLE_API_KEY = 'AIzaSyDsrdC9f_xMYhWSzQvmqT1v121rGvV6CAQ';
 
   function distFromKC(lat, lon) {
     // Haversine distance in miles
