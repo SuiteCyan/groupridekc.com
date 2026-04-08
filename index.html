@@ -407,110 +407,6 @@
     }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
-    /* ─── Lake of the Ozarks Section ────────────────── */
-    :root { --lake: #1a9fc0; --lake-dk: #127a96; --lake-lt: #5dcce8; }
-
-    #loto {
-      padding: 100px 0;
-      background:
-        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(26,159,192,.14) 0%, transparent 65%),
-        radial-gradient(ellipse 50% 40% at 10% 100%, rgba(26,159,192,.07) 0%, transparent 60%),
-        #0a0a0a;
-    }
-    .loto-header { text-align: center; margin-bottom: 56px; }
-    .loto-header .section-label { color: var(--lake-lt); }
-    .loto-header .section-sub   { margin: 12px auto 0; }
-
-    /* Trip type selector */
-    .trip-type-selector {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
-      margin-bottom: 32px;
-    }
-    @media(max-width: 600px) { .trip-type-selector { grid-template-columns: 1fr; } }
-
-    .trip-type-opt {
-      border: 2px solid var(--border); border-radius: 14px;
-      padding: 20px 16px; text-align: center; cursor: pointer;
-      transition: all .2s; background: var(--card);
-      position: relative; overflow: hidden;
-    }
-    .trip-type-opt:hover { border-color: rgba(26,159,192,.5); transform: translateY(-3px); }
-    .trip-type-opt.selected {
-      border-color: var(--lake); background: rgba(26,159,192,.08);
-      box-shadow: 0 0 0 1px var(--lake), 0 8px 24px rgba(26,159,192,.15);
-    }
-    .trip-type-opt .tt-icon  { font-size: 2rem; margin-bottom: 8px; }
-    .trip-type-opt .tt-name  { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
-    .trip-type-opt .tt-desc  { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
-    .trip-type-opt .tt-badge {
-      position: absolute; top: 10px; right: 10px;
-      background: var(--lake); color: #fff; font-size: 0.62rem;
-      font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
-      padding: 2px 8px; border-radius: 100px;
-    }
-
-    /* LOTO layout */
-    .loto-inner {
-      display: grid; grid-template-columns: 1fr 1.35fr; gap: 60px; align-items: start;
-    }
-    @media(max-width: 900px) { .loto-inner { grid-template-columns: 1fr; } }
-
-    .loto-info {}
-    .loto-highlights {
-      margin-top: 36px; display: flex; flex-direction: column; gap: 18px;
-    }
-    .loto-highlight {
-      display: flex; align-items: flex-start; gap: 14px;
-    }
-    .loto-hl-icon {
-      width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
-      background: rgba(26,159,192,.12);
-      display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-    }
-    .loto-hl-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
-    .loto-hl-desc  { font-size: 0.82rem; color: var(--text-muted); }
-
-    .loto-distance-badge {
-      display: inline-flex; align-items: center; gap: 10px;
-      background: rgba(26,159,192,.1); border: 1px solid rgba(26,159,192,.25);
-      border-radius: 10px; padding: 12px 16px; margin-top: 28px;
-      font-size: 0.82rem; color: var(--lake-lt);
-    }
-    .loto-distance-badge strong { font-size: 1.1rem; color: #fff; }
-
-    /* LOTO form card */
-    .loto-form-card {
-      background: var(--card2); border: 1px solid rgba(26,159,192,.2);
-      border-radius: 20px; padding: 36px;
-      box-shadow: 0 0 40px rgba(26,159,192,.06);
-      position: relative; overflow: hidden;
-    }
-    .loto-circle-logo {
-      display: block; margin: 36px auto 0;
-      width: 390px; max-width: 90%; height: auto;
-      opacity: 0.55; pointer-events: none;
-      filter: drop-shadow(0 0 30px rgba(26,159,192,.35));
-    }
-    .loto-form-card .form-title { color: var(--lake-lt); }
-    .loto-form-card input[type="checkbox"]:checked {
-      background: var(--lake, #1a9fc0);
-      border-color: var(--lake, #1a9fc0);
-    }
-
-    /* Return date row — hidden unless multi-day */
-    .return-row { display: none; }
-    .return-row.visible { display: grid; }
-
-    /* Price breakdown lake accent */
-    .loto-price-breakdown {
-      background: rgba(26,159,192,.05); border: 1px solid rgba(26,159,192,.18);
-      border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;
-    }
-    .loto-price-breakdown .pb-total span:last-child { color: var(--lake-lt); }
-    .loto-price-breakdown .pb-row span:last-child.surcharge { color: var(--lake-lt); }
-
-    .btn-lake { background: var(--lake); color: #fff; }
-    .btn-lake:hover { background: var(--lake-dk); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,159,192,.4); }
   </style>
 </head>
 <body>
@@ -525,7 +421,6 @@
       <div class="nav-links">
         <a href="#how-it-works">How It Works</a>
         <a href="#services">Services</a>
-        <a href="#loto" style="color:var(--lake-lt);">🏖️ Lake Ozarks</a>
         <a href="worldcup.html" style="color:var(--gold);">⚽ World Cup</a>
         <a href="#reviews">Reviews</a>
         <a href="#contact">Contact</a>
@@ -642,7 +537,7 @@
           <li><span class="check">✦</span> USB charging at every seat</li>
           <li><span class="check">✦</span> Professional, licensed driver</li>
           <li><span class="check">✦</span> Live GPS tracking included</li>
-          <li><span class="check">✦</span> Direct airport &amp; stadium routes</li>
+          <li><span class="check">✦</span> Direct stadium &amp; venue routes</li>
         </ul>
         <a href="#quote-form" class="btn btn-outline" style="width:100%; justify-content:center;">Get a Quote →</a>
         <div class="service-glow"></div>
@@ -660,7 +555,7 @@
           <li><span class="check">✦</span> USB &amp; 12V power at every row</li>
           <li><span class="check">✦</span> Professional, licensed driver</li>
           <li><span class="check">✦</span> Live GPS tracking included</li>
-          <li><span class="check">✦</span> Direct airport &amp; stadium routes</li>
+          <li><span class="check">✦</span> Direct stadium &amp; venue routes</li>
         </ul>
         <a href="#quote-form" class="btn btn-gold" style="width:100%; justify-content:center;">Get a Quote →</a>
         <div class="service-glow"></div>
@@ -668,232 +563,6 @@
 
     </div>
   </div>
-</section>
-
-<!-- ══════════════ LAKE OF THE OZARKS ══════════════ -->
-<section id="loto">
-  <div class="container">
-
-    <div class="loto-header reveal">
-      <div class="section-label">🏖️ Lake Getaway Shuttles</div>
-      <h2 class="section-title">Lake of the Ozarks Day Trips</h2>
-      <p class="section-sub">Door-to-door group shuttles from Kansas City to the Lake — one-way, same-day, or multi-day. We handle the drive so your group can start the party early.</p>
-    </div>
-
-    <div class="loto-inner reveal">
-
-      <!-- Left: info panel -->
-      <div class="loto-info">
-        <div class="section-label">Why Ride With Us</div>
-        <h3 class="section-title" style="font-size:clamp(1.4rem,3vw,2rem);">Skip the Convoy.<br>Arrive Together.</h3>
-        <p class="section-sub" style="max-width:100%;">No one wants to coordinate three separate cars 160 miles down I-70. Let your group relax, enjoy the ride, and arrive at Bagnell Dam — or anywhere on the lake — stress-free.</p>
-
-        <div class="loto-highlights">
-          <div class="loto-highlight">
-            <div class="loto-hl-icon">🚐</div>
-            <div>
-              <div class="loto-hl-title">Door-to-Door Service</div>
-              <div class="loto-hl-desc">We pick up from any KC address and drop off at Bagnell Dam, your lakehouse, resort, or marina.</div>
-            </div>
-          </div>
-          <div class="loto-highlight">
-            <div class="loto-hl-icon">🔄</div>
-            <div>
-              <div class="loto-hl-title">Flexible Trip Types</div>
-              <div class="loto-hl-desc">One-way drop-off, same-day turnaround, or multi-day — we'll be there when you're ready to head back.</div>
-            </div>
-          </div>
-          <div class="loto-highlight">
-            <div class="loto-hl-icon">🍺</div>
-            <div>
-              <div class="loto-hl-title">Drink Up, Ride Safely</div>
-              <div class="loto-hl-desc">Nobody has to be the designated driver. Our licensed pros handle the road while your crew handles the cooler.</div>
-            </div>
-          </div>
-          <div class="loto-highlight">
-            <div class="loto-hl-icon">📍</div>
-            <div>
-              <div class="loto-hl-title">Bagnell Dam & Beyond</div>
-              <div class="loto-hl-desc">Drop at the Dam strip, Party Cove area, Osage Beach, or any address on the lake — $3/mi from there.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="loto-distance-badge">
-          <span>🗺️</span>
-          <span>KC → Bagnell Dam: approx. <strong>~160 miles</strong> · ~2 hr 30 min</span>
-        </div>
-
-        <img src="images/grkc-logo-circle-white.png" alt="Group Ride KC" class="loto-circle-logo" aria-hidden="true">
-      </div>
-
-      <!-- Right: quote form -->
-      <div class="loto-form-card" id="loto-quote-form">
-        <div class="form-title">Lake Ozarks Quote</div>
-        <div class="form-sub">Live pricing · Availability check · Instant estimate</div>
-
-        <!-- Trip Type Selector -->
-        <div class="form-group">
-          <label>Trip Type</label>
-          <div class="trip-type-selector">
-            <div class="trip-type-opt selected" id="loto-tt-oneway" onclick="selectTripType('oneway')">
-              <div class="tt-icon">➡️</div>
-              <div class="tt-name">One-Way</div>
-              <div class="tt-desc">Drop-off at the lake, no return needed</div>
-            </div>
-            <div class="trip-type-opt" id="loto-tt-sameday" onclick="selectTripType('sameday')">
-              <div class="tt-icon">🔄</div>
-              <div class="tt-name">Same-Day Round Trip</div>
-              <div class="tt-desc">Out and back the same day</div>
-              <div class="tt-badge">Popular</div>
-            </div>
-            <div class="trip-type-opt" id="loto-tt-multiday" onclick="selectTripType('multiday')">
-              <div class="tt-icon">🌙</div>
-              <div class="tt-name">Multi-Day Round Trip</div>
-              <div class="tt-desc">Stay overnight, we'll pick you up later</div>
-            </div>
-          </div>
-        </div>
-
-        <form id="lotoForm" onsubmit="submitLoto(event)">
-
-          <!-- Departure Date & Time -->
-          <div class="form-row">
-            <div class="form-group">
-              <label for="loto-date">Departure Date</label>
-              <input type="date" id="loto-date" required oninput="lotoOnDateTimeChange()" />
-            </div>
-            <div class="form-group">
-              <label for="loto-time">Departure Time</label>
-              <input type="time" id="loto-time" required oninput="lotoOnDateTimeChange()" />
-            </div>
-          </div>
-
-          <!-- Return Date & Time (multi-day only) -->
-          <div class="form-row return-row" id="loto-return-row">
-            <div class="form-group">
-              <label for="loto-return-date">Return Date</label>
-              <input type="date" id="loto-return-date" oninput="lotoRecalcPrice()" />
-            </div>
-            <div class="form-group">
-              <label for="loto-return-time">Return Pickup Time</label>
-              <input type="time" id="loto-return-time" value="10:00" oninput="lotoRecalcPrice()" />
-            </div>
-          </div>
-
-          <!-- Availability -->
-          <div id="loto-avail-status" style="display:none;">
-            <div class="avail-dot"></div>
-            <span id="loto-avail-text"></span>
-          </div>
-
-          <!-- Pickup Address -->
-          <div class="form-group autocomplete-wrapper">
-            <label for="loto-pickup-loc">Pickup Location (Kansas City area)</label>
-            <input type="text" id="loto-pickup-loc" placeholder="Hotel, address, or KC landmark"
-                   required autocomplete="off" oninput="debounceGeocodeFor(this,'loto-pickup')" />
-            <div class="autocomplete-dropdown" id="loto-pickup-dropdown"></div>
-          </div>
-
-          <!-- Drop-off Address — pre-filled to Bagnell Dam -->
-          <div class="form-group autocomplete-wrapper">
-            <label for="loto-dropoff-loc">Drop-off Location</label>
-            <input type="text" id="loto-dropoff-loc"
-                   value="Bagnell Dam, Lake Ozark, MO 65049"
-                   required autocomplete="off" oninput="debounceGeocodeFor(this,'loto-dropoff')" />
-            <div class="autocomplete-dropdown" id="loto-dropoff-dropdown"></div>
-          </div>
-
-          <!-- Route Info -->
-          <div id="loto-route-info" style="display:none; background:rgba(26,159,192,.07); border:1px solid rgba(26,159,192,.2); border-radius:8px; padding:10px 14px; margin-bottom:14px; gap:16px; flex-wrap:wrap;">
-            <div class="ri-item">📍 <span class="ri-label">Distance:</span>&nbsp;<span class="ri-value" id="loto-ri-dist">--</span></div>
-            <div class="ri-item">⏱ <span class="ri-label">Drive time:</span>&nbsp;<span class="ri-value" id="loto-ri-time">--</span></div>
-          </div>
-
-          <!-- Passengers & Luggage -->
-          <div class="form-row">
-            <div class="form-group">
-              <label for="loto-passengers">Passengers</label>
-              <select id="loto-passengers" required>
-                <option value="">Select…</option>
-                <option>1</option><option>2</option><option>3</option>
-                <option>4</option><option>5</option><option>6</option>
-                <option>7</option><option>8</option><option>9</option><option>10</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="loto-luggage">Luggage Pieces</label>
-              <select id="loto-luggage" required>
-                <option value="">Select…</option>
-                <option>0</option><option>1</option><option>2</option><option>3</option>
-                <option>4</option><option>5</option><option>6</option><option>7</option>
-                <option>8</option><option>9</option><option>10</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Phone -->
-          <div class="form-group">
-            <label for="loto-phone">Phone Number</label>
-            <input type="tel" id="loto-phone" placeholder="(816) 552-6669" required oninput="formatPhone(this)" maxlength="14" />
-          </div>
-
-          <div class="form-group">
-            <label for="loto-email">Email Address</label>
-            <input type="email" id="loto-email" placeholder="you@example.com" required />
-          </div>
-
-          <!-- Local Area Transport Add-on -->
-          <div class="form-group" style="margin-bottom:10px;">
-            <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; font-weight:400;">
-              <input type="checkbox" id="loto-local-transport" onchange="lotoRecalcPrice()"
-                     style="margin-top:2px;">
-              <span>
-                <strong style="color:var(--lake-lt);">Local Area Transport</strong>
-                <span style="color:var(--text-muted); font-size:0.85rem;"> +$250</span>
-                <div style="font-size:0.78rem; color:var(--text-muted); margin-top:3px;">Driver stays at the lake — Party Cove, Osage Beach, marinas &amp; more</div>
-              </span>
-            </label>
-          </div>
-
-          <!-- Price Breakdown -->
-          <div class="loto-price-breakdown price-breakdown">
-            <div class="pb-row">
-              <span id="loto-pb-trip-label">One-Way Flat Rate</span>
-              <span id="loto-pb-base">$500</span>
-            </div>
-            <div class="pb-row" id="loto-pb-local-row" style="display:none;">
-              <span style="color:var(--lake-lt);">+ Local Area Transport</span>
-              <span id="loto-pb-local-val" style="color:var(--lake-lt);">+$250</span>
-            </div>
-            <div class="pb-row" id="loto-pb-dist-row" style="display:none; font-size:0.8rem; opacity:0.6;">
-              <span id="loto-pb-dist-label">Route info</span>
-              <span id="loto-pb-dist-val"></span>
-            </div>
-            <hr class="pb-divider" />
-            <div class="pb-total">
-              <span>Estimated Total</span>
-              <span id="loto-price-display">$500</span>
-            </div>
-            <hr class="pb-divider" />
-            <div class="pb-row" style="color:var(--lake-lt); font-weight:700;">
-              <span>Non-refundable 50% Deposit Due Now</span>
-              <span id="loto-pb-deposit">$250</span>
-            </div>
-            <div class="pb-row">
-              <span>Remaining balance (due on ride day)</span>
-              <span id="loto-pb-remaining">$250</span>
-            </div>
-            <div class="pb-note">Submit your request to unlock the secure deposit payment below.</div>
-          </div>
-
-          <button type="submit" class="btn btn-lake form-submit" id="loto-submit-btn">Request Lake Ride →</button>
-        </form>
-      </div>
-
-    </div>
-  </div>
-</section>
 
 <!-- ══════════════ WHY BOOK WITH US ══════════════ -->
 <section id="booking" style="padding: 80px 0; background: radial-gradient(ellipse 70% 50% at 50% 100%, rgba(227,24,55,.12) 0%, transparent 70%), var(--card);">
@@ -993,7 +662,7 @@
 
       <div class="review-card">
         <div class="review-stars">★★★★★</div>
-        <p class="review-text">"Used Group Ride KC for both the airport pickup and the match day. Consistent, professional, and affordable for a group our size. Live tracking gave everyone peace of mind."</p>
+        <p class="review-text">"Used Group Ride KC for our match day ride. Consistent, professional, and affordable for a group our size. Live tracking gave everyone peace of mind."</p>
         <div class="reviewer">
           <div class="reviewer-avatar" style="background:rgba(255,100,100,.2);color:#ff7a7a;">PR</div>
           <div>
@@ -1055,7 +724,6 @@
         <ul>
           <li><a href="#services">Chevy Suburban</a></li>
           <li><a href="#services">10-Passenger Van</a></li>
-          <li><a href="#loto">Lake of the Ozarks</a></li>
           <li><a href="#booking">Airport Transfers</a></li>
           <li><a href="#booking">Stadium Shuttles</a></li>
           <li><a href="#booking">Hotel Pickups</a></li>
@@ -1133,359 +801,6 @@
   }
 
   /* ═══════════════════════════════════════════════════
-     LAKE OF THE OZARKS QUOTE ENGINE
-     • Drop-off defaults to Bagnell Dam (pre-geocoded)
-     • Per-mile rate: $3.00 for both vehicles
-     • Trip types: one-way · same-day RT · multi-day RT
-     • Same deposit / surge logic as main form
-   ═══════════════════════════════════════════════════ */
-
-  /* ── LOTO Pricing ──────────────────────────────── */
-  // Flat-rate pricing — vehicle choice is recorded but does not affect price
-  const LOTO_FLAT_RATES = { oneway: 500, sameday: 700, multiday: 1000 };
-  const LOTO_LOCAL_TRANSPORT_FEE = 250;
-  const LOTO_VEHICLE_LABELS = { suburban: 'Suburban', van: '10-Pass Van' };
-
-  // Bagnell Dam, Lake Ozark MO — pre-geocoded coordinates
-  const BAGNELL_DAM = { lat: 38.0931, lon: -92.6249 };
-
-  /* ── LOTO State ─────────────────────────────────── */
-  let lotoVehicle   = 'suburban';
-  let lotoTripType  = 'oneway';   // 'oneway' | 'sameday' | 'multiday'
-  let lotoCoords    = { pickup: null, dropoff: BAGNELL_DAM };
-  let lotoRouteMiles = null;
-  let lotoGeoTimers = {};
-
-  // Pre-fill Bagnell Dam dropoff coords so route calculates immediately
-  // after pickup is chosen (no need to re-select dropoff)
-
-  /* ── Trip Type Selector ─────────────────────────── */
-  function selectTripType(type) {
-    lotoTripType = type;
-    ['oneway','sameday','multiday'].forEach(t => {
-      document.getElementById('loto-tt-' + t).classList.toggle('selected', t === type);
-    });
-    // Show/hide return date row
-    const returnRow = document.getElementById('loto-return-row');
-    if (type === 'multiday') {
-      returnRow.classList.add('visible');
-      const retDateEl = document.getElementById('loto-return-date');
-      if (!retDateEl.value) {
-        // default return to day after departure
-        const dep = document.getElementById('loto-date').value;
-        if (dep) {
-          const d = new Date(dep); d.setDate(d.getDate() + 1);
-          retDateEl.value = d.toISOString().split('T')[0];
-        }
-      }
-    } else {
-      returnRow.classList.remove('visible');
-    }
-    lotoRecalcPrice();
-  }
-
-  /* ── LOTO Vehicle Selector ──────────────────────── */
-  function selectLotoVehicle(v) {
-    lotoVehicle = v;
-    document.getElementById('loto-opt-suburban').classList.toggle('selected', v === 'suburban');
-    document.getElementById('loto-opt-van').classList.toggle('selected', v === 'van');
-    lotoRecalcPrice();
-    lotoOnDateTimeChange();
-  }
-
-  /* ── LOTO Availability ──────────────────────────── */
-  async function lotoOnDateTimeChange() {
-    const date = document.getElementById('loto-date').value;
-    const time = document.getElementById('loto-time').value;
-    const el   = document.getElementById('loto-avail-status');
-    const txt  = document.getElementById('loto-avail-text');
-    if (!date || !time) { el.style.display = 'none'; return; }
-
-    el.style.display = 'flex';
-    el.className = 'avail-load';
-    txt.textContent = 'Checking availability…';
-
-    // Fetch real bookings from both KC + LOTO tables, then check
-    await window.fetchBookedSlots(date);
-    const available = window.checkAvailability(date, time);
-    el.className = available ? 'avail-ok' : 'avail-no';
-    if (available) {
-      txt.textContent = '✓ Available for your selected date & time';
-    } else {
-      txt.textContent = '✗ Unavailable — please choose a different time';
-    }
-    lotoRecalcPrice();
-
-    // Set minimum return date = departure date
-    if (date) {
-      const retEl = document.getElementById('loto-return-date');
-      retEl.setAttribute('min', date);
-    }
-  }
-
-  /* ── LOTO Address Autocomplete ──────────────────── */
-  function debounceGeocodeFor(input, type) {
-    clearTimeout(lotoGeoTimers[type]);
-    const q = input.value.trim();
-    const dd = document.getElementById(type + '-dropdown');
-    if (q.length < 3) { dd.classList.remove('open'); return; }
-    lotoGeoTimers[type] = setTimeout(() => geocodeSearchFor(q, type), 400);
-  }
-
-  async function geocodeSearchFor(query, type) {
-    // Pickup: bias toward KC center. Dropoff: bias toward Lake Ozark / Bagnell Dam.
-    const lat = type === 'loto-pickup' ? 39.0984 : 38.0931;
-    const lon = type === 'loto-pickup' ? -94.5786 : -92.6249;
-    try {
-      const url = `https://photon.komoot.io/api/` +
-        `?q=${encodeURIComponent(query)}&lat=${lat}&lon=${lon}&bbox=-100.18,34.75,-88.98,43.45&limit=5`;
-      const res  = await fetch(url);
-      const data = await res.json();
-      showLotoDropdown(normalizePhoton(data.features), type);
-    } catch(e) {}
-  }
-
-  function showLotoDropdown(results, type) {
-    const dd = document.getElementById(type + '-dropdown');
-    if (!results.length) { dd.classList.remove('open'); return; }
-    dd.innerHTML = results.map(r => {
-      const name = r.name || r.display_name.split(',')[0];
-      const addr = r.display_name;
-      return `<div class="ac-item"
-                   onclick="selectLotoAddress('${type}', ${r.lat}, ${r.lon}, \`${r.display_name.replace(/`/g,"'")}\`)">
-                <span class="ac-icon">📍</span>
-                <div><div class="ac-name">${name}</div>
-                     <div class="ac-addr">${addr}</div></div>
-              </div>`;
-    }).join('');
-    dd.classList.add('open');
-  }
-
-  function selectLotoAddress(type, lat, lon, label) {
-    const fieldId = type === 'loto-pickup' ? 'loto-pickup-loc' : 'loto-dropoff-loc';
-    document.getElementById(fieldId).value = label;
-    document.getElementById(type + '-dropdown').classList.remove('open');
-    const key = type === 'loto-pickup' ? 'pickup' : 'dropoff';
-    lotoCoords[key] = { lat: parseFloat(lat), lon: parseFloat(lon) };
-    if (lotoCoords.pickup && lotoCoords.dropoff) lotoCalculateRoute();
-  }
-
-  // If user clears or types into the pre-filled Bagnell Dam field,
-  // watch for address selection to update dropoff coords.
-  // On page load, ensure Bagnell Dam coords are pre-set.
-  (function initLotoBagnell() {
-    // Bagnell Dam is already in lotoCoords.dropoff.
-    // If user selects a pickup, route will calculate automatically.
-    const today = new Date().toISOString().split('T')[0];
-    const loDate = document.getElementById('loto-date');
-    const loRetDate = document.getElementById('loto-return-date');
-    if (loDate) loDate.setAttribute('min', today);
-    if (loRetDate) loRetDate.setAttribute('min', today);
-  })();
-
-  /* ── LOTO Route Calculator ──────────────────────── */
-  async function lotoCalculateRoute() {
-    const { pickup, dropoff } = lotoCoords;
-    if (!pickup || !dropoff) return;
-
-    const routeBar = document.getElementById('loto-route-info');
-    routeBar.style.display = 'flex';
-    document.getElementById('loto-ri-dist').textContent = '…';
-    document.getElementById('loto-ri-time').textContent = '…';
-
-    try {
-      const url = `https://router.project-osrm.org/route/v1/driving/` +
-        `${pickup.lon},${pickup.lat};${dropoff.lon},${dropoff.lat}?overview=false`;
-      const res  = await fetch(url);
-      const data = await res.json();
-      if (data.code === 'Ok') {
-        const meters  = data.routes[0].distance;
-        const seconds = data.routes[0].duration;
-        lotoRouteMiles = meters / 1609.344;
-
-        const miles   = lotoRouteMiles.toFixed(1);
-        const mins    = Math.round(seconds / 60);
-        const hrs     = Math.floor(mins / 60);
-        const timeStr = hrs > 0 ? `${hrs}h ${mins % 60}m` : `${mins} min`;
-
-        document.getElementById('loto-ri-dist').textContent = miles + ' mi';
-        document.getElementById('loto-ri-time').textContent = timeStr;
-        lotoRecalcPrice();
-      }
-    } catch(e) {
-      routeBar.style.display = 'none';
-    }
-  }
-
-  /* ── LOTO Pricing Engine (flat-rate) ───────────── */
-  function lotoRecalcPrice() {
-    // Flat rate by trip type — vehicle does not affect price
-    const flatRate = LOTO_FLAT_RATES[lotoTripType];
-    const tripLabels = {
-      oneway:   'One-Way Flat Rate',
-      sameday:  'Same-Day Round Trip',
-      multiday: 'Multi-Day Round Trip'
-    };
-    document.getElementById('loto-pb-trip-label').textContent = tripLabels[lotoTripType];
-    document.getElementById('loto-pb-base').textContent = '$' + flatRate;
-
-    // Local Area Transport add-on
-    const localChecked = document.getElementById('loto-local-transport')?.checked;
-    const localFee = localChecked ? LOTO_LOCAL_TRANSPORT_FEE : 0;
-    const localRow = document.getElementById('loto-pb-local-row');
-    if (localFee > 0) {
-      localRow.style.display = 'flex';
-      document.getElementById('loto-pb-local-val').textContent = '+$' + localFee;
-    } else {
-      localRow.style.display = 'none';
-    }
-
-    // Route info — informational only, does not affect price
-    if (lotoRouteMiles !== null) {
-      document.getElementById('loto-pb-dist-row').style.display = 'flex';
-      document.getElementById('loto-pb-dist-label').textContent = `Route: ~${lotoRouteMiles.toFixed(0)} mi each way`;
-      document.getElementById('loto-pb-dist-val').textContent = '';
-    } else {
-      document.getElementById('loto-pb-dist-row').style.display = 'none';
-    }
-
-    // Total, deposit, remaining
-    const total   = flatRate + localFee;
-    const deposit = Math.ceil(total * DEPOSIT_PCT);
-
-    document.getElementById('loto-price-display').textContent = '$' + total;
-    document.getElementById('loto-pb-deposit').textContent    = '$' + deposit;
-    document.getElementById('loto-pb-remaining').textContent  = '$' + (total - deposit);
-  }
-
-  /* ── LOTO Form Submit ───────────────────────────── */
-  async function submitLoto(e) {
-    e.preventDefault();
-    const avail = document.getElementById('loto-avail-status');
-    if (avail.classList.contains('avail-no')) {
-      alert('This time slot is unavailable. Please choose a different date or time.');
-      return;
-    }
-    if (lotoTripType === 'multiday') {
-      const dep = document.getElementById('loto-date').value;
-      const ret = document.getElementById('loto-return-date').value;
-      if (!ret || ret <= dep) {
-        alert('Please select a return date that is after your departure date.');
-        return;
-      }
-    }
-
-    lotoRecalcPrice();
-
-    const btn = document.getElementById('loto-submit-btn');
-    btn.textContent = 'Checking availability…';
-    btn.disabled = true;
-
-    // Re-check availability against Supabase RIGHT NOW (not stale UI state)
-    const lotoDateCheck = document.getElementById('loto-date').value;
-    const lotoTimeCheck = document.getElementById('loto-time').value || '06:00';
-    console.log('[LOTO-SUBMIT] Re-checking availability for', lotoDateCheck, lotoTimeCheck);
-    await window.fetchBookedSlots(lotoDateCheck);
-    const isAvailable = window.checkAvailability(lotoDateCheck, lotoTimeCheck);
-    if (!isAvailable) {
-      btn.textContent = 'Request This Trip';
-      btn.disabled = false;
-      alert('Sorry, this time slot was just booked. Please choose a different date or time.');
-      await lotoOnDateTimeChange();
-      return;
-    }
-
-    btn.textContent = 'Submitting…';
-
-    const total   = parseInt(document.getElementById('loto-price-display').textContent.replace('$',''));
-    const deposit = parseInt(document.getElementById('loto-pb-deposit').textContent.replace('$',''));
-    const localChecked = document.getElementById('loto-local-transport')?.checked;
-    const localFee = localChecked ? LOTO_LOCAL_TRANSPORT_FEE : 0;
-
-    const booking = {
-      vehicle:        lotoVehicle,
-      trip_type:      lotoTripType,
-      departure_date: document.getElementById('loto-date').value,
-      departure_time: document.getElementById('loto-time').value || '06:00',
-      return_date:    lotoTripType === 'multiday' ? document.getElementById('loto-return-date').value : null,
-      pickup_address:  document.getElementById('loto-pickup-loc').value,
-      dropoff_address: document.getElementById('loto-dropoff-loc').value,
-      pickup_lat:     lotoCoords.pickup?.lat || null,
-      pickup_lon:     lotoCoords.pickup?.lon || null,
-      dropoff_lat:    lotoCoords.dropoff?.lat || BAGNELL_DAM.lat,
-      dropoff_lon:    lotoCoords.dropoff?.lon || BAGNELL_DAM.lon,
-      route_miles:    lotoRouteMiles,
-      passengers:     parseInt(document.getElementById('loto-passengers').value),
-      phone:          document.getElementById('loto-phone').value,
-      email:          document.getElementById('loto-email').value,
-      flat_rate:      LOTO_FLAT_RATES[lotoTripType],
-      local_transport: localChecked || false,
-      local_transport_fee: localFee,
-      total_price:    total,
-      deposit_amount: deposit,
-      payment_status: 'pending',
-      booking_status: 'pending'
-    };
-
-    try {
-      const { data, error } = await supabaseClient.from('loto_bookings').insert([booking]).select();
-      if (error) throw error;
-      window.activeBooking = { id: data[0].id, type: 'loto' };
-
-      // Fire-and-forget: create Google Calendar event
-      if (window.createCalendarEvent) {
-        window.createCalendarEvent({
-          booking_id:      data[0].id,
-          booking_type:    'loto',
-          vehicle:         lotoVehicle,
-          trip_type:       lotoTripType,
-          pickup_date:     booking.departure_date,
-          pickup_time:     booking.departure_time,
-          pickup_address:  booking.pickup_address,
-          dropoff_address: booking.dropoff_address,
-          route_miles:     lotoRouteMiles,
-          passengers:      booking.passengers,
-          phone:           booking.phone,
-          email:           booking.email,
-          total_price:     total,
-          deposit_amount:  deposit,
-          payment_status:  'pending',
-          source_page:     'loto',
-        });
-      }
-
-      // Reveal the payment section and scroll to it (using quote-engine section)
-      const paySection = document.getElementById('qe-payment');
-      if(paySection) {
-        paySection.style.display = 'block';
-
-        document.getElementById('pay-deposit-amt').textContent   = '$' + deposit;
-        document.getElementById('pay-total-amt').textContent     = '$' + total;
-        document.getElementById('pay-remaining-amt').textContent = '$' + (total - deposit);
-
-        setTimeout(() => paySection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-      }
-
-      btn.textContent = '✓ Request Submitted — Pay Deposit Below';
-      btn.style.background = '#2a9d5c';
-    } catch(err) {
-      console.error('Supabase insert error:', err);
-      alert('There was an error submitting your booking. Please try again or call us at (816) 552-6669.');
-      btn.textContent = 'Book Lake Trip →';
-      btn.disabled = false;
-    }
-  }
-
-  // Trigger route calculation immediately if user has pickup address
-  // but Bagnell Dam is already set as dropoff
-  document.getElementById('loto-pickup-loc').addEventListener('blur', function() {
-    if (this.value.trim().length > 5 && !lotoCoords.pickup) {
-      // User typed something but didn't select from dropdown — try geocoding it
-      geocodeSearchFor(this.value.trim(), 'loto-pickup');
-    }
-  });
-
-  /* ═══════════════════════════════════════════════════
      STRIPE CHECKOUT — handled by window.redirectToStripe() in quote-engine.js
    ═══════════════════════════════════════════════════ */
 
@@ -1503,21 +818,26 @@
     if (!payment || !bookingId) return;
 
     if (payment === 'success') {
-      // Update payment status in Supabase
-      const table = bookingType === 'loto' ? 'loto_bookings' : 'bookings';
-      supabaseClient.from(table)
-        .update({ payment_status: 'deposit_paid', stripe_payment_id: sessionId })
+      // Update payment status in Supabase (webhook also handles this as backup)
+      supabaseClient.from('bookings')
+        .update({ status: 'paid', payment_status: 'deposit_paid', stripe_session_id: sessionId })
         .eq('id', bookingId)
         .then(() => {
-          // Show success modal (using quote-engine modal)
-          const modal = document.getElementById('qe-payModal');
-          if(modal) modal.classList.add('active');
+          // Show success message via the confirmation modal
+          const modal = document.getElementById('qe-confirmationModal');
+          if (modal) {
+            const heading = modal.querySelector('h2');
+            const msg = modal.querySelector('p');
+            if (heading) heading.textContent = 'Payment Successful!';
+            if (msg) msg.textContent = 'Your deposit has been received and your ride is confirmed! You will receive a confirmation email shortly. We look forward to driving you!';
+            modal.classList.add('active');
+          }
         });
 
       // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
     } else if (payment === 'cancelled') {
-      alert('Payment was cancelled. Your booking is still saved — you can pay the deposit anytime by calling us at (816) 552-6669.');
+      alert('Payment was cancelled. Your booking is still saved — you can pay the deposit anytime using the link in your email, or call us at (816) 552-6669.');
       window.history.replaceState({}, '', window.location.pathname);
     }
   })();

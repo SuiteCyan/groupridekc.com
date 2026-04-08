@@ -1,20 +1,20 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- * GROUP RIDE KC – Universal Quote Engine
+ * GROUP RIDE KC – Quote Engine (Admin Approval Flow)
  * ═══════════════════════════════════════════════════════════════
  *
- * This self-contained module provides a complete quote form system
- * for both index.html and worldcup.html (via iframe).
+ * This self-contained module provides a quote form for requesting rides.
+ * The flow: customer submits form → booking saved with status 'pending_review' →
+ * admin notification email sent → confirmation modal shown.
  *
  * Usage:
  *   <div id="quote-form-container"></div>
  *   <script src="quote-engine.js"></script>
  *
  * The engine injects:
- *   - All CSS styling (booking form, payment, modal, autocomplete)
+ *   - All CSS styling (booking form, modal, autocomplete)
  *   - Complete form HTML (trip type, dates, locations, pricing)
- *   - Payment section (initially hidden)
- *   - Success modals
+ *   - Confirmation modal
  *   - Full JavaScript state and API logic
  */
 
@@ -126,21 +126,6 @@
     .pac-icon { display: none !important; }
     .pac-logo::after { display: none !important; }
 
-    /* Availability Badge */
-    #avail-status {
-      border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
-      font-size: 0.82rem; font-weight: 600; display: flex;
-      align-items: center; gap: 8px;
-    }
-    #avail-status.avail-ok   { background: rgba(40,200,120,.12); border: 1px solid rgba(40,200,120,.3); color: #4ce0a0; }
-    #avail-status.avail-no   { background: rgba(227,24,55,.12);  border: 1px solid rgba(227,24,55,.3);  color: #ff6b7a; }
-    #avail-status.avail-load { background: rgba(253,185,19,.08); border: 1px solid rgba(253,185,19,.2); color: var(--gold); }
-    .avail-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .avail-ok .avail-dot   { background: #4ce0a0; box-shadow: 0 0 6px #4ce0a0; }
-    .avail-no .avail-dot   { background: #ff6b7a; box-shadow: 0 0 6px #ff6b7a; }
-    .avail-load .avail-dot { background: var(--gold); animation: pulse 1s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-
     /* Route Info Bar */
     #route-info {
       background: rgba(253,185,19,.07); border: 1px solid rgba(253,185,19,.2);
@@ -170,55 +155,6 @@
     .pb-total span:first-child { font-weight: 600; }
     .pb-total span:last-child  { font-size: 1.4rem; font-weight: 800; color: var(--gold); }
     .pb-note { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
-    .pb-cal-note {
-      margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
-      font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;
-    }
-
-    /* Payment Section */
-    #qe-payment { padding: 100px 0; }
-    .payment-inner {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start;
-    }
-    @media(max-width: 900px) { .payment-inner { grid-template-columns: 1fr; } }
-
-    .payment-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 20px; padding: 36px;
-    }
-    .payment-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
-    .payment-card .pay-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 28px; }
-    .pay-methods { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
-    .pay-method {
-      background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
-      padding: 10px 16px; font-size: 0.82rem; font-weight: 600;
-      display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all .2s;
-    }
-    .pay-method:hover, .pay-method.active { border-color: var(--gold); color: var(--gold); }
-
-    .pay-secure {
-      display: flex; align-items: center; gap: 8px; font-size: 0.78rem;
-      color: var(--text-muted); margin-top: 16px;
-    }
-    .secure-icon { color: var(--gold); }
-    .pay-btn { width: 100%; padding: 16px; font-size: 1rem; border-radius: 10px; margin-top: 20px; }
-    .powered-by {
-      text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 12px;
-    }
-    .powered-by span { color: var(--gold); font-weight: 600; }
-
-    .payment-info { }
-    .payment-steps { margin-top: 28px; display: flex; flex-direction: column; gap: 20px; }
-    .pay-step {
-      display: flex; gap: 16px; align-items: flex-start;
-    }
-    .pay-step-num {
-      width: 32px; height: 32px; border-radius: 50%; background: var(--red);
-      color: #fff; font-weight: 800; font-size: 0.85rem;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .pay-step-title { font-weight: 600; margin-bottom: 4px; }
-    .pay-step-desc  { font-size: 0.83rem; color: var(--text-muted); }
 
     /* Calendar & Clock Icon Colors */
     input[type="date"]::-webkit-calendar-picker-indicator,
@@ -264,7 +200,7 @@
   const formHTML = `
     <div class="booking-form-card" id="quote-form" style="position:relative;">
       <div class="form-title">Get a Quote</div>
-      <div class="form-sub">Live pricing · Availability check · Instant estimate</div>
+      <div class="form-sub">Request a ride · Get a quick estimate</div>
 
       <form id="bookingForm" onsubmit="window.submitBooking(event)">
 
@@ -310,12 +246,6 @@
           </div>
         </div>
 
-        <!-- Availability Status -->
-        <div id="avail-status" style="display:none;">
-          <div class="avail-dot"></div>
-          <span id="avail-text"></span>
-        </div>
-
         <!-- Pickup Address with Google Autocomplete -->
         <div class="form-group">
           <label for="pickup-loc">Pickup Location</label>
@@ -358,6 +288,12 @@
           </div>
         </div>
 
+        <!-- Name -->
+        <div class="form-group">
+          <label for="customer-name">Your Name</label>
+          <input type="text" id="customer-name" placeholder="First and last name" required />
+        </div>
+
         <!-- Phone -->
         <div class="form-group">
           <label for="phone">Phone Number</label>
@@ -369,11 +305,17 @@
           <input type="email" id="email" placeholder="you@example.com" required />
         </div>
 
+        <!-- Notes -->
+        <div class="form-group">
+          <label for="notes">Notes (optional)</label>
+          <textarea id="notes" placeholder="Any special requests or details..."></textarea>
+        </div>
+
         <!-- Price Breakdown -->
         <div class="price-breakdown">
           <div class="pb-row">
             <span>Base fare</span>
-            <span id="pb-base">$65</span>
+            <span id="pb-base">$95</span>
           </div>
           <div class="pb-row" id="pb-dist-row" style="display:none;">
             <span id="pb-dist-label">Distance (-- mi × $2.25)</span>
@@ -394,18 +336,9 @@
           <hr class="pb-divider" />
           <div class="pb-total">
             <span>Estimated Total</span>
-            <span id="price-display">$65</span>
+            <span id="price-display">$95</span>
           </div>
-          <hr class="pb-divider" />
-          <div class="pb-row" style="color:var(--gold); font-weight:700;">
-            <span>Non-refundable 50% Deposit Due Now</span>
-            <span id="pb-deposit">$33</span>
-          </div>
-          <div class="pb-row">
-            <span>Remaining balance (due on ride day)</span>
-            <span id="pb-remaining">$32</span>
-          </div>
-          <div class="pb-note">Submit your request to unlock the secure deposit payment below.</div>
+          <div class="pb-note">This is an estimate. Final price will be confirmed by Group Ride KC.</div>
         </div>
 
         <!-- Estimate disclaimer — shown when address is approximate -->
@@ -414,7 +347,7 @@
             <span style="font-size:1.1rem; flex-shrink:0;">⚠️</span>
             <div>
               <div style="font-size:0.85rem; color:var(--gold); font-weight:700; margin-bottom:5px;">Estimated Price Only</div>
-              <div style="font-size:0.79rem; color:var(--text-muted); line-height:1.5;">Your exact address couldn't be pinpointed — distance is estimated from the nearest city center. The final fare will be confirmed by Group Ride KC when your reservation is accepted.</div>
+              <div style="font-size:0.79rem; color:var(--text-muted); line-height:1.5;">Your exact address couldn't be pinpointed — distance is estimated from the nearest city center. The final fare will be confirmed by Group Ride KC when your reservation is reviewed.</div>
             </div>
           </div>
           <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-top:12px;">
@@ -423,114 +356,20 @@
           </label>
         </div>
 
-        <button type="submit" class="btn btn-primary form-submit" id="submit-btn">Request This Ride →</button>
+        <button type="submit" class="btn btn-primary form-submit" id="submit-btn">Submit Request →</button>
       </form>
     </div>
   `;
 
-  const paymentHTML = `
-    <!-- Payment Section -->
-    <section id="qe-payment" style="display:none;">
-      <div class="container">
-        <!-- Unlocked banner -->
-        <div style="background:rgba(40,200,120,.1); border:1px solid rgba(40,200,120,.3); border-radius:12px; padding:16px 24px; margin-bottom:40px; display:flex; align-items:center; gap:14px;">
-          <span style="font-size:1.5rem;">🔓</span>
-          <div>
-            <div style="font-weight:700; color:#4ce0a0;">Reservation Request Received!</div>
-            <div style="font-size:0.83rem; color:var(--text-muted); margin-top:2px;">Pay your non-refundable 50% deposit below to hold your vehicle. The remaining balance is due on ride day.</div>
-          </div>
-        </div>
-        <div class="payment-inner">
-          <div class="payment-info reveal">
-            <div class="section-label">Secure Deposit</div>
-            <h2 class="section-title">Hold Your<br>Reservation</h2>
-            <p class="section-sub">A non-refundable 50% deposit is required to confirm your booking. The remaining balance is collected on the day of your ride.</p>
-            <div class="payment-steps">
-              <div class="pay-step">
-                <div class="pay-step-num">1</div>
-                <div>
-                  <div class="pay-step-title">Submit Your Request</div>
-                  <div class="pay-step-desc">Fill out the booking form and we confirm availability within 30 minutes.</div>
-                </div>
-              </div>
-              <div class="pay-step">
-                <div class="pay-step-num">2</div>
-                <div>
-                  <div class="pay-step-title">Receive Secure Invoice</div>
-                  <div class="pay-step-desc">You'll get a payment link via email and SMS for the confirmed amount.</div>
-                </div>
-              </div>
-              <div class="pay-step">
-                <div class="pay-step-num">3</div>
-                <div>
-                  <div class="pay-step-title">Pay &amp; Get Confirmed</div>
-                  <div class="pay-step-desc">Complete checkout in seconds. Driver info sent immediately after payment.</div>
-                </div>
-              </div>
-              <div class="pay-step">
-                <div class="pay-step-num">4</div>
-                <div>
-                  <div class="pay-step-title">Ride Day — You're All Set</div>
-                  <div class="pay-step-desc">Track your driver, receive SMS updates, and enjoy a stress-free ride to the game.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="payment-card reveal">
-            <h3>Deposit Payment</h3>
-            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(253,185,19,.08); border:1px solid rgba(253,185,19,.2); border-radius:8px; padding:12px 16px; margin-bottom:20px; flex-wrap:wrap; gap:8px;">
-              <div>
-                <div style="font-size:0.75rem; color:var(--text-muted);">Non-refundable deposit due now (50%)</div>
-                <div style="font-size:1.6rem; font-weight:900; color:var(--gold);" id="pay-deposit-amt">$17</div>
-              </div>
-              <div style="text-align:right;">
-                <div style="font-size:0.75rem; color:var(--text-muted);">Remaining on ride day</div>
-                <div style="font-size:1rem; font-weight:700;" id="pay-remaining-amt">$48</div>
-                <div style="font-size:0.7rem; color:var(--text-muted);">Total: <span id="pay-total-amt">$65</span></div>
-              </div>
-            </div>
-            <div class="pay-sub">You'll be redirected to Stripe's secure checkout. We never store your card information.</div>
-
-            <button id="pay-deposit-btn" class="btn btn-primary pay-btn" onclick="window.redirectToStripe()" style="width:100%; padding:18px; font-size:1.05rem;">Pay Deposit Now →</button>
-
-            <div style="display:flex; flex-wrap:wrap; gap:8px; margin:20px 0 12px; justify-content:center;">
-              <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; width:100%; text-align:center; margin-bottom:4px;">Accepted payment methods</div>
-              <div style="background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:0.78rem; color:var(--text-muted);">💳 Credit / Debit</div>
-              <div style="background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:0.78rem; color:var(--text-muted);"> Apple Pay</div>
-              <div style="background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:0.78rem; color:var(--text-muted);">Google Pay</div>
-            </div>
-
-            <div class="pay-secure">
-              <span class="secure-icon">🔒</span>
-              256-bit SSL encryption · PCI DSS compliant · Powered by Stripe
-            </div>
-            <div class="powered-by">Secure payments by <span>Stripe</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-  `;
-
   const modalHTML = `
-    <!-- Success Modals -->
-    <div class="modal-overlay" id="qe-bookingModal">
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="qe-confirmationModal">
       <div class="modal">
-        <button class="modal-close" onclick="window.closeModal('qe-bookingModal')">✕</button>
-        <div class="modal-icon">🎉</div>
-        <h3>Ride Request Sent!</h3>
-        <p>We've received your booking request and will confirm availability and send your payment link within 30 minutes. Check your email and SMS for next steps.</p>
-        <button class="btn btn-primary" onclick="window.closeModal('qe-bookingModal')">Got It — Thanks!</button>
-      </div>
-    </div>
-
-    <div class="modal-overlay" id="qe-payModal">
-      <div class="modal">
-        <button class="modal-close" onclick="window.closeModal('qe-payModal')">✕</button>
+        <button class="modal-close" onclick="window.closeModal('qe-confirmationModal')">✕</button>
         <div class="modal-icon">✅</div>
-        <h3>Payment Confirmed!</h3>
-        <p>Your ride is booked and confirmed. Your driver's name and contact info will be sent to your email and phone within the hour.</p>
-        <button class="btn btn-gold" onclick="window.closeModal('qe-payModal')">View My Booking</button>
+        <h3>Request Received!</h3>
+        <p>Thank you for your request! We will review your ride details and get back to you within 24 hours via text and email.</p>
+        <button class="btn btn-primary" onclick="window.closeModal('qe-confirmationModal')">Got It — Thanks!</button>
       </div>
     </div>
   `;
@@ -546,11 +385,6 @@
   }
 
   container.innerHTML = formHTML;
-
-  // Insert payment section AFTER the hero section so it's full-width
-  const heroSection = container.closest('section') || container.parentElement;
-  heroSection.insertAdjacentHTML('afterend', paymentHTML);
-
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 
   /* ═══════════════════════════════════════════════════════════════
@@ -576,7 +410,7 @@
     suburban: { base: 95,  perMile: 2.25, label: 'Suburban' },
     van:      { base: 95,  perMile: 3.00, label: '10-Pass Van' }
   };
-  const SURGE_PRICING = { base: 99, perMile: 5.00 };
+  const SURGE_PRICING = { base: 145, perMile: 5.00 };
   const DEPOSIT_PCT = 0.50;
   const KC_LOCAL_TRANSPORT_FEE = 250;
 
@@ -599,17 +433,11 @@
     '2026-06-28','2026-07-01','2026-07-02','2026-07-05'
   ]);
 
-  // Live bookings fetched from Supabase (replaces hardcoded BOOKED_SLOTS)
-  let liveBookedSlots = [];
-
   let selectedVehicle = 'suburban';
   let kcTripType = 'oneway';
   let coords = { pickup: null, dropoff: null };
   let coordsApproximate = { pickup: false, dropoff: false };
   let routeMiles = null;
-  let activeBooking = { id: null, type: null };
-  // Expose to window so LOTO inline script can access it
-  window.activeBooking = activeBooking;
 
   /* ═══════════════════════════════════════════════════════════════
      PUBLIC FUNCTIONS (exposed to window)
@@ -635,94 +463,10 @@
     window.onDateTimeChange();
   };
 
-  window.onDateTimeChange = async function() {
-    const date = document.getElementById('pickup-date').value;
-    const time = document.getElementById('pickup-time').value;
-    const el   = document.getElementById('avail-status');
-    const txt  = document.getElementById('avail-text');
-    if (!date || !time) { el.style.display = 'none'; return; }
-
-    el.style.display = 'flex';
-    el.className = 'avail-load';
-    txt.textContent = 'Checking availability…';
-
-    // Fetch real bookings from Supabase, then check
-    await fetchBookedSlots(date);
-    const available = checkAvailability(date, time);
-    el.className = available ? 'avail-ok' : 'avail-no';
-    if (available) {
-      const isMatchDay = MATCH_DAYS.has(date);
-      txt.textContent = isMatchDay
-        ? '✓ Available — Match day surcharge applies'
-        : '✓ Available for your selected date & time';
-    } else {
-      txt.textContent = '✗ Unavailable — please choose a different time';
-    }
+  window.onDateTimeChange = function() {
+    // Only recalculate price on date/time change
     window.recalcPrice();
   };
-
-  // Fetch real bookings from BOTH bookings + loto_bookings tables for a given date
-  async function fetchBookedSlots(date) {
-    if (!supabaseClient) {
-      console.warn('[AVAIL] No Supabase client — cannot check availability');
-      return;
-    }
-    try {
-      // Query KC bookings and LOTO bookings in parallel
-      const [kcResult, lotoResult] = await Promise.all([
-        supabaseClient
-          .from('bookings')
-          .select('vehicle, pickup_date, pickup_time, booking_status')
-          .eq('pickup_date', date),
-        supabaseClient
-          .from('loto_bookings')
-          .select('vehicle, departure_date, departure_time, booking_status')
-          .eq('departure_date', date)
-      ]);
-
-      console.log('[AVAIL] KC query for', date, '→', kcResult.data, kcResult.error);
-      console.log('[AVAIL] LOTO query for', date, '→', lotoResult.data, lotoResult.error);
-
-      if (kcResult.error) console.error('[AVAIL] KC Supabase error:', kcResult.error);
-      if (lotoResult.error) console.error('[AVAIL] LOTO Supabase error:', lotoResult.error);
-
-      const kcActive = (kcResult.data || []).filter(b => b.booking_status !== 'cancelled');
-      const lotoActive = (lotoResult.data || []).filter(b => b.booking_status !== 'cancelled');
-
-      console.log('[AVAIL] Active KC bookings:', kcActive);
-      console.log('[AVAIL] Active LOTO bookings:', lotoActive);
-
-      // Normalize both into a common slot format
-      const kcSlots = kcActive.map(b => {
-        const [h, m] = (b.pickup_time || '00:00').split(':').map(Number);
-        return { date: b.pickup_date, startMins: h * 60 + (m || 0), source: 'kc' };
-      });
-      const lotoSlots = lotoActive.map(b => {
-        const [h, m] = (b.departure_time || '00:00').split(':').map(Number);
-        return { date: b.departure_date, startMins: h * 60 + (m || 0), source: 'loto' };
-      });
-
-      liveBookedSlots = [...kcSlots, ...lotoSlots];
-      console.log('[AVAIL] Combined booked slots:', liveBookedSlots);
-    } catch(e) {
-      console.error('[AVAIL] Failed to fetch booked slots:', e);
-    }
-  }
-
-  // Expose for LOTO inline script
-  window.fetchBookedSlots = fetchBookedSlots;
-  window.checkAvailability = checkAvailability;
-
-  // Block if ANY booking (KC or LOTO, any vehicle) is within 2 hours
-  function checkAvailability(date, time) {
-    const [h, m] = time.split(':').map(Number);
-    const pickupMins = h * 60 + m;
-    const BUFFER_MINS = 120; // 2-hour buffer
-    return !liveBookedSlots.some(slot =>
-      slot.date === date &&
-      Math.abs(pickupMins - slot.startMins) < BUFFER_MINS
-    );
-  }
 
   /* ── Google Places Autocomplete Setup ────────────────────────── */
   function initGoogleAutocomplete() {
@@ -867,26 +611,12 @@
       kcLocalRow.style.display = 'none';
     }
 
-    const total   = (isRoundTrip ? oneWayTotal * 2 : oneWayTotal) + localFee;
-    const deposit = Math.ceil(total * DEPOSIT_PCT);
-
-    document.getElementById('price-display').textContent  = '$' + total;
-    document.getElementById('pb-deposit').textContent     = '$' + deposit;
-    document.getElementById('pb-remaining').textContent   = '$' + (total - deposit);
-    document.getElementById('pay-deposit-amt').textContent  = '$' + deposit;
-    document.getElementById('pay-total-amt').textContent    = '$' + total;
-    document.getElementById('pay-remaining-amt').textContent = '$' + (total - deposit);
+    const total = (isRoundTrip ? oneWayTotal * 2 : oneWayTotal) + localFee;
+    document.getElementById('price-display').textContent = '$' + total;
   };
 
   window.submitBooking = async function(e) {
     e.preventDefault();
-
-    // Prevent double submissions
-    if (activeBooking.id) {
-      document.getElementById('qe-payment').style.display = 'block';
-      document.getElementById('qe-payment').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
-    }
 
     const disc = document.getElementById('estimate-disclaimer');
     const ack  = document.getElementById('estimate-ack');
@@ -898,40 +628,31 @@
     }
 
     const btn = document.getElementById('submit-btn');
-    btn.textContent = 'Checking availability…';
-    btn.disabled = true;
-
-    // Re-check availability against Supabase RIGHT NOW (not stale UI state)
-    const pickupDateCheck = document.getElementById('pickup-date').value;
-    const pickupTimeCheck = document.getElementById('pickup-time').value;
-    console.log('[SUBMIT] Checking availability for', pickupDateCheck, pickupTimeCheck, selectedVehicle);
-    await fetchBookedSlots(pickupDateCheck);
-    const isAvailable = checkAvailability(pickupDateCheck, pickupTimeCheck);
-    console.log('[SUBMIT] Available?', isAvailable, 'Slots:', liveBookedSlots);
-    if (!isAvailable) {
-      alert('Sorry, this vehicle was just booked for that time. Please choose a different date or time.');
-      btn.textContent = 'Request This Ride →';
-      btn.disabled = false;
-      // Update the UI status too
-      const el  = document.getElementById('avail-status');
-      const txt = document.getElementById('avail-text');
-      el.className = 'avail-no';
-      txt.textContent = '✗ Unavailable — please choose a different time';
-      return;
-    }
-
-    window.recalcPrice();
-
     btn.textContent = 'Submitting…';
     btn.disabled = true;
 
-    const totalText   = document.getElementById('price-display').textContent.replace('$','');
-    const depositText = document.getElementById('pb-deposit').textContent.replace('$','');
-    const total   = parseFloat(totalText);
-    const deposit = parseFloat(depositText);
-
+    // Validate all required fields
     const pickupDate = document.getElementById('pickup-date').value;
     const pickupTime = document.getElementById('pickup-time').value;
+    const pickupAddr = document.getElementById('pickup-loc').value;
+    const dropoffAddr = document.getElementById('dropoff-loc').value;
+    const passengers = document.getElementById('passengers').value;
+    const luggage = document.getElementById('luggage').value;
+    const customerName = document.getElementById('customer-name').value.trim();
+    const phone = document.getElementById('phone').value;
+    const email = document.getElementById('email').value;
+    const notes = document.getElementById('notes').value || '';
+
+    if (!customerName || !pickupDate || !pickupTime || !pickupAddr || !dropoffAddr || !passengers || luggage === '' || !phone || !email) {
+      alert('Please fill in all required fields.');
+      btn.textContent = 'Submit Request →';
+      btn.disabled = false;
+      return;
+    }
+
+    const totalText = document.getElementById('price-display').textContent.replace('$','');
+    const total = parseFloat(totalText);
+
     const isSurgeFlag = MATCH_DAYS.has(pickupDate) || (function(){
       if(!pickupTime) return false;
       const h = parseInt(pickupTime.split(':')[0]);
@@ -939,76 +660,72 @@
     })();
 
     const booking = {
-      vehicle:       selectedVehicle,
-      trip_type:     kcTripType,
-      pickup_date:   pickupDate,
-      pickup_time:   pickupTime,
-      pickup_address:  document.getElementById('pickup-loc').value,
-      dropoff_address: document.getElementById('dropoff-loc').value,
-      pickup_lat:    coords.pickup?.lat || null,
-      pickup_lon:    coords.pickup?.lon || null,
-      dropoff_lat:   coords.dropoff?.lat || null,
-      dropoff_lon:   coords.dropoff?.lon || null,
-      route_miles:   routeMiles,
-      passengers:    parseInt(document.getElementById('passengers').value),
-      phone:         document.getElementById('phone').value,
-      email:         document.getElementById('email').value,
-      base_fare:     PRICING[selectedVehicle].base,
-      distance_cost: routeMiles ? parseFloat((routeMiles * PRICING[selectedVehicle].perMile).toFixed(2)) : null,
-      surge_applied: isSurgeFlag,
-      total_price:   total,
-      deposit_amount: deposit,
-      payment_status: 'pending',
-      booking_status: 'pending',
-      notes:         'Source: ' + window.location.pathname
+      customer_name:   customerName,
+      vehicle:         selectedVehicle,
+      trip_type:       kcTripType,
+      pickup_date:     pickupDate,
+      pickup_time:     pickupTime,
+      pickup_address:  pickupAddr,
+      dropoff_address: dropoffAddr,
+      pickup_lat:      coords.pickup?.lat || null,
+      pickup_lon:      coords.pickup?.lon || null,
+      dropoff_lat:     coords.dropoff?.lat || null,
+      dropoff_lon:     coords.dropoff?.lon || null,
+      route_miles:     routeMiles,
+      passengers:      parseInt(passengers),
+      luggage:         parseInt(luggage),
+      phone:           phone,
+      email:           email,
+      notes:           notes,
+      base_fare:       PRICING[selectedVehicle].base,
+      distance_cost:   routeMiles ? parseFloat((routeMiles * PRICING[selectedVehicle].perMile).toFixed(2)) : null,
+      surge_applied:   isSurgeFlag,
+      total_price:     total,
+      deposit_amount:  parseFloat((total * DEPOSIT_PCT).toFixed(2)),
+      status:          'pending_review',
+      payment_status:  'pending',
+      source_page:     window.location.pathname
     };
 
     try {
       const { data, error } = await supabaseClient.from('bookings').insert([booking]).select();
       if (error) throw error;
-      activeBooking = { id: data[0].id, type: 'kc' };
-      window.activeBooking = activeBooking;
 
-      // Fire-and-forget: create Google Calendar event for this booking
-      createCalendarEvent({
-        booking_id:      data[0].id,
-        booking_type:    'kc',
-        vehicle:         selectedVehicle,
-        trip_type:       kcTripType,
-        pickup_date:     pickupDate,
-        pickup_time:     pickupTime,
-        pickup_address:  booking.pickup_address,
-        dropoff_address: booking.dropoff_address,
-        route_miles:     routeMiles,
-        passengers:      booking.passengers,
-        phone:           booking.phone,
-        email:           booking.email,
-        total_price:     total,
-        deposit_amount:  deposit,
-        payment_status:  'pending',
-        source_page:     window.location.pathname,
+      // Fire-and-forget: send admin notification email via Netlify function
+      fetch('/.netlify/functions/send-request-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          booking_id: data[0].id,
+          booking_data: booking
+        })
+      }).catch(err => {
+        console.warn('Admin email notification failed (non-critical):', err);
       });
 
-      const paySection = document.getElementById('qe-payment');
-      paySection.style.display = 'block';
+      // Show confirmation modal and reset form
+      document.getElementById('qe-confirmationModal').classList.add('active');
+      document.getElementById('bookingForm').reset();
 
-      // Force reveal animations on payment section children
-      // (IntersectionObserver can't see them while parent is display:none)
-      paySection.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      // Reset vehicle selection UI
+      selectedVehicle = 'suburban';
+      kcTripType = 'oneway';
+      coords = { pickup: null, dropoff: null };
+      coordsApproximate = { pickup: false, dropoff: false };
+      routeMiles = null;
+      document.getElementById('kc-tt-oneway').classList.add('selected');
+      document.getElementById('kc-tt-roundtrip').classList.remove('selected');
+      document.getElementById('kc-local-transport-row').style.display = 'none';
+      document.getElementById('route-info').style.display = 'none';
+      window.recalcPrice();
 
-      document.getElementById('pay-deposit-amt').textContent   = '$' + deposit;
-      document.getElementById('pay-total-amt').textContent     = '$' + total;
-      document.getElementById('pay-remaining-amt').textContent = '$' + (total - deposit);
-
-      setTimeout(() => paySection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-
-      btn.textContent = '✓ Request Submitted — Pay Deposit Below';
-      btn.style.background = '#2a9d5c';
+      btn.textContent = 'Submit Request →';
+      btn.disabled = false;
     } catch(err) {
       console.error('Supabase insert error:', err);
       const detail = err?.message || err?.details || JSON.stringify(err);
       alert('Booking error: ' + detail + '\n\nPlease try again or call us at (816) 552-6669.');
-      btn.textContent = 'Request This Ride →';
+      btn.textContent = 'Submit Request →';
       btn.disabled = false;
     }
   };
@@ -1026,78 +743,6 @@
     document.getElementById(id).classList.remove('active');
   };
 
-  window.redirectToStripe = async function() {
-    if (!activeBooking.id) {
-      alert('Please submit a booking form first.');
-      return;
-    }
-
-    const depositText = document.getElementById('pay-deposit-amt').textContent.replace('$','');
-    const depositAmt  = parseFloat(depositText);
-    const amountCents = Math.round(depositAmt * 100);
-
-    // Determine customer email from the active form
-    let customerEmail = '';
-    if (activeBooking.type === 'kc') {
-      customerEmail = document.getElementById('email')?.value || '';
-    } else {
-      customerEmail = document.getElementById('loto-email')?.value || '';
-    }
-    const description = activeBooking.type === 'loto'
-      ? 'Group Ride KC — Lake Ozarks Deposit'
-      : 'Group Ride KC — KC Ride Deposit';
-
-    const payBtn = document.getElementById('pay-deposit-btn');
-    if (payBtn) { payBtn.textContent = 'Redirecting to checkout…'; payBtn.disabled = true; }
-
-    try {
-      const res = await fetch('/.netlify/functions/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount_cents:   amountCents,
-          booking_id:     activeBooking.id,
-          booking_type:   activeBooking.type,
-          customer_email: customerEmail,
-          description:    description
-        })
-      });
-
-      const data = await res.json();
-      if (data.url) {
-        const table = activeBooking.type === 'loto' ? 'loto_bookings' : 'bookings';
-        await supabaseClient.from(table).update({ stripe_session_id: data.sessionId }).eq('id', activeBooking.id);
-        window.location.href = data.url;
-      } else {
-        throw new Error(data.error || 'Failed to create checkout session');
-      }
-    } catch(err) {
-      console.error('Stripe redirect error:', err);
-      const detail = err?.message || JSON.stringify(err);
-      alert('Payment error: ' + detail + '\n\nPlease try again or call us at (816) 552-6669.');
-      if (payBtn) { payBtn.textContent = 'Pay Deposit Now →'; payBtn.disabled = false; }
-    }
-  };
-
-  /* ═══════════════════════════════════════════════════════════════
-     GOOGLE CALENDAR INTEGRATION (fire-and-forget)
-     ═══════════════════════════════════════════════════════════════ */
-  async function createCalendarEvent(bookingData) {
-    try {
-      await fetch('/.netlify/functions/create-calendar-event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookingData),
-      });
-      console.log('Calendar event request sent');
-    } catch (err) {
-      // Non-blocking — don't interrupt the booking flow
-      console.warn('Calendar event creation failed (non-critical):', err);
-    }
-  }
-  // Expose for LOTO form to use
-  window.createCalendarEvent = createCalendarEvent;
-
   /* ═══════════════════════════════════════════════════════════════
      PAGE INITIALIZATION
      ═══════════════════════════════════════════════════════════════ */
@@ -1106,31 +751,5 @@
   const dateInput = document.getElementById('pickup-date');
   if(dateInput) dateInput.setAttribute('min', today);
 
-  // Check payment status on load
-  (function checkPaymentStatus() {
-    const params = new URLSearchParams(window.location.search);
-    const payment   = params.get('payment');
-    const bookingId = params.get('booking_id');
-    const bookingType = params.get('type') || 'kc';
-    const sessionId = params.get('session_id');
-
-    if (!payment || !bookingId) return;
-
-    if (payment === 'success') {
-      const table = bookingType === 'loto' ? 'loto_bookings' : 'bookings';
-      supabaseClient.from(table)
-        .update({ payment_status: 'deposit_paid', stripe_payment_id: sessionId })
-        .eq('id', bookingId)
-        .then(() => {
-          document.getElementById('qe-payModal').classList.add('active');
-        });
-
-      window.history.replaceState({}, '', window.location.pathname);
-    } else if (payment === 'cancelled') {
-      alert('Payment was cancelled. Your booking is still saved — you can pay the deposit anytime by calling us at (816) 552-6669.');
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  })();
-
-  console.log('Quote Engine initialized');
+  console.log('Quote Engine initialized (admin approval flow)');
 })();
