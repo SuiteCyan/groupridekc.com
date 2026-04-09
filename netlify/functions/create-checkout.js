@@ -20,7 +20,7 @@ exports.handler = async (event) => {
     }
 
     // Determine the origin for redirect URLs
-    const origin = event.headers.origin || event.headers.referer?.replace(/\/+$/, '') || 'https://groupridekc.com';
+   const origin = event.headers.origin || event.headers.referer?.replace(/\/+$/, '') || process.env.URL || 'https://groupridekc.netlify.app';
 
     // Build the Stripe Checkout Session request
     const params = new URLSearchParams({
