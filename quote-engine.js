@@ -9,7 +9,7 @@
  *
  * Usage:
  *   <div id="quote-form-container"></div>
-    *    <script src="quote-engine.js"></script>
+ *   <script src="quote-engine.js"></script>
  *
  * The engine injects:
  *   - All CSS styling (booking form, modal, autocomplete)
@@ -218,17 +218,31 @@
           </div>
         </div>
 
-        <!-- Round Trip Local Transport Add-on (shown only for round trip) -->
-        <div id="kc-local-transport-row" class="form-group" style="display:none; margin-bottom:10px;">
-          <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; font-weight:400;">
-            <input type="checkbox" id="kc-local-transport" onchange="window.recalcPrice()"
-                   style="margin-top:2px;">
-            <span>
-              <strong style="color:var(--gold);">Local Area Transport</strong>
-              <span style="color:var(--text-muted); font-size:0.85rem;"> +$250</span>
-              <div style="font-size:0.78rem; color:var(--text-muted); margin-top:3px;">Driver stays on-site to taxi your group to different locations — venues, restaurants, bars &amp; more</div>
-            </span>
-          </label>
+        <!-- Round Trip On-Site Hours (shown only for round trip) -->
+        <div id="kc-onsite-hours-row" class="form-group" style="display:none; margin-bottom:18px;">
+          <div style="background:rgba(253,185,19,.07); border:1px solid rgba(253,185,19,.25); border-radius:10px; padding:14px 16px;">
+            <div style="display:flex; align-items:flex-start; gap:10px;">
+              <span style="font-size:1.1rem; flex-shrink:0;">🕐</span>
+              <div style="flex:1;">
+                <div style="font-size:0.9rem; color:var(--gold); font-weight:700; margin-bottom:4px;">On-Site Wait Time</div>
+                <div style="font-size:0.8rem; color:var(--text-muted); line-height:1.5; margin-bottom:12px;">Round trips include an additional <strong style="color:#fff;">$95/hour</strong> for each hour the driver stays on-site between drop-off and return pickup. Estimate how long you'll need below.</div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <label for="kc-onsite-hours" style="font-size:0.82rem; color:rgba(255,255,255,.7); white-space:nowrap; margin-bottom:0;">Hours on-site</label>
+                  <select id="kc-onsite-hours" onchange="window.recalcPrice()" style="width:100px; background:rgba(255,255,255,.08); border:1px solid var(--border); border-radius:8px; padding:8px 12px; color:#fff; font-family:inherit; font-size:0.9rem;">
+                    <option value="1">1 hour</option>
+                    <option value="2" selected>2 hours</option>
+                    <option value="3">3 hours</option>
+                    <option value="4">4 hours</option>
+                    <option value="5">5 hours</option>
+                    <option value="6">6 hours</option>
+                    <option value="7">7 hours</option>
+                    <option value="8">8 hours</option>
+                  </select>
+                  <span id="kc-onsite-cost-preview" style="font-size:0.85rem; color:var(--gold); font-weight:600;">+$190</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Date & Time -->
@@ -326,9 +340,9 @@
             <span style="color:var(--gold);">🔄 Round trip (×2)</span>
             <span id="pb-roundtrip-val" style="color:var(--gold);"></span>
           </div>
-          <div class="pb-row" id="pb-kc-local-row" style="display:none;">
-            <span style="color:var(--gold);">+ Local Area Transport</span>
-            <span id="pb-kc-local-val" style="color:var(--gold);">+$250</span>
+          <div class="pb-row" id="pb-kc-onsite-row" style="display:none;">
+            <span id="pb-kc-onsite-label" style="color:var(--gold);">🕐 On-site (2 hrs × $95)</span>
+            <span id="pb-kc-onsite-val" style="color:var(--gold);">+$190</span>
           </div>
           <hr class="pb-divider" />
           <div class="pb-total">
@@ -409,7 +423,7 @@
   };
   const SURGE_PRICING = { base: 145, perMile: 5.00 };
   const DEPOSIT_PCT = 0.50;
-  const KC_LOCAL_TRANSPORT_FEE = 250;
+  const KC_ONSITE_HOURLY_RATE = 95;
 
   // KC center (64109) and 200-mile radius for geocoder
   const KC_LAT = 39.0984, KC_LON = -94.5786, MAX_RADIUS_MI = 200;
@@ -444,10 +458,10 @@
     kcTripType = type;
     document.getElementById('kc-tt-oneway').classList.toggle('selected', type === 'oneway');
     document.getElementById('kc-tt-roundtrip').classList.toggle('selected', type === 'roundtrip');
-    const localRow = document.getElementById('kc-local-transport-row');
-    localRow.style.display = type === 'roundtrip' ? 'block' : 'none';
+    const onsiteRow = document.getElementById('kc-onsite-hours-row');
+    onsiteRow.style.display = type === 'roundtrip' ? 'block' : 'none';
     if (type === 'oneway') {
-      document.getElementById('kc-local-transport').checked = false;
+      document.getElementById('kc-onsite-hours').value = '2';
     }
     window.recalcPrice();
   };
@@ -618,17 +632,19 @@
       rtRow.style.display = 'none';
     }
 
-    const localChecked = document.getElementById('kc-local-transport')?.checked;
-    const localFee = (isRoundTrip && localChecked) ? KC_LOCAL_TRANSPORT_FEE : 0;
-    const kcLocalRow = document.getElementById('pb-kc-local-row');
-    if (localFee > 0) {
-      kcLocalRow.style.display = 'flex';
-      document.getElementById('pb-kc-local-val').textContent = '+$' + localFee;
+    const onsiteHours = isRoundTrip ? parseInt(document.getElementById('kc-onsite-hours')?.value || '0') : 0;
+    const onsiteFee = onsiteHours * KC_ONSITE_HOURLY_RATE;
+    const kcOnsiteRow = document.getElementById('pb-kc-onsite-row');
+    if (isRoundTrip && onsiteHours > 0) {
+      kcOnsiteRow.style.display = 'flex';
+      document.getElementById('pb-kc-onsite-label').textContent = '🕐 On-site (' + onsiteHours + ' hr' + (onsiteHours > 1 ? 's' : '') + ' × $' + KC_ONSITE_HOURLY_RATE + ')';
+      document.getElementById('pb-kc-onsite-val').textContent = '+$' + onsiteFee;
+      document.getElementById('kc-onsite-cost-preview').textContent = '+$' + onsiteFee;
     } else {
-      kcLocalRow.style.display = 'none';
+      kcOnsiteRow.style.display = 'none';
     }
 
-    const total = (isRoundTrip ? oneWayTotal * 2 : oneWayTotal) + localFee;
+    const total = (isRoundTrip ? oneWayTotal * 2 : oneWayTotal) + onsiteFee;
     document.getElementById('price-display').textContent = '$' + total;
   };
 
@@ -693,12 +709,13 @@
       luggage:         parseInt(luggage),
       phone:           phone,
       email:           email,
-      notes:           notes,
+      notes:           kcTripType === 'roundtrip' ? (notes ? notes + ' | ' : '') + 'On-site wait: ' + (document.getElementById('kc-onsite-hours')?.value || '0') + ' hours' : notes,
       base_fare:       PRICING[selectedVehicle].base,
       distance_cost:   routeMiles ? parseFloat((routeMiles * PRICING[selectedVehicle].perMile).toFixed(2)) : null,
       surge_applied:   isSurgeFlag,
       total_price:     total,
       deposit_amount:  parseFloat((total * DEPOSIT_PCT).toFixed(2)),
+      local_transport_fee: kcTripType === 'roundtrip' ? parseInt(document.getElementById('kc-onsite-hours')?.value || '0') * KC_ONSITE_HOURLY_RATE : 0,
       status:          'pending_review',
       payment_status:  'pending',
       source_page:     window.location.pathname
@@ -732,7 +749,8 @@
       routeMiles = null;
       document.getElementById('kc-tt-oneway').classList.add('selected');
       document.getElementById('kc-tt-roundtrip').classList.remove('selected');
-      document.getElementById('kc-local-transport-row').style.display = 'none';
+      document.getElementById('kc-onsite-hours-row').style.display = 'none';
+      document.getElementById('kc-onsite-hours').value = '2';
       document.getElementById('route-info').style.display = 'none';
       window.recalcPrice();
 
