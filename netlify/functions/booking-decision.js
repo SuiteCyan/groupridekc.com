@@ -238,7 +238,7 @@ function buildAcceptanceEmail(booking, vehicleLabel, paymentUrl) {
     </div>
 
     <p style="font-size: 12px; color: #666; text-align: center; margin-top: 20px;">
-      Questions? Reply to this email or text us at (816) 555-RIDE.
+      Questions? Reply to this email or text us at (816) 552-6669.
     </p>
   </div>
 </body>
@@ -265,13 +265,13 @@ function buildDenialEmail(booking, vehicleLabel) {
     </ul>
 
     <div style="text-align: center; margin: 30px 0;">
-      <a href="https://groupridekc.com/#quote-form-container" style="display: inline-block; background: #FFB81C; color: #000; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
+      <a href="https://groupridekc.netlify.app/#quote-form-container" style="display: inline-block; background: #FFB81C; color: #000; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
         Request a Different Ride
       </a>
     </div>
 
     <p style="font-size: 12px; color: #666; text-align: center; margin-top: 20px;">
-      Questions? Reply to this email or text us at (816) 555-RIDE.
+      Questions? Reply to this email or text us at (816) 552-6669.
     </p>
   </div>
 </body>
@@ -303,7 +303,7 @@ function htmlResponse(statusCode, title, message) {
   <div class="card">
     <h1>${title}</h1>
     <p>${message}</p>
-    <p style="margin-top: 24px;"><a href="https://groupridekc.com">← Back to Group Ride KC</a></p>
+    <p style="margin-top: 24px;"><a href="https://groupridekc.netlify.app">← Back to Group Ride KC</a></p>
   </div>
 </body>
 </html>`,
