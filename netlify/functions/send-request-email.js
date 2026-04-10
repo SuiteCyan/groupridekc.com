@@ -15,6 +15,25 @@ exports.handler = async (event) => {
     return { statusCode: 200, body: JSON.stringify({ skipped: true, reason: 'Email not configured' }) };
   }
 
+  // ── Formatting helpers ──
+  function formatDate(dateStr) {
+    if (!dateStr) return 'N/A';
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return dateStr;
+    return `${parts[1]}/${parts[2]}/${parts[0]}`;
+  }
+  function formatTime(timeStr) {
+    if (!timeStr) return 'N/A';
+    const parts = timeStr.split(':');
+    let h = parseInt(parts[0]);
+    const m = parts[1] || '00';
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    if (h === 0) h = 12;
+    else if (h > 12) h -= 12;
+    return `${h}:${m} ${ampm}`;
+  }
+  const LOGO_URL = 'https://groupridekc.netlify.app/images/grkc-logo-van.png';
+
   try {
     const { booking_id, booking_data } = JSON.parse(event.body);
 
@@ -56,6 +75,7 @@ exports.handler = async (event) => {
 <head><meta charset="utf-8"></head>
 <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f5f5f5; padding: 20px;">
   <div style="background: #0a0a0a; color: #ffffff; border-radius: 12px; padding: 30px;">
+    <div style="text-align: center; margin-bottom: 24px;"><img src="${LOGO_URL}" alt="Group Ride KC" style="width: 180px; height: auto;" /></div>
     <h1 style="color: #E31837; margin-top: 0;">New Ride Request</h1>
 
     <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
@@ -85,11 +105,11 @@ exports.handler = async (event) => {
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #aaa;">Pickup Date</td>
-        <td style="padding: 8px 0; color: #fff;">${booking_data.pickup_date || 'N/A'}</td>
+        <td style="padding: 8px 0; color: #fff;">${formatDate(booking_data.pickup_date)}</td>
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #aaa;">Pickup Time</td>
-        <td style="padding: 8px 0; color: #fff;">${booking_data.pickup_time || 'N/A'}</td>
+        <td style="padding: 8px 0; color: #fff;">${formatTime(booking_data.pickup_time)}</td>
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #aaa;">Pickup</td>
@@ -101,7 +121,7 @@ exports.handler = async (event) => {
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #aaa;">Distance</td>
-        <td style="padding: 8px 0; color: #fff;">${booking_data.route_miles ? booking_data.route_miles + ' mi' : 'N/A'}</td>
+        <td style="padding: 8px 0; color: #fff;">${booking_data.route_miles ? parseFloat(booking_data.route_miles).toFixed(1) + ' mi' : 'N/A'}</td>
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #aaa;">Estimated Total</td>
@@ -140,7 +160,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         from: 'Group Ride KC <bookings@groupridekc.com>',
         to: [ADMIN_EMAIL],
-        subject: `🚐 New Ride Request — ${booking_data.customer_name || booking_data.phone || 'Customer'} — ${booking_data.pickup_date || 'No date'}`,
+        subject: `🚐 New Ride Request — ${booking_data.customer_name || booking_data.phone || 'Customer'} — ${formatDate(booking_data.pickup_date)}`,
         html: emailHtml,
       }),
     });
