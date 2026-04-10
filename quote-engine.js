@@ -350,6 +350,18 @@
             <span id="price-display">$95</span>
           </div>
           <div class="pb-note">This is an estimate. Final price will be confirmed by Group Ride KC.</div>
+          <div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,.08);">
+            <div style="font-size:0.78rem; color:var(--text-muted); line-height:1.6;">
+              <strong style="color:rgba(255,255,255,.6);">Deposit &amp; Cancellation Policy:</strong>
+              A 50% deposit is required to book your ride. The remaining balance is due 72 hours prior to your pickup time.
+              Cancellations made more than 72 hours before pickup are eligible for a 50% deposit refund.
+              Cancellations within 72 hours of pickup will result in no refund of the deposit.
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-muted); line-height:1.6; margin-top:8px;">
+              <strong style="color:rgba(255,255,255,.6);">Cleaning Fee Disclaimer:</strong>
+              Passengers are responsible for maintaining the cleanliness of the vehicle during their ride. An additional cleaning fee of up to $250 will be charged for any excessive mess, including but not limited to vomiting, spills, or other damage to the vehicle interior.
+            </div>
+          </div>
         </div>
 
         <!-- Estimate disclaimer — shown when address is approximate -->
