@@ -69,6 +69,25 @@ exports.handler = async (event) => {
     const vehicleLabel = booking_data.vehicle === 'van' ? '10-Passenger Van' : 'Chevy Suburban';
     const tripLabel = booking_data.trip_type === 'roundtrip' ? 'Round Trip' : 'One-Way';
 
+    // ── Trip cost calculator ──
+    const miles = parseFloat(booking_data.route_miles) || 0;
+    const isRoundTrip = booking_data.trip_type === 'roundtrip';
+    const totalMiles = isRoundTrip ? miles * 2 : miles;
+    const mpg = booking_data.vehicle === 'van' ? 13 : 15;
+    const gasPrice = 3.39;
+    const driverRate = 30;
+    const estDriveMin = Math.round(miles * 2); // ~2 min/mile
+    const bufferMin = isRoundTrip ? 30 : 15;
+    const onsiteHours = (isRoundTrip && booking_data.local_transport_fee) ? Math.round(parseFloat(booking_data.local_transport_fee) / 95) : 0;
+    const totalTimeHrs = ((isRoundTrip ? estDriveMin * 2 : estDriveMin) + bufferMin) / 60 + onsiteHours;
+    const fuelCost = (totalMiles / mpg) * gasPrice;
+    const driverPay = totalTimeHrs * driverRate;
+    const totalCost = driverPay + fuelCost;
+    const revenue = parseFloat(booking_data.total_price) || 0;
+    const profit = revenue - totalCost;
+    const margin = revenue > 0 ? (profit / revenue * 100) : 0;
+    const profitColor = profit >= 0 ? '#22c55e' : '#E31837';
+
     const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -133,6 +152,27 @@ exports.handler = async (event) => {
       </tr>
       ${booking_data.notes ? `<tr><td style="padding: 8px 0; color: #aaa;">Notes</td><td style="padding: 8px 0; color: #fff;">${booking_data.notes}</td></tr>` : ''}
     </table>
+
+    <!-- Trip Cost Breakdown -->
+    <div style="background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 20px; margin: 24px 0;">
+      <h3 style="color: #FFB81C; margin: 0 0 14px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Trip Cost Breakdown</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr><td style="padding: 4px 0; color: #666; font-size: 13px;">Vehicle</td><td style="padding: 4px 0; color: #999; font-size: 13px; text-align: right;">${vehicleLabel} (${mpg} MPG)</td></tr>
+        <tr><td style="padding: 4px 0; color: #666; font-size: 13px;">Distance</td><td style="padding: 4px 0; color: #999; font-size: 13px; text-align: right;">${totalMiles.toFixed(1)} mi${isRoundTrip ? ' (×2)' : ''}</td></tr>
+        <tr><td style="padding: 4px 0; color: #666; font-size: 13px;">Est. driver time</td><td style="padding: 4px 0; color: #999; font-size: 13px; text-align: right;">${totalTimeHrs.toFixed(1)} hrs</td></tr>
+        ${onsiteHours > 0 ? `<tr><td style="padding: 4px 0; color: #666; font-size: 13px;">On-site wait</td><td style="padding: 4px 0; color: #999; font-size: 13px; text-align: right;">${onsiteHours} hrs</td></tr>` : ''}
+        <tr><td colspan="2" style="border-top: 1px solid #333; padding: 0; height: 8px;"></td></tr>
+        <tr><td style="padding: 4px 0; color: #aaa; font-size: 13px;">Driver Pay ($${driverRate}/hr × ${totalTimeHrs.toFixed(1)})</td><td style="padding: 4px 0; color: #fff; font-size: 13px; text-align: right;">$${driverPay.toFixed(2)}</td></tr>
+        <tr><td style="padding: 4px 0; color: #aaa; font-size: 13px;">Fuel ($${gasPrice}/gal × ${(totalMiles / mpg).toFixed(1)} gal)</td><td style="padding: 4px 0; color: #fff; font-size: 13px; text-align: right;">$${fuelCost.toFixed(2)}</td></tr>
+        <tr><td colspan="2" style="border-top: 1px solid #333; padding: 0; height: 8px;"></td></tr>
+        <tr><td style="padding: 4px 0; color: #FFB81C; font-weight: bold; font-size: 14px;">Total Trip Cost</td><td style="padding: 4px 0; color: #FFB81C; font-weight: bold; font-size: 14px; text-align: right;">$${totalCost.toFixed(2)}</td></tr>
+        <tr><td style="padding: 4px 0; color: #aaa; font-size: 13px;">Customer Revenue</td><td style="padding: 4px 0; color: #fff; font-size: 13px; text-align: right;">$${revenue.toFixed(2)}</td></tr>
+        <tr><td colspan="2" style="border-top: 1px solid #333; padding: 0; height: 8px;"></td></tr>
+        <tr><td style="padding: 6px 0; color: ${profitColor}; font-weight: bold; font-size: 16px;">Profit</td><td style="padding: 6px 0; color: ${profitColor}; font-weight: bold; font-size: 16px; text-align: right;">${profit >= 0 ? '$' : '-$'}${Math.abs(profit).toFixed(2)}</td></tr>
+        <tr><td colspan="2" style="text-align: right; color: ${profitColor}; font-size: 12px;">${margin.toFixed(1)}% margin</td></tr>
+      </table>
+      <p style="font-size: 11px; color: #555; margin: 10px 0 0; text-align: center;">Driver: $30/hr · Gas: $3.39/gal (KC avg) · 15-min buffer per leg</p>
+    </div>
 
     <div style="margin-top: 30px; text-align: center;">
       <a href="${acceptUrl}" style="display: inline-block; background: #22c55e; color: #fff; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px; margin-right: 12px;">
