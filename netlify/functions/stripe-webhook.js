@@ -122,6 +122,36 @@ exports.handler = async (event) => {
       } catch (calErr) {
         console.error('Calendar event creation failed (non-critical):', calErr.message);
       }
+
+      // 4. Send customer confirmation email (non-blocking)
+      try {
+        const emailRes = await fetch(`${SITE_URL}/.netlify/functions/send-customer-confirmation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            booking_id: booking.id,
+            booking_data: {
+              customer_name: booking.customer_name,
+              email: booking.email,
+              phone: booking.phone,
+              vehicle: booking.vehicle,
+              trip_type: booking.trip_type,
+              passengers: booking.passengers,
+              pickup_date: booking.pickup_date,
+              pickup_time: booking.pickup_time,
+              pickup_address: booking.pickup_address,
+              dropoff_address: booking.dropoff_address,
+              route_miles: booking.route_miles,
+              total_price: booking.total_price,
+              deposit_amount: booking.deposit_amount,
+            },
+          }),
+        });
+        const emailData = await emailRes.json();
+        console.log('Customer confirmation email:', emailData.emailId || emailData);
+      } catch (emailErr) {
+        console.error('Customer confirmation email failed (non-critical):', emailErr.message);
+      }
     }
 
     return {
