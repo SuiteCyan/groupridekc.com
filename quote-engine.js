@@ -309,6 +309,9 @@
         <div class="form-group">
           <label for="phone">Phone Number</label>
           <input type="tel" id="phone" placeholder="(816) 552-6669" required oninput="window.formatPhone(this)" maxlength="14" />
+          <div style="font-size:0.72rem; color:var(--text-muted); line-height:1.5; margin-top:6px;">
+            By providing your phone number and submitting this form, you agree to receive SMS messages from Group Ride KC related to your ride request, including booking confirmations, driver details, and account notifications. Message frequency varies. Message &amp; data rates may apply. Reply STOP to opt out, HELP for help.
+          </div>
         </div>
 
         <div class="form-group">
