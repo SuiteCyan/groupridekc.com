@@ -16,9 +16,8 @@ exports.handler = async (event) => {
   const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nysoddktcdzynktrddte.supabase.co';
   const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55c29kZGt0Y2R6eW5rdHJkZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTYyMzAsImV4cCI6MjA4ODk5MjIzMH0.uj4aEhQ0fWog_6OA6ypx5N8Kou871hw7eipgKPIiIDU';
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
-  const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
-  const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
+  const QUO_API_KEY = process.env.QUO_API_KEY;
+  const QUO_PHONE_NUMBER_ID = process.env.QUO_PHONE_NUMBER_ID;
 
   try {
     // 1. Look up booking by admin_token
@@ -95,10 +94,10 @@ exports.handler = async (event) => {
         console.error('Failed to create checkout session:', e.message);
       }
 
-      // Send SMS via Twilio
-      if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER && booking.phone) {
+      // Send SMS via QUO
+      if (QUO_API_KEY && QUO_PHONE_NUMBER_ID && booking.phone) {
         await sendSMS(
-          TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER,
+          QUO_API_KEY, QUO_PHONE_NUMBER_ID,
           booking.phone,
           `Great news! Your Group Ride KC request for ${formatDate(booking.pickup_date)} has been approved! Check your email for details and a link to pay your deposit. — Group Ride KC`
         );
@@ -117,10 +116,10 @@ exports.handler = async (event) => {
     } else if (action === 'deny') {
       // DENIED
 
-      // Send SMS via Twilio
-      if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER && booking.phone) {
+      // Send SMS via QUO
+      if (QUO_API_KEY && QUO_PHONE_NUMBER_ID && booking.phone) {
         await sendSMS(
-          TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER,
+          QUO_API_KEY, QUO_PHONE_NUMBER_ID,
           booking.phone,
           `Hi ${customerName}, unfortunately the time slot you requested for ${formatDate(booking.pickup_date)} is not available. Check your email for more options. — Group Ride KC`
         );
@@ -196,30 +195,31 @@ function emailHeader() {
   return `<div style="text-align: center; margin-bottom: 24px;"><img src="${LOGO_URL}" alt="Group Ride KC" style="width: 180px; height: auto;" /></div>`;
 }
 
-// ── Helper: Send SMS via Twilio REST API ──
-async function sendSMS(accountSid, authToken, from, to, body) {
+// ── Helper: Send SMS via QUO (formerly OpenPhone) REST API ──
+async function sendSMS(apiKey, phoneNumberId, to, body) {
   try {
     // Normalize phone: ensure +1 prefix for US numbers
     let phone = to.replace(/\D/g, '');
     if (phone.length === 10) phone = '1' + phone;
     if (!phone.startsWith('+')) phone = '+' + phone;
 
-    const res = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: 'Basic ' + Buffer.from(`${accountSid}:${authToken}`).toString('base64'),
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({ From: from, To: phone, Body: body }),
-      }
-    );
+    const res = await fetch('https://api.openphone.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        Authorization: apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: phoneNumberId,
+        to: [phone],
+        content: body,
+      }),
+    });
     const data = await res.json();
-    if (data.error_code) {
-      console.error('Twilio error:', data.message);
+    if (!res.ok) {
+      console.error('QUO SMS error:', JSON.stringify(data));
     } else {
-      console.log('SMS sent:', data.sid);
+      console.log('SMS sent via QUO:', data?.data?.id);
     }
   } catch (e) {
     console.error('SMS send failed:', e.message);
