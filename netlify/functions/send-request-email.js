@@ -9,6 +9,8 @@ exports.handler = async (event) => {
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'GroupRideKC@gmail.com';
   const SITE_URL = process.env.URL || 'https://groupridekc.netlify.app';
+  const QUO_API_KEY = process.env.QUO_API_KEY;
+  const QUO_PHONE_NUMBER_ID = process.env.QUO_PHONE_NUMBER_ID;
 
   if (!RESEND_API_KEY) {
     console.warn('RESEND_API_KEY not configured — skipping email');
@@ -212,6 +214,40 @@ exports.handler = async (event) => {
     }
 
     console.log('Admin email sent successfully:', emailData.id);
+
+    // ── Send "request received" SMS to customer via QUO ──
+    if (QUO_API_KEY && QUO_PHONE_NUMBER_ID && booking_data.phone) {
+      try {
+        let phone = booking_data.phone.replace(/\D/g, '');
+        if (phone.length === 10) phone = '1' + phone;
+        if (!phone.startsWith('+')) phone = '+' + phone;
+
+        const customerName = booking_data.customer_name ? ` ${booking_data.customer_name.split(' ')[0]}` : '';
+        const smsRes = await fetch('https://api.openphone.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            Authorization: QUO_API_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: QUO_PHONE_NUMBER_ID,
+            to: [phone],
+            content: `Hi${customerName}, we received your Group Ride KC request for ${formatDate(booking_data.pickup_date)}! We'll review it and get back to you within 24 hours. Questions? Reply to this text. — Group Ride KC`,
+          }),
+        });
+        const smsData = await smsRes.json();
+        if (!smsRes.ok) {
+          console.error('QUO SMS error:', JSON.stringify(smsData));
+        } else {
+          console.log('Request-received SMS sent via QUO:', smsData?.data?.id);
+        }
+      } catch (smsErr) {
+        console.error('Request-received SMS failed:', smsErr.message);
+      }
+    } else {
+      console.warn('QUO SMS skipped — missing QUO_API_KEY, QUO_PHONE_NUMBER_ID, or customer phone');
+    }
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
