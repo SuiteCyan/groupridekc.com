@@ -190,7 +190,7 @@ exports.handler = async (event) => {
           if (!phone.startsWith('+')) phone = '+' + phone;
           const smsRes = await fetch('https://api.openphone.com/v1/messages', {
             method: 'POST',
-            headers: { Authorization: `Bearer ${QUO_API_KEY}`, 'Content-Type': 'application/json' },
+            headers: { Authorization: QUO_API_KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify({
               from: QUO_PHONE_NUMBER_ID,
               to: [phone],
