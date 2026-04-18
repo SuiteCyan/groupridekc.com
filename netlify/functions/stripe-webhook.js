@@ -123,34 +123,89 @@ exports.handler = async (event) => {
         console.error('Calendar event creation failed (non-critical):', calErr.message);
       }
 
-      // 4. Send customer confirmation email (non-blocking)
-      try {
-        const emailRes = await fetch(`${SITE_URL}/.netlify/functions/send-customer-confirmation`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            booking_id: booking.id,
-            booking_data: {
-              customer_name: booking.customer_name,
-              email: booking.email,
-              phone: booking.phone,
-              vehicle: booking.vehicle,
-              trip_type: booking.trip_type,
-              passengers: booking.passengers,
-              pickup_date: booking.pickup_date,
-              pickup_time: booking.pickup_time,
-              pickup_address: booking.pickup_address,
-              dropoff_address: booking.dropoff_address,
-              route_miles: booking.route_miles,
-              total_price: booking.total_price,
-              deposit_amount: booking.deposit_amount,
+      // 4. Send customer payment confirmation email (non-blocking)
+      const RESEND_API_KEY = process.env.RESEND_API_KEY;
+      const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'GroupRideKC@gmail.com';
+
+      if (RESEND_API_KEY && booking.email) {
+        try {
+          const custEmailRes = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
             },
-          }),
-        });
-        const emailData = await emailRes.json();
-        console.log('Customer confirmation email:', emailData.emailId || emailData);
-      } catch (emailErr) {
-        console.error('Customer confirmation email failed (non-critical):', emailErr.message);
+            body: JSON.stringify({
+              from: 'Group Ride KC <bookings@groupridekc.com>',
+              to: [booking.email],
+              subject: `✅ Deposit Confirmed — Group Ride KC`,
+              html: buildCustomerConfirmationEmail(booking),
+            }),
+          });
+          const custEmailData = await custEmailRes.json();
+          if (custEmailData.error) {
+            console.error('Customer confirmation email error:', custEmailData.error);
+          } else {
+            console.log('Customer confirmation email sent:', custEmailData.id);
+          }
+        } catch (emailErr) {
+          console.error('Customer confirmation email failed (non-critical):', emailErr.message);
+        }
+      }
+
+      // 5. Send admin deposit-paid notification (non-blocking)
+      if (RESEND_API_KEY) {
+        try {
+          const adminEmailRes = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: 'Group Ride KC <bookings@groupridekc.com>',
+              to: [ADMIN_EMAIL],
+              subject: `💳 Deposit Paid — ${booking.customer_name || 'Customer'} — ${formatDate(booking.pickup_date)}`,
+              html: buildAdminDepositEmail(booking),
+            }),
+          });
+          const adminEmailData = await adminEmailRes.json();
+          if (adminEmailData.error) {
+            console.error('Admin deposit notification error:', adminEmailData.error);
+          } else {
+            console.log('Admin deposit notification sent:', adminEmailData.id);
+          }
+        } catch (emailErr) {
+          console.error('Admin deposit notification failed (non-critical):', emailErr.message);
+        }
+      }
+
+      // 6. Send customer SMS payment confirmation (non-blocking)
+      const QUO_API_KEY = process.env.QUO_API_KEY;
+      const QUO_PHONE_NUMBER_ID = process.env.QUO_PHONE_NUMBER_ID;
+      if (QUO_API_KEY && QUO_PHONE_NUMBER_ID && booking.phone) {
+        try {
+          let phone = booking.phone.replace(/\D/g, '');
+          if (phone.length === 10) phone = '1' + phone;
+          if (!phone.startsWith('+')) phone = '+' + phone;
+          const smsRes = await fetch('https://api.openphone.com/v1/messages', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${QUO_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: QUO_PHONE_NUMBER_ID,
+              to: [phone],
+              content: `Your deposit for Group Ride KC on ${formatDate(booking.pickup_date)} is confirmed! The remaining balance is due on ride day. See you then! — Group Ride KC`,
+            }),
+          });
+          const smsData = await smsRes.json();
+          if (!smsRes.ok) {
+            console.error('QUO SMS error (payment confirmation):', JSON.stringify(smsData));
+          } else {
+            console.log('Payment confirmation SMS sent via QUO:', smsData?.data?.id);
+          }
+        } catch (smsErr) {
+          console.error('Payment confirmation SMS failed:', smsErr.message);
+        }
       }
     }
 
@@ -168,3 +223,110 @@ exports.handler = async (event) => {
     };
   }
 };
+
+// ── Helpers ──
+
+function formatDate(dateStr) {
+  if (!dateStr) return 'N/A';
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
+  return `${parts[1]}/${parts[2]}/${parts[0]}`;
+}
+
+function formatTime(timeStr) {
+  if (!timeStr) return 'N/A';
+  const parts = timeStr.split(':');
+  let h = parseInt(parts[0]);
+  const m = parts[1] || '00';
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  if (h === 0) h = 12;
+  else if (h > 12) h -= 12;
+  return `${h}:${m} ${ampm}`;
+}
+
+const LOGO_URL = 'https://groupridekc.netlify.app/images/grkc-logo-van.png';
+
+function emailHeader() {
+  return `<div style="text-align: center; margin-bottom: 24px;"><img src="${LOGO_URL}" alt="Group Ride KC" style="width: 180px; height: auto;" /></div>`;
+}
+
+// ── Customer payment confirmation email ──
+function buildCustomerConfirmationEmail(booking) {
+  const vehicleLabel = booking.vehicle === 'van' ? '10-Passenger Van' : 'Chevy Suburban';
+  const tripLabel = booking.trip_type === 'roundtrip' ? 'Round Trip' : 'One-Way';
+  const remaining = (booking.total_price || 0) - (booking.deposit_amount || 0);
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f5f5f5; padding: 20px;">
+  <div style="background: #0a0a0a; color: #ffffff; border-radius: 12px; padding: 30px;">
+    ${emailHeader()}
+    <h1 style="color: #22c55e; margin-top: 0;">Deposit Confirmed!</h1>
+    <p style="color: #ccc; font-size: 16px;">Hi ${booking.customer_name || 'there'},</p>
+    <p style="color: #ccc;">Your deposit has been received and your ride is locked in. Here's a summary of your booking:</p>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+      <tr><td style="padding: 8px 0; color: #aaa; width: 140px;">Vehicle</td><td style="padding: 8px 0; color: #fff;">${vehicleLabel}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Trip Type</td><td style="padding: 8px 0; color: #fff;">${tripLabel}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Date</td><td style="padding: 8px 0; color: #fff;">${formatDate(booking.pickup_date)}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Time</td><td style="padding: 8px 0; color: #fff;">${formatTime(booking.pickup_time)}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Pickup</td><td style="padding: 8px 0; color: #fff;">${booking.pickup_address}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Drop-off</td><td style="padding: 8px 0; color: #fff;">${booking.dropoff_address}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Passengers</td><td style="padding: 8px 0; color: #fff;">${booking.passengers}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Deposit Paid</td><td style="padding: 8px 0; color: #22c55e; font-weight: bold;">$${booking.deposit_amount}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Balance Due</td><td style="padding: 8px 0; color: #FFB81C; font-weight: bold;">$${remaining.toFixed(2)} (due on ride day)</td></tr>
+    </table>
+
+    <div style="background: rgba(255,255,255,.05); border-radius: 8px; padding: 14px 16px; margin: 16px 0;">
+      <p style="font-size: 12px; color: #999; margin: 0; line-height: 1.6;">
+        <strong style="color: #ccc;">Cancellation Policy:</strong> Cancellations made more than 72 hours before pickup are eligible for a 50% deposit refund. Cancellations within 72 hours of pickup will result in no refund of the deposit.
+      </p>
+    </div>
+
+    <p style="font-size: 12px; color: #666; text-align: center; margin-top: 20px;">
+      Questions? Reply to this email or text us at (816) 552-6669.
+    </p>
+  </div>
+</body>
+</html>`;
+}
+
+// ── Admin deposit-paid notification email ──
+function buildAdminDepositEmail(booking) {
+  const vehicleLabel = booking.vehicle === 'van' ? '10-Passenger Van' : 'Chevy Suburban';
+  const tripLabel = booking.trip_type === 'roundtrip' ? 'Round Trip' : 'One-Way';
+  const remaining = (booking.total_price || 0) - (booking.deposit_amount || 0);
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f5f5f5; padding: 20px;">
+  <div style="background: #0a0a0a; color: #ffffff; border-radius: 12px; padding: 30px;">
+    ${emailHeader()}
+    <h1 style="color: #22c55e; margin-top: 0;">💳 Deposit Received</h1>
+    <p style="color: #ccc;">A customer has paid their deposit. The ride is confirmed and on the calendar.</p>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+      <tr><td style="padding: 8px 0; color: #aaa; width: 140px;">Customer</td><td style="padding: 8px 0; color: #fff;">${booking.customer_name || 'N/A'}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Phone</td><td style="padding: 8px 0; color: #FFB81C; font-weight: bold;">${booking.phone || 'N/A'}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Email</td><td style="padding: 8px 0; color: #fff;">${booking.email || 'N/A'}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Vehicle</td><td style="padding: 8px 0; color: #fff;">${vehicleLabel}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Trip Type</td><td style="padding: 8px 0; color: #fff;">${tripLabel}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Date</td><td style="padding: 8px 0; color: #fff;">${formatDate(booking.pickup_date)}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Time</td><td style="padding: 8px 0; color: #fff;">${formatTime(booking.pickup_time)}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Pickup</td><td style="padding: 8px 0; color: #fff;">${booking.pickup_address}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Drop-off</td><td style="padding: 8px 0; color: #fff;">${booking.dropoff_address}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Passengers</td><td style="padding: 8px 0; color: #fff;">${booking.passengers}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Total Price</td><td style="padding: 8px 0; color: #FFB81C; font-weight: bold;">$${booking.total_price}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Deposit Paid</td><td style="padding: 8px 0; color: #22c55e; font-weight: bold;">$${booking.deposit_amount}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Balance Owed</td><td style="padding: 8px 0; color: #fff;">$${remaining.toFixed(2)} (collect on ride day)</td></tr>
+    </table>
+
+    <p style="font-size: 12px; color: #666; text-align: center; margin-top: 20px;">
+      Booking ID: ${booking.id}
+    </p>
+  </div>
+</body>
+</html>`;
+}
