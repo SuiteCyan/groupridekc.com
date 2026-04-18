@@ -226,7 +226,7 @@ exports.handler = async (event) => {
         const smsRes = await fetch('https://api.openphone.com/v1/messages', {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${QUO_API_KEY}`,
+            Authorization: QUO_API_KEY,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
