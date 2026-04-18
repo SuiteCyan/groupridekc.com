@@ -206,7 +206,7 @@ async function sendSMS(apiKey, phoneNumberId, to, body) {
     const res = await fetch('https://api.openphone.com/v1/messages', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: apiKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -233,7 +233,7 @@ async function sendEmail(apiKey, to, customerName, { subject, html }) {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: apiKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
