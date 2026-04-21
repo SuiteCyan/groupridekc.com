@@ -356,9 +356,10 @@
           <div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,.08);">
             <div style="font-size:0.78rem; color:var(--text-muted); line-height:1.6;">
               <strong style="color:rgba(255,255,255,.6);">Deposit &amp; Cancellation Policy:</strong>
-              A 50% deposit is required to book your ride. The remaining balance is due 72 hours prior to your pickup time.
-              Cancellations made more than 72 hours before pickup are eligible for a 50% deposit refund.
-              Cancellations within 72 hours of pickup will result in no refund of the deposit.
+              A 50% deposit is required to book your ride. The remaining balance is due 72 hours prior to your pickup time — you'll receive a reminder at 96 hours out.
+              Rides booked within 72 hours of pickup require full payment at the time of booking.
+              Cancellations made more than 72 hours before pickup are eligible for a 50% refund of payments made.
+              Cancellations within 72 hours of pickup are non-refundable.
             </div>
             <div style="font-size:0.78rem; color:var(--text-muted); line-height:1.6; margin-top:8px;">
               <strong style="color:rgba(255,255,255,.6);">Cleaning Fee Disclaimer:</strong>
@@ -710,6 +711,12 @@
       return h >= 22 || h < 5;
     })();
 
+    // Rides booked within 72 hours of pickup require full payment upfront
+    const pickupDateTime = new Date(`${pickupDate}T${pickupTime}:00`);
+    const hoursUntilPickup = (pickupDateTime - new Date()) / (1000 * 60 * 60);
+    const requiresFullPayment = hoursUntilPickup <= 72;
+    const depositAmount = requiresFullPayment ? total : parseFloat((total * DEPOSIT_PCT).toFixed(2));
+
     const booking = {
       customer_name:   customerName,
       vehicle:         selectedVehicle,
@@ -732,7 +739,8 @@
       distance_cost:   routeMiles ? parseFloat((routeMiles * PRICING[selectedVehicle].perMile).toFixed(2)) : null,
       surge_applied:   isSurgeFlag,
       total_price:     total,
-      deposit_amount:  parseFloat((total * DEPOSIT_PCT).toFixed(2)),
+      deposit_amount:  depositAmount,
+      full_payment_required: requiresFullPayment,
       local_transport_fee: kcTripType === 'roundtrip' ? parseInt(document.getElementById('kc-onsite-hours')?.value || '0') * KC_ONSITE_HOURLY_RATE : 0,
       status:          'pending_review',
       payment_status:  'pending',
