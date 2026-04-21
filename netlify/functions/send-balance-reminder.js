@@ -17,6 +17,7 @@ exports.handler = async () => {
   const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'GroupRideKC@gmail.com';
   const QUO_API_KEY = process.env.QUO_API_KEY;
   const QUO_PHONE_NUMBER_ID = process.env.QUO_PHONE_NUMBER_ID;
+  const SITE_URL = process.env.URL || 'https://groupridekc.netlify.app';
   const LOGO_URL = 'https://groupridekc.netlify.app/images/grkc-logo-van.png';
 
   try {
@@ -94,7 +95,28 @@ exports.handler = async () => {
         }
       );
 
-      // ── 2. Send customer email ──
+      // ── 2. Generate Stripe payment link for the balance ──
+      let paymentUrl = `${SITE_URL}/#quote-form-container`; // fallback
+      try {
+        const checkoutRes = await fetch(`${SITE_URL}/.netlify/functions/create-checkout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount_cents: Math.round(balance * 100),
+            booking_id: booking.id,
+            booking_type: 'kc',
+            customer_email: booking.email,
+            description: `Group Ride KC — remaining balance (${vehicleLabel})`,
+          }),
+        });
+        const checkoutData = await checkoutRes.json();
+        if (checkoutData.url) paymentUrl = checkoutData.url;
+        console.log(`Payment link generated for booking ${booking.id}: ${paymentUrl}`);
+      } catch (checkoutErr) {
+        console.error(`Failed to generate payment link for booking ${booking.id}:`, checkoutErr.message);
+      }
+
+      // ── 3. Send customer email ──
       if (RESEND_API_KEY && booking.email) {
         const emailHtml = `
 <!DOCTYPE html>
@@ -143,14 +165,14 @@ exports.handler = async () => {
       </p>
     </div>
 
-    <p style="text-align: center; color: #ddd; font-size: 14px;">
-      To pay your balance, reply to this email or call/text us and we'll send a payment link right away.
-    </p>
-
-    <p style="text-align: center; margin: 30px 0 10px;">
-      <a href="tel:+18165526669" style="display: inline-block; background: #E31837; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">
-        📞 (816) 552-6669
+    <div style="text-align: center; margin: 30px 0 10px;">
+      <a href="${paymentUrl}" style="display: inline-block; background: #E31837; color: #fff; padding: 16px 48px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 18px;">
+        Pay Balance — $${balance.toFixed(2)}
       </a>
+    </div>
+
+    <p style="text-align: center; color: #888; font-size: 13px; margin-top: 8px;">
+      Questions? Call or text us at <a href="tel:+18165526669" style="color: #FFB81C;">(816) 552-6669</a>
     </p>
 
     <p style="margin-top: 24px; font-size: 12px; color: #666; text-align: center;">
@@ -200,7 +222,7 @@ exports.handler = async () => {
             body: JSON.stringify({
               from: QUO_PHONE_NUMBER_ID,
               to: [phone],
-              content: `Hi ${firstName}! Reminder: your Group Ride KC balance of $${balance.toFixed(2)} is due within the next 24 hours for your ride on ${pickupDateFmt}. Reply or call (816) 552-6669 to pay. If not received by 72 hrs before pickup, we reserve the right to cancel and retain the deposit. — Group Ride KC`,
+              content: `Hi ${firstName}! Reminder: your Group Ride KC balance of $${balance.toFixed(2)} is due within 24 hours for your ride on ${pickupDateFmt}. Pay now: ${paymentUrl} — If not received by 72 hrs before pickup, we reserve the right to cancel and retain the deposit. — Group Ride KC`,
             }),
           });
           const smsData = await smsRes.json();
