@@ -149,7 +149,7 @@ exports.handler = async (event) => {
         <td style="padding: 8px 0; color: #FFB81C; font-weight: bold; font-size: 1.1em;">$${booking_data.total_price || '?'}</td>
       </tr>
       <tr>
-        <td style="padding: 8px 0; color: #aaa;">Deposit (50%)</td>
+        <td style="padding: 8px 0; color: #aaa;">${booking_data.deposit_amount >= booking_data.total_price ? 'Total Due (full payment — under 72 hrs)' : 'Deposit (50%)'}</td>
         <td style="padding: 8px 0; color: #fff;">$${booking_data.deposit_amount || '?'}</td>
       </tr>
       ${booking_data.notes ? `<tr><td style="padding: 8px 0; color: #aaa;">Notes</td><td style="padding: 8px 0; color: #fff;">${booking_data.notes}</td></tr>` : ''}
