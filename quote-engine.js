@@ -740,7 +740,6 @@
       surge_applied:   isSurgeFlag,
       total_price:     total,
       deposit_amount:  depositAmount,
-      full_payment_required: requiresFullPayment,
       local_transport_fee: kcTripType === 'roundtrip' ? parseInt(document.getElementById('kc-onsite-hours')?.value || '0') * KC_ONSITE_HOURLY_RATE : 0,
       status:          'pending_review',
       payment_status:  'pending',
