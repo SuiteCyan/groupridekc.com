@@ -286,7 +286,7 @@ function buildAcceptanceEmail(booking, vehicleLabel, paymentUrl) {
 
     <div style="background: rgba(255,255,255,.05); border-radius: 8px; padding: 14px 16px; margin: 16px 0;">
       <p style="font-size: 12px; color: #999; margin: 0; line-height: 1.6;">
-        <strong style="color: #ccc;">Cancellation Policy:</strong> Cancellations made more than 72 hours before pickup are eligible for a 50% deposit refund. Cancellations within 72 hours of pickup will result in no refund of the deposit.
+        <strong style="color: #ccc;">Payment &amp; Cancellation Policy:</strong> Remaining balance is due 72 hours before pickup — you'll receive a reminder at 96 hours out. If balance is not received by 72 hours before pickup, we reserve the right to cancel and retain the deposit. Cancellations made more than 72 hours before pickup are eligible for a 50% refund of payments made. Cancellations within 72 hours are non-refundable.
       </p>
       <p style="font-size: 12px; color: #999; margin: 8px 0 0; line-height: 1.6;">
         <strong style="color: #ccc;">Cleaning Fee:</strong> An additional cleaning fee of up to $250 may be charged for excessive mess, including vomiting, spills, or damage to the vehicle interior.
