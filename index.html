@@ -590,8 +590,8 @@
       </div>
       <div class="step-card">
         <div class="booking-feat-icon" style="font-size:2rem; margin-bottom:16px;">🔄</div>
-        <div class="step-title">Flexible Cancellation</div>
-        <div class="step-desc">Plans change — we get it. Cancel up to 72 hours before your ride for a 50% refund, no questions asked.</div>
+        <div class="step-title" onclick="openRefundPolicy(event)" style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted; text-underline-offset:4px;">Flexible Cancellation ↗</div>
+        <div class="step-desc">Secure your ride with a 50% deposit. Cancel more than 72 hours before pickup for a 50% refund of what you've paid. Need to change plans? Reschedule anytime and your deposit carries over.</div>
       </div>
     </div>
   </div>
@@ -743,7 +743,7 @@
         <ul>
           <li><a href="#">Terms of Service</a></li>
           <li><a href="#">Privacy Policy</a></li>
-          <li><a href="#">Refund Policy</a></li>
+          <li><a href="#" onclick="openRefundPolicy(event)">Refund Policy</a></li>
           <li><a href="#">Accessibility</a></li>
         </ul>
       </div>
@@ -758,6 +758,30 @@
     </div>
   </div>
 </footer>
+
+<!-- ══════════════ REFUND POLICY MODAL ══════════════ -->
+<div class="modal-overlay" id="refundModal">
+  <div class="modal" style="max-width:540px;">
+    <button class="modal-close" onclick="closeModal('refundModal')">✕</button>
+    <div class="modal-icon">📋</div>
+    <h3>Cancellation &amp; Refund Policy</h3>
+    <div style="text-align:left; color:var(--text-muted); font-size:0.9rem; line-height:1.7; margin-bottom:24px;">
+      <p style="margin-bottom:12px;"><strong style="color:#fff;">Deposit</strong><br>
+      A 50% deposit is required at the time of booking to secure your ride.</p>
+      <p style="margin-bottom:12px;"><strong style="color:#fff;">Remaining Balance</strong><br>
+      The remaining balance must be paid no later than 72 hours before your scheduled pickup time. A reminder will be sent at 96 hours out giving you 24 hours to complete payment.</p>
+      <p style="margin-bottom:12px;"><strong style="color:#fff;">Non-Payment</strong><br>
+      If the remaining balance is not received by 72 hours before pickup, Group Ride KC reserves the right to cancel the ride and retain the deposit.</p>
+      <p style="margin-bottom:12px;"><strong style="color:#fff;">Cancellations — More Than 72 Hours Out</strong><br>
+      If you cancel more than 72 hours before your pickup time, you will receive a 50% refund of all payments made.</p>
+      <p style="margin-bottom:12px;"><strong style="color:#fff;">Cancellations — Within 72 Hours</strong><br>
+      Cancellations made within 72 hours of your scheduled pickup are non-refundable.</p>
+      <p style="margin-bottom:0;"><strong style="color:#fff;">Rescheduling</strong><br>
+      Need to change your date or time? No problem — reschedule your ride at any time and your deposit will carry over to your new booking.</p>
+    </div>
+    <button class="btn btn-primary" onclick="closeModal('refundModal')">Got It</button>
+  </div>
+</div>
 
 <!-- ══════════════ SUCCESS MODAL ══════════════ -->
 <div class="modal-overlay" id="bookingModal">
@@ -781,6 +805,14 @@
     entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  /* ── Modal Helpers ── */
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+  function openRefundPolicy(e) { e.preventDefault(); document.getElementById('refundModal').classList.add('active'); }
+  // Close modal on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
+  });
 </script>
 
 <script>
