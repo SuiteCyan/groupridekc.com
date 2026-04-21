@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms, Policies & Disclaimers — Group Ride KC</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #111;
+      --card2: #161616;
+      --border: rgba(255,255,255,.1);
+      --text-muted: rgba(255,255,255,.5);
+      --gold: #FFB81C;
+      --red: #E31837;
+      --green: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 1rem; line-height: 1.7;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,10,10,.95); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo img { height: 36px; }
+    .nav-logo span { font-weight: 700; font-size: 1rem; color: #fff; }
+    .nav-back {
+      font-size: 0.85rem; color: var(--gold); text-decoration: none;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .nav-back:hover { text-decoration: underline; }
+
+    /* ── Page layout ── */
+    .page { max-width: 780px; margin: 0 auto; padding: 60px 24px 100px; }
+
+    /* ── Hero ── */
+    .page-hero { margin-bottom: 56px; }
+    .page-hero .label {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 12px;
+    }
+    .page-hero h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; line-height: 1.1; }
+    .page-hero p { color: var(--text-muted); margin-top: 12px; font-size: 1rem; }
+    .page-hero .updated { font-size: 0.78rem; color: var(--text-muted); margin-top: 16px; }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 24px 28px; margin-bottom: 48px;
+    }
+    .toc h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin-bottom: 14px; }
+    .toc ol { padding-left: 18px; }
+    .toc li { margin-bottom: 6px; }
+    .toc a { color: var(--gold); text-decoration: none; font-size: 0.9rem; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── Sections ── */
+    .section { margin-bottom: 56px; scroll-margin-top: 80px; }
+    .section-num {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
+    }
+    .section h2 {
+      font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .section p { color: rgba(255,255,255,.75); margin-bottom: 14px; }
+    .section p:last-child { margin-bottom: 0; }
+
+    /* ── Policy cards ── */
+    .policy-card {
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 24px; margin-bottom: 14px;
+    }
+    .policy-card h4 { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .policy-card p { font-size: 0.9rem; color: rgba(255,255,255,.65); margin: 0; }
+
+    .highlight-card {
+      background: rgba(227,24,55,.08); border: 1px solid rgba(227,24,55,.25);
+      border-radius: 12px; padding: 18px 22px; margin-bottom: 14px;
+    }
+    .highlight-card h4 { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .highlight-card p { font-size: 0.9rem; color: rgba(255,255,255,.65); margin: 0; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center; padding: 32px 24px;
+      font-size: 0.82rem; color: var(--text-muted);
+    }
+    footer a { color: var(--gold); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav>
+  <a class="nav-logo" href="/">
+    <img src="images/grkc-logo-circle.png" alt="Group Ride KC" />
+    <span>Group Ride KC</span>
+  </a>
+  <a class="nav-back" href="/">← Back to Home</a>
+</nav>
+
+<!-- ── Page ── -->
+<div class="page">
+
+  <div class="page-hero">
+    <div class="label">Legal</div>
+    <h1>Terms, Policies &amp; Disclaimers</h1>
+    <p>Please read these terms carefully before booking a ride with Group Ride KC.</p>
+    <div class="updated">Last updated: April 2026</div>
+  </div>
+
+  <!-- Table of Contents -->
+  <div class="toc">
+    <h3>On this page</h3>
+    <ol>
+      <li><a href="#pricing">Pricing &amp; Availability</a></li>
+      <li><a href="#payment">Payment Terms</a></li>
+      <li><a href="#cancellation">Cancellation &amp; Refund Policy</a></li>
+      <li><a href="#conduct">Passenger Conduct &amp; Cleaning Fee</a></li>
+      <li><a href="#liability">Liability &amp; Service Disclaimer</a></li>
+      <li><a href="#privacy">Privacy Policy</a></li>
+      <li><a href="#accessibility">Accessibility</a></li>
+      <li><a href="#contact">Contact Us</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. Pricing -->
+  <div class="section" id="pricing">
+    <div class="section-num">Section 01</div>
+    <h2>Pricing &amp; Availability</h2>
+    <p>All prices displayed on the Group Ride KC website are <strong>estimates only</strong>. Final pricing will be confirmed by Group Ride KC prior to payment.</p>
+    <div class="policy-card">
+      <h4>Prices Subject to Change</h4>
+      <p>Quoted prices are subject to change based on availability, demand, route adjustments, and other factors. A confirmed price is only guaranteed once Group Ride KC has accepted your booking request and provided a payment link.</p>
+    </div>
+    <div class="policy-card">
+      <h4>First Come, First Served</h4>
+      <p>All ride bookings are on a first come, first served basis. Submitting a request does not guarantee availability. Your ride is only confirmed once your deposit (or full payment, where applicable) has been received.</p>
+    </div>
+    <div class="policy-card">
+      <h4>Match Day &amp; Event Pricing</h4>
+      <p>Rides on Sporting KC match days, major Kansas City events, and late-night hours (10 PM–5 AM) are subject to surge pricing. Surge rates will be reflected in your quoted price prior to payment.</p>
+    </div>
+    <div class="policy-card">
+      <h4>Round Trip On-Site Fees</h4>
+      <p>Round trip bookings that require the driver to remain on-site between drop-off and return pickup are subject to an additional on-site fee of $95/hour.</p>
+    </div>
+  </div>
+
+  <!-- 2. Payment -->
+  <div class="section" id="payment">
+    <div class="section-num">Section 02</div>
+    <h2>Payment Terms</h2>
+    <div class="policy-card">
+      <h4>Deposit Requirement</h4>
+      <p>A 50% deposit is required at the time of booking to secure your ride. Your booking is not confirmed until the deposit payment is received.</p>
+    </div>
+    <div class="policy-card">
+      <h4>Remaining Balance</h4>
+      <p>The remaining balance must be paid no later than 72 hours before your scheduled pickup time. You will receive an automatic reminder at 96 hours before your pickup, giving you 24 hours to complete payment.</p>
+    </div>
+    <div class="highlight-card">
+      <h4>Non-Payment Policy</h4>
+      <p>If the remaining balance is not received by 72 hours before your scheduled pickup, Group Ride KC reserves the right to cancel the ride and retain the deposit.</p>
+    </div>
+    <div class="policy-card">
+      <h4>Rides Booked Within 72 Hours</h4>
+      <p>Bookings made within 72 hours of the scheduled pickup time require full payment at the time of booking. No split deposit/balance arrangement is available for short-notice bookings.</p>
+    </div>
+    <div class="policy-card">
+      <h4>Accepted Payment Methods</h4>
+      <p>We accept all major credit and debit cards, Apple Pay, and Google Pay. All transactions are processed securely via Stripe and are PCI DSS compliant.</p>
+    </div>
+  </div>
+
+  <!-- 3. Cancellation -->
+  <div class="section" id="cancellation">
+    <div class="section-num">Section 03</div>
+    <h2>Cancellation &amp; Refund Policy</h2>
+    <div class="policy-card">
+      <h4>Cancellations — More Than 72 Hours Before Pickup</h4>
+      <p>If you cancel more than 72 hours before your scheduled pickup time, you will receive a 50% refund of all payments made to date.</p>
+    </div>
+    <div class="highlight-card">
+      <h4>Cancellations — Within 72 Hours of Pickup</h4>
+      <p>Cancellations made within 72 hours of your scheduled pickup time are non-refundable. No refund will be issued.</p>
+    </div>
+    <div class="policy-card">
+      <h4>Rescheduling</h4>
+      <p>Need to change your date or time? You may reschedule your ride at any time and your deposit will carry over to your new booking. Rescheduling is not considered a cancellation.</p>
+    </div>
+    <div class="policy-card">
+      <h4>How to Cancel or Reschedule</h4>
+      <p>To cancel or reschedule, reply to your confirmation email or contact us directly at <a href="tel:+18165526669" style="color:var(--gold);">(816) 552-6669</a> or <a href="mailto:GroupRideKC@gmail.com" style="color:var(--gold);">GroupRideKC@gmail.com</a>.</p>
+    </div>
+  </div>
+
+  <!-- 4. Conduct -->
+  <div class="section" id="conduct">
+    <div class="section-num">Section 04</div>
+    <h2>Passenger Conduct &amp; Cleaning Fee</h2>
+    <p>Group Ride KC is committed to providing a safe and comfortable experience for all passengers and drivers.</p>
+    <div class="highlight-card">
+      <h4>Cleaning Fee</h4>
+      <p>An additional cleaning fee of up to $250 will be charged for any excessive mess caused by passengers, including but not limited to vomiting, spills, staining, or other damage to the vehicle interior. This fee will be charged to the payment method on file.</p>
+    </div>
+    <div class="policy-card">
+      <h4>Unacceptable Conduct</h4>
+      <p>Group Ride KC reserves the right to refuse or terminate service at any time if passengers engage in disruptive, unsafe, or illegal behavior. No refund will be issued in the event of service termination due to passenger misconduct.</p>
+    </div>
+    <div class="policy-card">
+      <h4>Alcohol Policy</h4>
+      <p>Passengers are responsible for complying with all applicable laws regarding alcohol consumption. Group Ride KC is not responsible for the actions of passengers before, during, or after their ride.</p>
+    </div>
+  </div>
+
+  <!-- 5. Liability -->
+  <div class="section" id="liability">
+    <div class="section-num">Section 05</div>
+    <h2>Liability &amp; Service Disclaimer</h2>
+    <p>Group Ride KC operates as a private transportation service. While we make every effort to provide reliable, on-time service, the following limitations apply:</p>
+    <div class="policy-card">
+      <h4>Service Disruptions</h4>
+      <p>Group Ride KC is not liable for delays or service disruptions caused by traffic, weather, road conditions, mechanical issues, or other circumstances beyond our control. In the event we are unable to fulfill a confirmed booking, you will receive a full refund.</p>
+    </div>
+    <div class="policy-card">
+      <h4>Lost or Damaged Property</h4>
+      <p>Group Ride KC is not responsible for items lost, left behind, or damaged in our vehicles. Please ensure you have all personal belongings before exiting the vehicle.</p>
+    </div>
+    <div class="policy-card">
+      <h4>Limitation of Liability</h4>
+      <p>To the maximum extent permitted by law, Group Ride KC's total liability to any customer shall not exceed the amount paid for the specific ride in question.</p>
+    </div>
+  </div>
+
+  <!-- 6. Privacy -->
+  <div class="section" id="privacy">
+    <div class="section-num">Section 06</div>
+    <h2>Privacy Policy</h2>
+    <p>Group Ride KC collects personal information (name, phone number, email address, and pickup/drop-off locations) solely for the purpose of fulfilling your ride booking and communicating with you about your service.</p>
+    <div class="policy-card">
+      <h4>SMS Messaging</h4>
+      <p>By providing your phone number and submitting a booking request, you agree to receive SMS messages from Group Ride KC related to your ride, including booking confirmations, driver details, payment reminders, and account notifications. Message frequency varies. Message &amp; data rates may apply. Reply STOP to opt out, HELP for help.</p>
+    </div>
+    <div class="policy-card">
+      <h4>Data Sharing</h4>
+      <p>We do not sell or share your personal information with third parties for marketing purposes. Information may be shared with service providers (e.g., payment processors, calendar services) solely to fulfill your booking.</p>
+    </div>
+    <div class="policy-card" id="cookies">
+      <h4>Cookies</h4>
+      <p>Our website may use cookies to improve your browsing experience. No personally identifiable information is stored in cookies. You may disable cookies in your browser settings at any time.</p>
+    </div>
+  </div>
+
+  <!-- 7. Accessibility -->
+  <div class="section" id="accessibility">
+    <div class="section-num">Section 07</div>
+    <h2>Accessibility</h2>
+    <p>Group Ride KC is committed to making our services accessible to all customers. If you require special accommodations or have accessibility-related questions, please contact us prior to booking at <a href="tel:+18165526669" style="color:var(--gold);">(816) 552-6669</a> and we will do our best to assist you.</p>
+  </div>
+
+  <!-- 8. Contact -->
+  <div class="section" id="contact">
+    <div class="section-num">Section 08</div>
+    <h2>Contact Us</h2>
+    <p>Questions about these terms or our policies? Reach out any time:</p>
+    <div class="policy-card">
+      <h4>Group Ride KC</h4>
+      <p>
+        📞 <a href="tel:+18165526669" style="color:var(--gold);">(816) 552-6669</a><br/>
+        ✉️ <a href="mailto:GroupRideKC@gmail.com" style="color:var(--gold);">GroupRideKC@gmail.com</a><br/>
+        🌐 <a href="https://groupridekc.com" style="color:var(--gold);">groupridekc.com</a><br/>
+        📍 Kansas City, MO
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2026 Group Ride KC · All rights reserved. · <a href="/">Back to Home</a></p>
+</footer>
+
+</body>
+</html>
