@@ -55,7 +55,30 @@ exports.handler = async (event) => {
 
     console.log(`Payment completed for booking: ${bookingId}`);
 
-    // 1. Update booking status to 'paid' and payment_status to 'deposit_paid'
+    // Determine if this was a full payment or deposit
+    // Stripe amount_total is in cents
+    const amountPaidDollars = (session.amount_total || 0) / 100;
+
+    // 1. Fetch the booking first so we can compare amount paid vs total
+    const preCheckRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/bookings?id=eq.${bookingId}&select=total_price,deposit_amount,full_payment_required`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+      }
+    );
+    const preCheckData = await preCheckRes.json();
+    const preBooking = preCheckData?.[0] || {};
+    const totalPrice = parseFloat(preBooking.total_price) || 0;
+    const isFullPayment = preBooking.full_payment_required === true ||
+      (totalPrice > 0 && Math.abs(amountPaidDollars - totalPrice) < 0.50);
+    const newPaymentStatus = isFullPayment ? 'fully_paid' : 'deposit_paid';
+
+    console.log(`Payment: $${amountPaidDollars} | Total: $${totalPrice} | Status: ${newPaymentStatus}`);
+
+    // 2. Update booking status
     const updateRes = await fetch(
       `${SUPABASE_URL}/rest/v1/bookings?id=eq.${bookingId}`,
       {
@@ -68,7 +91,7 @@ exports.handler = async (event) => {
         },
         body: JSON.stringify({
           status: 'paid',
-          payment_status: 'deposit_paid',
+          payment_status: newPaymentStatus,
           stripe_session_id: session.id,
         }),
       }
@@ -138,8 +161,10 @@ exports.handler = async (event) => {
             body: JSON.stringify({
               from: 'Group Ride KC <bookings@groupridekc.com>',
               to: [booking.email],
-              subject: `✅ Deposit Confirmed — Group Ride KC`,
-              html: buildCustomerConfirmationEmail(booking),
+              subject: isFullPayment
+                ? `✅ Payment Confirmed — You're All Set! Group Ride KC`
+                : `✅ Deposit Confirmed — Group Ride KC`,
+              html: buildCustomerConfirmationEmail(booking, isFullPayment),
             }),
           });
           const custEmailData = await custEmailRes.json();
@@ -251,10 +276,26 @@ function emailHeader() {
 }
 
 // ── Customer payment confirmation email ──
-function buildCustomerConfirmationEmail(booking) {
+function buildCustomerConfirmationEmail(booking, isFullPayment) {
   const vehicleLabel = booking.vehicle === 'van' ? '10-Passenger Van' : 'Chevy Suburban';
   const tripLabel = booking.trip_type === 'roundtrip' ? 'Round Trip' : 'One-Way';
   const remaining = (booking.total_price || 0) - (booking.deposit_amount || 0);
+  const headline = isFullPayment ? 'Paid in Full — You\'re All Set!' : 'Deposit Confirmed!';
+  const headlineColor = '#22c55e';
+  const intro = isFullPayment
+    ? 'Your full payment has been received and your ride is confirmed. No further payment needed — see you there!'
+    : 'Your deposit has been received and your ride is locked in. Here\'s a summary of your booking:';
+
+  const paymentRows = isFullPayment
+    ? `<tr><td style="padding: 8px 0; color: #aaa;">Paid in Full</td><td style="padding: 8px 0; color: #22c55e; font-weight: bold;">$${(booking.total_price || 0).toFixed(2)}</td></tr>
+       <tr><td style="padding: 8px 0; color: #aaa;">Balance Due</td><td style="padding: 8px 0; color: #22c55e; font-weight: bold;">$0.00 — Nothing more owed!</td></tr>`
+    : `<tr><td style="padding: 8px 0; color: #aaa;">Deposit Paid</td><td style="padding: 8px 0; color: #22c55e; font-weight: bold;">$${booking.deposit_amount}</td></tr>
+       <tr><td style="padding: 8px 0; color: #aaa;">Balance Due</td><td style="padding: 8px 0; color: #FFB81C; font-weight: bold;">$${remaining.toFixed(2)} (due 72 hrs before pickup)</td></tr>`;
+
+  const policyNote = isFullPayment
+    ? 'Cancellations made more than 72 hours before pickup are eligible for a 50% refund of payments made. Cancellations within 72 hours are non-refundable.'
+    : 'Remaining balance is due 72 hours before pickup — you\'ll receive a reminder at 96 hours out. If balance is not received by 72 hours before pickup, we reserve the right to cancel and retain the deposit. Cancellations made more than 72 hours before pickup are eligible for a 50% refund of payments made. Cancellations within 72 hours are non-refundable.';
+
   return `
 <!DOCTYPE html>
 <html>
@@ -262,9 +303,9 @@ function buildCustomerConfirmationEmail(booking) {
 <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f5f5f5; padding: 20px;">
   <div style="background: #0a0a0a; color: #ffffff; border-radius: 12px; padding: 30px;">
     ${emailHeader()}
-    <h1 style="color: #22c55e; margin-top: 0;">Deposit Confirmed!</h1>
+    <h1 style="color: ${headlineColor}; margin-top: 0;">${headline}</h1>
     <p style="color: #ccc; font-size: 16px;">Hi ${booking.customer_name || 'there'},</p>
-    <p style="color: #ccc;">Your deposit has been received and your ride is locked in. Here's a summary of your booking:</p>
+    <p style="color: #ccc;">${intro}</p>
 
     <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
       <tr><td style="padding: 8px 0; color: #aaa; width: 140px;">Vehicle</td><td style="padding: 8px 0; color: #fff;">${vehicleLabel}</td></tr>
@@ -274,13 +315,12 @@ function buildCustomerConfirmationEmail(booking) {
       <tr><td style="padding: 8px 0; color: #aaa;">Pickup</td><td style="padding: 8px 0; color: #fff;">${booking.pickup_address}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Drop-off</td><td style="padding: 8px 0; color: #fff;">${booking.dropoff_address}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Passengers</td><td style="padding: 8px 0; color: #fff;">${booking.passengers}</td></tr>
-      <tr><td style="padding: 8px 0; color: #aaa;">Deposit Paid</td><td style="padding: 8px 0; color: #22c55e; font-weight: bold;">$${booking.deposit_amount}</td></tr>
-      <tr><td style="padding: 8px 0; color: #aaa;">Balance Due</td><td style="padding: 8px 0; color: #FFB81C; font-weight: bold;">$${remaining.toFixed(2)} (due 72 hrs before pickup)</td></tr>
+      ${paymentRows}
     </table>
 
     <div style="background: rgba(255,255,255,.05); border-radius: 8px; padding: 14px 16px; margin: 16px 0;">
       <p style="font-size: 12px; color: #999; margin: 0; line-height: 1.6;">
-        <strong style="color: #ccc;">Payment &amp; Cancellation Policy:</strong> Remaining balance is due 72 hours before pickup — you'll receive a reminder at 96 hours out. If balance is not received by 72 hours before pickup, we reserve the right to cancel and retain the deposit. Cancellations made more than 72 hours before pickup are eligible for a 50% refund of payments made. Cancellations within 72 hours are non-refundable.
+        <strong style="color: #ccc;">Cancellation Policy:</strong> ${policyNote}
       </p>
     </div>
 
@@ -320,7 +360,7 @@ function buildAdminDepositEmail(booking) {
       <tr><td style="padding: 8px 0; color: #aaa;">Passengers</td><td style="padding: 8px 0; color: #fff;">${booking.passengers}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Total Price</td><td style="padding: 8px 0; color: #FFB81C; font-weight: bold;">$${booking.total_price}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Deposit Paid</td><td style="padding: 8px 0; color: #22c55e; font-weight: bold;">$${booking.deposit_amount}</td></tr>
-      <tr><td style="padding: 8px 0; color: #aaa;">Balance Owed</td><td style="padding: 8px 0; color: #fff;">$${remaining.toFixed(2)} (due 72 hrs before pickup)</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Balance Owed</td><td style="padding: 8px 0; color: #fff;">${remaining <= 0 ? '<span style="color:#22c55e; font-weight:bold;">$0.00 — Paid in Full</span>' : `$${remaining.toFixed(2)} (due 72 hrs before pickup)`}</td></tr>
     </table>
 
     <p style="font-size: 12px; color: #666; text-align: center; margin-top: 20px;">
