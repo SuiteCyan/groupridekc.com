@@ -72,10 +72,13 @@ exports.handler = async (event) => {
     const customerName = booking.customer_name || 'there';
 
     if (action === 'accept') {
-      // Rides within 72 hours of pickup require full payment upfront
+      // Rides within 72 hours of pickup require full payment upfront.
+      // Check both: time until pickup (UTC approximation) AND whether deposit_amount
+      // was already set to the full total by the quote engine at submission time.
       const pickupDateTime = new Date(`${booking.pickup_date}T${booking.pickup_time || '00:00'}:00`);
       const hoursUntilPickup = (pickupDateTime - new Date()) / (1000 * 60 * 60);
-      const chargeFullPayment = hoursUntilPickup <= 72 || booking.full_payment_required === true;
+      const chargeFullPayment = hoursUntilPickup <= 72 ||
+        parseFloat(booking.deposit_amount) >= parseFloat(booking.total_price);
       const chargeAmount = chargeFullPayment
         ? (booking.total_price || 0)
         : (booking.deposit_amount || booking.total_price * 0.5);
