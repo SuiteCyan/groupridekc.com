@@ -72,13 +72,23 @@ exports.handler = async (event) => {
     const customerName = booking.customer_name || 'there';
 
     if (action === 'accept') {
+      // Rides within 72 hours of pickup require full payment upfront
+      const pickupDateTime = new Date(`${booking.pickup_date}T${booking.pickup_time || '00:00'}:00`);
+      const hoursUntilPickup = (pickupDateTime - new Date()) / (1000 * 60 * 60);
+      const chargeFullPayment = hoursUntilPickup <= 72 || booking.full_payment_required === true;
+      const chargeAmount = chargeFullPayment
+        ? (booking.total_price || 0)
+        : (booking.deposit_amount || booking.total_price * 0.5);
+
       // Build Stripe payment link via the create-checkout function
       const checkoutPayload = {
-        amount_cents: Math.round((booking.deposit_amount || booking.total_price * 0.5) * 100),
+        amount_cents: Math.round(chargeAmount * 100),
         booking_id: booking.id,
         booking_type: 'kc',
         customer_email: booking.email,
-        description: `Group Ride KC — ${vehicleLabel} deposit`,
+        description: chargeFullPayment
+          ? `Group Ride KC — ${vehicleLabel} (full payment — ride within 72 hrs)`
+          : `Group Ride KC — ${vehicleLabel} deposit`,
       };
 
       let paymentUrl = SITE_URL; // fallback
@@ -107,7 +117,7 @@ exports.handler = async (event) => {
       if (RESEND_API_KEY && booking.email) {
         await sendEmail(RESEND_API_KEY, booking.email, customerName, {
           subject: `✅ Your Group Ride KC Request is Approved!`,
-          html: buildAcceptanceEmail(booking, vehicleLabel, paymentUrl),
+          html: buildAcceptanceEmail(booking, vehicleLabel, paymentUrl, chargeAmount, chargeFullPayment),
         });
       }
 
@@ -256,9 +266,14 @@ async function sendEmail(apiKey, to, customerName, { subject, html }) {
 
 
 // ── Helper: Build acceptance email HTML ──
-function buildAcceptanceEmail(booking, vehicleLabel, paymentUrl) {
-  const deposit = booking.deposit_amount || (booking.total_price * 0.5);
+function buildAcceptanceEmail(booking, vehicleLabel, paymentUrl, chargeAmount, chargeFullPayment) {
+  const deposit = chargeAmount || booking.deposit_amount || (booking.total_price * 0.5);
   const tripLabel = booking.trip_type === 'roundtrip' ? 'Round Trip' : 'One-Way';
+  const paymentLabel = chargeFullPayment ? 'Full Payment Due' : 'Deposit Due';
+  const payBtnLabel = chargeFullPayment ? `Pay in Full — $${deposit}` : `Pay Deposit — $${deposit}`;
+  const paymentNote = chargeFullPayment
+    ? 'Because your ride is within 72 hours, <strong style="color:#fff;">full payment is required</strong> to confirm your booking.'
+    : 'To secure your ride, please pay the 50% deposit below. The remaining balance is due 72 hours prior to your pickup time.';
   return `
 <!DOCTYPE html>
 <html>
@@ -279,14 +294,17 @@ function buildAcceptanceEmail(booking, vehicleLabel, paymentUrl) {
       <tr><td style="padding: 8px 0; color: #aaa;">Drop-off</td><td style="padding: 8px 0; color: #fff;">${booking.dropoff_address}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Passengers</td><td style="padding: 8px 0; color: #fff;">${booking.passengers}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Total</td><td style="padding: 8px 0; color: #FFB81C; font-weight: bold;">$${booking.total_price}</td></tr>
-      <tr><td style="padding: 8px 0; color: #aaa;">Deposit Due</td><td style="padding: 8px 0; color: #fff; font-weight: bold;">$${deposit}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">${paymentLabel}</td><td style="padding: 8px 0; color: #fff; font-weight: bold;">$${deposit}</td></tr>
     </table>
 
-    <p style="color: #ccc;">To secure your ride, please pay the 50% deposit below. The remaining balance is due 72 hours prior to your pickup time.</p>
+    <p style="color: #ccc;">${paymentNote}</p>
 
     <div style="background: rgba(255,255,255,.05); border-radius: 8px; padding: 14px 16px; margin: 16px 0;">
       <p style="font-size: 12px; color: #999; margin: 0; line-height: 1.6;">
-        <strong style="color: #ccc;">Payment &amp; Cancellation Policy:</strong> Remaining balance is due 72 hours before pickup — you'll receive a reminder at 96 hours out. If balance is not received by 72 hours before pickup, we reserve the right to cancel and retain the deposit. Cancellations made more than 72 hours before pickup are eligible for a 50% refund of payments made. Cancellations within 72 hours are non-refundable.
+        <strong style="color: #ccc;">Payment &amp; Cancellation Policy:</strong> ${chargeFullPayment
+          ? 'Full payment is required for rides booked within 72 hours of pickup.'
+          : 'Remaining balance is due 72 hours before pickup — you\'ll receive a reminder at 96 hours out. If balance is not received by 72 hours before pickup, we reserve the right to cancel and retain the deposit.'
+        } Cancellations made more than 72 hours before pickup are eligible for a 50% refund of payments made. Cancellations within 72 hours are non-refundable.
       </p>
       <p style="font-size: 12px; color: #999; margin: 8px 0 0; line-height: 1.6;">
         <strong style="color: #ccc;">Cleaning Fee:</strong> An additional cleaning fee of up to $250 may be charged for excessive mess, including vomiting, spills, or damage to the vehicle interior.
@@ -295,7 +313,7 @@ function buildAcceptanceEmail(booking, vehicleLabel, paymentUrl) {
 
     <div style="text-align: center; margin: 30px 0;">
       <a href="${paymentUrl}" style="display: inline-block; background: #E31837; color: #fff; padding: 16px 48px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 18px;">
-        Pay Deposit — $${deposit}
+        ${payBtnLabel}
       </a>
     </div>
 
