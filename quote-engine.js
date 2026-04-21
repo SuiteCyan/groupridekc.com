@@ -352,7 +352,7 @@
             <span>Estimated Total</span>
             <span id="price-display">$95</span>
           </div>
-          <div class="pb-note">This is an estimate. Final price will be confirmed by Group Ride KC.</div>
+          <div class="pb-note">This is an estimate. Final price will be confirmed by Group Ride KC. Prices are subject to change based on availability. All rides are first come, first served. <a href="terms.html" target="_blank" style="color:var(--gold); text-decoration:underline;">Full terms →</a></div>
           <div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,.08);">
             <div style="font-size:0.78rem; color:var(--text-muted); line-height:1.6;">
               <strong style="color:rgba(255,255,255,.6);">Deposit &amp; Cancellation Policy:</strong>
