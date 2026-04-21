@@ -194,7 +194,7 @@ exports.handler = async (event) => {
             body: JSON.stringify({
               from: QUO_PHONE_NUMBER_ID,
               to: [phone],
-              content: `Your deposit for Group Ride KC on ${formatDate(booking.pickup_date)} is confirmed! The remaining balance is due on ride day. See you then! — Group Ride KC`,
+              content: `Your deposit for Group Ride KC on ${formatDate(booking.pickup_date)} is confirmed! Remaining balance is due 72 hrs before pickup — we'll remind you at 96 hrs out. See you then! — Group Ride KC`,
             }),
           });
           const smsData = await smsRes.json();
@@ -275,12 +275,12 @@ function buildCustomerConfirmationEmail(booking) {
       <tr><td style="padding: 8px 0; color: #aaa;">Drop-off</td><td style="padding: 8px 0; color: #fff;">${booking.dropoff_address}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Passengers</td><td style="padding: 8px 0; color: #fff;">${booking.passengers}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Deposit Paid</td><td style="padding: 8px 0; color: #22c55e; font-weight: bold;">$${booking.deposit_amount}</td></tr>
-      <tr><td style="padding: 8px 0; color: #aaa;">Balance Due</td><td style="padding: 8px 0; color: #FFB81C; font-weight: bold;">$${remaining.toFixed(2)} (due on ride day)</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Balance Due</td><td style="padding: 8px 0; color: #FFB81C; font-weight: bold;">$${remaining.toFixed(2)} (due 72 hrs before pickup)</td></tr>
     </table>
 
     <div style="background: rgba(255,255,255,.05); border-radius: 8px; padding: 14px 16px; margin: 16px 0;">
       <p style="font-size: 12px; color: #999; margin: 0; line-height: 1.6;">
-        <strong style="color: #ccc;">Cancellation Policy:</strong> Cancellations made more than 72 hours before pickup are eligible for a 50% deposit refund. Cancellations within 72 hours of pickup will result in no refund of the deposit.
+        <strong style="color: #ccc;">Payment &amp; Cancellation Policy:</strong> Remaining balance is due 72 hours before pickup — you'll receive a reminder at 96 hours out. If balance is not received by 72 hours before pickup, we reserve the right to cancel and retain the deposit. Cancellations made more than 72 hours before pickup are eligible for a 50% refund of payments made. Cancellations within 72 hours are non-refundable.
       </p>
     </div>
 
@@ -320,7 +320,7 @@ function buildAdminDepositEmail(booking) {
       <tr><td style="padding: 8px 0; color: #aaa;">Passengers</td><td style="padding: 8px 0; color: #fff;">${booking.passengers}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Total Price</td><td style="padding: 8px 0; color: #FFB81C; font-weight: bold;">$${booking.total_price}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Deposit Paid</td><td style="padding: 8px 0; color: #22c55e; font-weight: bold;">$${booking.deposit_amount}</td></tr>
-      <tr><td style="padding: 8px 0; color: #aaa;">Balance Owed</td><td style="padding: 8px 0; color: #fff;">$${remaining.toFixed(2)} (collect on ride day)</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa;">Balance Owed</td><td style="padding: 8px 0; color: #fff;">$${remaining.toFixed(2)} (due 72 hrs before pickup)</td></tr>
     </table>
 
     <p style="font-size: 12px; color: #666; text-align: center; margin-top: 20px;">
