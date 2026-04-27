@@ -219,7 +219,7 @@ exports.handler = async (event) => {
             body: JSON.stringify({
               from: QUO_PHONE_NUMBER_ID,
               to: [phone],
-              content: `Your deposit for Group Ride KC on ${formatDate(booking.pickup_date)} is confirmed! Remaining balance is due 72 hrs before pickup — we'll remind you at 96 hrs out. See you then! — Group Ride KC`,
+              content: `You're all set${booking.customer_name ? ', ' + booking.customer_name.split(' ')[0] : ''}! 🎉 Your Group Ride KC booking is confirmed:\n📅 ${formatDate(booking.pickup_date)} at ${formatTime(booking.pickup_time)}\n📍 ${booking.pickup_address}\n🏁 ${booking.dropoff_address}\n\n${isFullPayment ? 'Payment received in full. See you then!' : 'Deposit received! Remaining balance is due 72 hrs before pickup — we\'ll remind you.'} — Group Ride KC`,
             }),
           });
           const smsData = await smsRes.json();
