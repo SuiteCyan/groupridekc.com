@@ -232,7 +232,7 @@ exports.handler = async (event) => {
           body: JSON.stringify({
             from: QUO_PHONE_NUMBER_ID,
             to: [phone],
-            content: `Hi${customerName}, we received your Group Ride KC request for ${formatDate(booking_data.pickup_date)}! We'll review it and get back to you within 24 hours. Questions? Reply to this text. — Group Ride KC`,
+            content: `Hi${customerName}, we received your Group Ride KC request for ${formatDate(booking_data.pickup_date)} at ${formatTime(booking_data.pickup_time)}! We'll review it and get back to you within 24 hours. Questions? Reply to this text. — Group Ride KC`,
           }),
         });
         const smsData = await smsRes.json();
@@ -246,6 +246,43 @@ exports.handler = async (event) => {
       }
     } else {
       console.warn('QUO SMS skipped — missing QUO_API_KEY, QUO_PHONE_NUMBER_ID, or customer phone');
+    }
+
+    // ── Create QUO contact for customer ──
+    if (QUO_API_KEY && booking_data.phone) {
+      try {
+        let phone = booking_data.phone.replace(/\D/g, '');
+        if (phone.length === 10) phone = '1' + phone;
+        if (!phone.startsWith('+')) phone = '+' + phone;
+
+        const nameParts = (booking_data.customer_name || '').trim().split(/\s+/);
+        const firstName = nameParts[0] || 'Customer';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        const contactBody = {
+          firstName,
+          phoneNumbers: [{ phoneNumber: phone }],
+        };
+        if (lastName) contactBody.lastName = lastName;
+        if (booking_data.email) contactBody.emails = [{ email: booking_data.email }];
+
+        const contactRes = await fetch('https://api.openphone.com/v1/contacts', {
+          method: 'POST',
+          headers: {
+            Authorization: QUO_API_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(contactBody),
+        });
+        const contactData = await contactRes.json();
+        if (!contactRes.ok) {
+          console.warn('QUO contact creation skipped or failed:', JSON.stringify(contactData));
+        } else {
+          console.log('QUO contact created:', contactData?.data?.id);
+        }
+      } catch (contactErr) {
+        console.error('QUO contact creation failed (non-critical):', contactErr.message);
+      }
     }
 
     return {
