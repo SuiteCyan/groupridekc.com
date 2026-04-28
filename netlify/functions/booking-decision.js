@@ -107,15 +107,6 @@ exports.handler = async (event) => {
         console.error('Failed to create checkout session:', e.message);
       }
 
-      // Send SMS via QUO
-      if (QUO_API_KEY && QUO_PHONE_NUMBER_ID && booking.phone) {
-        await sendSMS(
-          QUO_API_KEY, QUO_PHONE_NUMBER_ID,
-          booking.phone,
-          `Good news ${booking.customer_name ? booking.customer_name.split(' ')[0] : ''}! Your Group Ride KC ride is approved. Date: ${formatDate(booking.pickup_date)} at ${formatTime(booking.pickup_time)}. Pickup: ${booking.pickup_address}. Check your email for a payment link to secure your booking. - Group Ride KC`
-        );
-      }
-
       // Send acceptance email via Resend
       if (RESEND_API_KEY && booking.email) {
         await sendEmail(RESEND_API_KEY, booking.email, customerName, {
@@ -128,15 +119,6 @@ exports.handler = async (event) => {
 
     } else if (action === 'deny') {
       // DENIED
-
-      // Send SMS via QUO
-      if (QUO_API_KEY && QUO_PHONE_NUMBER_ID && booking.phone) {
-        await sendSMS(
-          QUO_API_KEY, QUO_PHONE_NUMBER_ID,
-          booking.phone,
-          `Hi ${customerName}, unfortunately the time slot you requested for ${formatDate(booking.pickup_date)} is not available. Check your email for more options. - Group Ride KC`
-        );
-      }
 
       // Send denial email via Resend
       if (RESEND_API_KEY && booking.email) {
@@ -154,7 +136,7 @@ exports.handler = async (event) => {
       }
 
       return htmlResponse(200, 'Ride Denied',
-        `The ride for <strong>${customerName}</strong> on <strong>${formatDate(booking.pickup_date)}</strong> has been denied.<br><br>The customer has been notified via SMS and email with options to request an alternative time.`);
+        `The ride for <strong>${customerName}</strong> on <strong>${formatDate(booking.pickup_date)}</strong> has been denied.<br><br>The customer has been notified via email with options to request an alternative time.`);
 
     } else if (action === 'flexible') {
       // Customer says their timeslot is flexible — notify admin
