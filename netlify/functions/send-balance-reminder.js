@@ -222,7 +222,7 @@ exports.handler = async () => {
             body: JSON.stringify({
               from: QUO_PHONE_NUMBER_ID,
               to: [phone],
-              content: `Hi ${firstName}! Reminder: your Group Ride KC balance of $${balance.toFixed(2)} is due within 24 hours for your ride on ${pickupDateFmt}. Pay now: ${paymentUrl} — If not received by 72 hrs before pickup, we reserve the right to cancel and retain the deposit. — Group Ride KC`,
+              content: `Hi ${firstName}! Reminder: your Group Ride KC balance of $${balance.toFixed(2)} is due within 24 hours for your ride on ${pickupDateFmt}. Pay here: ${paymentUrl} - If not received 72 hrs before pickup, we may cancel and retain the deposit. - Group Ride KC`,
             }),
           });
           const smsData = await smsRes.json();
