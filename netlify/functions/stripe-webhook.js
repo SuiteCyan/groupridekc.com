@@ -219,7 +219,9 @@ exports.handler = async (event) => {
             body: JSON.stringify({
               from: QUO_PHONE_NUMBER_ID,
               to: [phone],
-              content: `You're all set${booking.customer_name ? ', ' + booking.customer_name.split(' ')[0] : ''}! 🎉 Your Group Ride KC booking is confirmed:\n📅 ${formatDate(booking.pickup_date)} at ${formatTime(booking.pickup_time)}\n📍 ${booking.pickup_address}\n🏁 ${booking.dropoff_address}\n\n💰 Ride total: $${parseFloat(booking.total_price).toFixed(2)}\n✅ ${isFullPayment ? `Paid in full: $${parseFloat(booking.total_price).toFixed(2)}` : `Deposit paid: $${parseFloat(booking.deposit_amount).toFixed(2)}\n⏳ Balance due: $${(parseFloat(booking.total_price) - parseFloat(booking.deposit_amount)).toFixed(2)} (due 72 hrs before pickup)`}\n\n— Group Ride KC`,
+              content: isFullPayment
+                ? `${booking.customer_name ? booking.customer_name.split(' ')[0] + ', your' : 'Your'} Group Ride KC booking is confirmed and paid in full! Date: ${formatDate(booking.pickup_date)} at ${formatTime(booking.pickup_time)}. Pickup: ${booking.pickup_address} to ${booking.dropoff_address}. See you there! - Group Ride KC`
+                : `${booking.customer_name ? booking.customer_name.split(' ')[0] + ', your' : 'Your'} Group Ride KC booking is confirmed! Date: ${formatDate(booking.pickup_date)} at ${formatTime(booking.pickup_time)}. Pickup: ${booking.pickup_address} to ${booking.dropoff_address}. Deposit paid: $${parseFloat(booking.deposit_amount).toFixed(2)}. Balance of $${(parseFloat(booking.total_price) - parseFloat(booking.deposit_amount)).toFixed(2)} due 72 hrs before pickup. - Group Ride KC`,
             }),
           });
           const smsData = await smsRes.json();
