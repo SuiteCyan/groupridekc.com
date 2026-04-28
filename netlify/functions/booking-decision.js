@@ -112,7 +112,7 @@ exports.handler = async (event) => {
         await sendSMS(
           QUO_API_KEY, QUO_PHONE_NUMBER_ID,
           booking.phone,
-          `Great news ${booking.customer_name ? booking.customer_name.split(' ')[0] : ''}! Your Group Ride KC ride is approved 🎉\n📅 ${formatDate(booking.pickup_date)} at ${formatTime(booking.pickup_time)}\n📍 ${booking.pickup_address}\n\nCheck your email for your payment link to secure your booking. — Group Ride KC`
+          `Good news ${booking.customer_name ? booking.customer_name.split(' ')[0] : ''}! Your Group Ride KC ride is approved. Date: ${formatDate(booking.pickup_date)} at ${formatTime(booking.pickup_time)}. Pickup: ${booking.pickup_address}. Check your email for a payment link to secure your booking. - Group Ride KC`
         );
       }
 
@@ -134,7 +134,7 @@ exports.handler = async (event) => {
         await sendSMS(
           QUO_API_KEY, QUO_PHONE_NUMBER_ID,
           booking.phone,
-          `Hi ${customerName}, unfortunately the time slot you requested for ${formatDate(booking.pickup_date)} is not available. Check your email for more options. — Group Ride KC`
+          `Hi ${customerName}, unfortunately the time slot you requested for ${formatDate(booking.pickup_date)} is not available. Check your email for more options. - Group Ride KC`
         );
       }
 
