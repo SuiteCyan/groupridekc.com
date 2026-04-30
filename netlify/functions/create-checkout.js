@@ -20,7 +20,7 @@ exports.handler = async (event) => {
     }
 
     // Determine the origin for redirect URLs
-   const origin = event.headers.origin || event.headers.referer?.replace(/\/+$/, '') || process.env.URL || 'https://groupridekc.netlify.app';
+    const origin = event.headers.origin || event.headers.referer?.replace(/\/+$/, '') || process.env.URL || 'https://groupridekc.netlify.app';
 
     // Build the Stripe Checkout Session request
     const params = new URLSearchParams({
@@ -35,6 +35,7 @@ exports.handler = async (event) => {
       'customer_email': customer_email,
       'metadata[booking_id]': booking_id,
       'metadata[booking_type]': booking_type || 'kc',
+      'allow_promotion_codes': 'true',
     });
 
     const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
