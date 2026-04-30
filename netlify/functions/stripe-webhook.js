@@ -61,7 +61,7 @@ exports.handler = async (event) => {
 
     // 1. Fetch the booking first so we can compare amount paid vs total
     const preCheckRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/bookings?id=eq.${bookingId}&select=total_price,deposit_amount,full_payment_required`,
+      `${SUPABASE_URL}/rest/v1/bookings?id=eq.${bookingId}&select=total_price,deposit_amount,full_payment_required,payment_status`,
       {
         headers: {
           apikey: SUPABASE_KEY,
@@ -72,7 +72,12 @@ exports.handler = async (event) => {
     const preCheckData = await preCheckRes.json();
     const preBooking = preCheckData?.[0] || {};
     const totalPrice = parseFloat(preBooking.total_price) || 0;
+    // isFullPayment is true if:
+    // - booking requires full payment upfront, OR
+    // - deposit was already paid (so this payment is the balance), OR
+    // - amount paid is within $0.50 of the total (full payment in one shot)
     const isFullPayment = preBooking.full_payment_required === true ||
+      preBooking.payment_status === 'deposit_paid' ||
       (totalPrice > 0 && Math.abs(amountPaidDollars - totalPrice) < 0.50);
     const newPaymentStatus = isFullPayment ? 'fully_paid' : 'deposit_paid';
 
@@ -190,8 +195,10 @@ exports.handler = async (event) => {
             body: JSON.stringify({
               from: 'Group Ride KC <bookings@groupridekc.com>',
               to: [ADMIN_EMAIL],
-              subject: `💳 Deposit Paid — ${booking.customer_name || 'Customer'} — ${formatDate(booking.pickup_date)}`,
-              html: buildAdminDepositEmail(booking),
+              subject: isFullPayment
+                ? `💳 Balance Paid — ${booking.customer_name || 'Customer'} — ${formatDate(booking.pickup_date)}`
+                : `💳 Deposit Paid — ${booking.customer_name || 'Customer'} — ${formatDate(booking.pickup_date)}`,
+              html: buildAdminDepositEmail(booking, isFullPayment),
             }),
           });
           const adminEmailData = await adminEmailRes.json();
@@ -334,11 +341,15 @@ function buildCustomerConfirmationEmail(booking, isFullPayment) {
 </html>`;
 }
 
-// ── Admin deposit-paid notification email ──
-function buildAdminDepositEmail(booking) {
+// ── Admin deposit-paid / balance-paid notification email ──
+function buildAdminDepositEmail(booking, isFullPayment) {
   const vehicleLabel = booking.vehicle === 'van' ? '10-Passenger Van' : 'Chevy Suburban';
   const tripLabel = booking.trip_type === 'roundtrip' ? 'Round Trip' : 'One-Way';
   const remaining = (booking.total_price || 0) - (booking.deposit_amount || 0);
+  const headline = isFullPayment ? '✅ Balance Received — Paid in Full' : '💳 Deposit Received';
+  const intro = isFullPayment
+    ? 'A customer has paid their remaining balance. The booking is now paid in full.'
+    : 'A customer has paid their deposit. The ride is confirmed and on the calendar.';
   return `
 <!DOCTYPE html>
 <html>
@@ -346,8 +357,8 @@ function buildAdminDepositEmail(booking) {
 <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f5f5f5; padding: 20px;">
   <div style="background: #0a0a0a; color: #ffffff; border-radius: 12px; padding: 30px;">
     ${emailHeader()}
-    <h1 style="color: #22c55e; margin-top: 0;">💳 Deposit Received</h1>
-    <p style="color: #ccc;">A customer has paid their deposit. The ride is confirmed and on the calendar.</p>
+    <h1 style="color: #22c55e; margin-top: 0;">${headline}</h1>
+    <p style="color: #ccc;">${intro}</p>
 
     <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
       <tr><td style="padding: 8px 0; color: #aaa; width: 140px;">Customer</td><td style="padding: 8px 0; color: #fff;">${booking.customer_name || 'N/A'}</td></tr>
