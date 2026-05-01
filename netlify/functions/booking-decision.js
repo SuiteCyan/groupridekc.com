@@ -68,7 +68,7 @@ exports.handler = async (event) => {
     }
 
     // 3. Send customer notifications
-    const vehicleLabel = booking.vehicle === 'van' ? '10-Passenger Van' : 'Chevy Suburban';
+    const vehicleLabel = booking.vehicle === 'van' ? '10-Passenger Van' : 'GMC Yukon Denali XL';
     const customerName = booking.customer_name || 'there';
 
     if (action === 'accept') {
