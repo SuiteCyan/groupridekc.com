@@ -220,6 +220,7 @@ exports.handler = async (event) => {
           let phone = booking.phone.replace(/\D/g, '');
           if (phone.length === 10) phone = '1' + phone;
           if (!phone.startsWith('+')) phone = '+' + phone;
+          const smsRemainingBalance = Math.max(0, parseFloat(booking.total_price) - parseFloat(booking.deposit_amount));
           const smsRes = await fetch('https://api.openphone.com/v1/messages', {
             method: 'POST',
             headers: { Authorization: QUO_API_KEY, 'Content-Type': 'application/json' },
@@ -228,7 +229,7 @@ exports.handler = async (event) => {
               to: [phone],
               content: isFullPayment
                 ? `Your balance has been paid and your ride is confirmed!\nDate: ${formatDate(booking.pickup_date)} at ${formatTime(booking.pickup_time)}.\nPickup: ${booking.pickup_address}\nDestination: ${booking.dropoff_address}.`
-                : `${booking.customer_name ? booking.customer_name.split(' ')[0] + ', your' : 'Your'} Group Ride KC booking is confirmed!\nDate: ${formatDate(booking.pickup_date)} at ${formatTime(booking.pickup_time)}.\nPickup: ${booking.pickup_address}\nDestination: ${booking.dropoff_address}.\nDeposit paid: $${parseFloat(booking.deposit_amount).toFixed(2)}.\nBalance of $${(parseFloat(booking.total_price) - parseFloat(booking.deposit_amount)).toFixed(2)} due 72 hrs before pickup.`,
+                : `${booking.customer_name ? booking.customer_name.split(' ')[0] + ', your' : 'Your'} Group Ride KC booking is confirmed!\nDate: ${formatDate(booking.pickup_date)} at ${formatTime(booking.pickup_time)}.\nPickup: ${booking.pickup_address}\nDestination: ${booking.dropoff_address}.\nDeposit paid: $${parseFloat(booking.deposit_amount).toFixed(2)}.${smsRemainingBalance > 0 ? `\nBalance of $${smsRemainingBalance.toFixed(2)} due 72 hrs before pickup.` : ''}`,
             }),
           });
           const smsData = await smsRes.json();
