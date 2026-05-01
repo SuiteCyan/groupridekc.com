@@ -434,7 +434,7 @@
      ═══════════════════════════════════════════════════════════════ */
 
   const PRICING = {
-    suburban: { base: 95,  perMile: 2.25, label: 'Suburban' },
+    suburban: { base: 95,  perMile: 2.25, label: 'GMC Yukon Denali XL' },
     van:      { base: 95,  perMile: 3.00, label: '10-Pass Van' }
   };
   const SURGE_PRICING = { base: 145, perMile: 5.00 };
