@@ -215,13 +215,22 @@ exports.handler = async () => {
           if (phone.length === 10) phone = '1' + phone;
           if (!phone.startsWith('+')) phone = '+' + phone;
 
+          // Shorten the Stripe payment URL via TinyURL
+          let shortUrl = paymentUrl;
+          try {
+            const tinyRes = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(paymentUrl)}`);
+            if (tinyRes.ok) shortUrl = await tinyRes.text();
+          } catch (e) {
+            console.warn('TinyURL shortening failed, using full URL:', e.message);
+          }
+
           const smsRes = await fetch('https://api.openphone.com/v1/messages', {
             method: 'POST',
             headers: { Authorization: QUO_API_KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify({
               from: QUO_PHONE_NUMBER_ID,
               to: [phone],
-              content: `Hi ${firstName}! Your Group Ride KC balance of $${balance.toFixed(2)} is due within 24 hours for your ride on ${pickupDateFmt}. Pay now. If not received by 72 hrs before pickup, we reserve the right to cancel and retain the deposit.`,
+              content: `Hi ${firstName}! Your Group Ride KC balance of $${balance.toFixed(2)} is due within 24 hours for your ride on ${pickupDateFmt}. Pay now: ${shortUrl} - If not received by 72 hrs before pickup, we reserve the right to cancel and retain the deposit.`,
             }),
           });
           const smsData = await smsRes.json();
