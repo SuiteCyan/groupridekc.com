@@ -83,10 +83,6 @@ exports.handler = async (event) => {
       <h3 style="color: #FFB81C; margin: 0 0 14px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Trip Details</h3>
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <td style="padding: 8px 0; color: #aaa; width: 140px;">Vehicle</td>
-          <td style="padding: 8px 0; color: #fff;">${vehicleLabel}</td>
-        </tr>
-        <tr>
           <td style="padding: 8px 0; color: #aaa;">Trip Type</td>
           <td style="padding: 8px 0; color: #fff;">${tripLabel}</td>
         </tr>
