@@ -53,7 +53,7 @@ exports.handler = async (event) => {
       return { statusCode: 200, body: JSON.stringify({ skipped: true, reason: 'No customer email' }) };
     }
 
-    const vehicleLabel = booking_data.vehicle === 'van' ? '10-Passenger Van' : 'Chevy Suburban';
+    const vehicleLabel = booking_data.vehicle === 'van' ? '10-Passenger Van' : 'GMC Yukon Denali XL';
     const tripLabel = booking_data.trip_type === 'roundtrip' ? 'Round Trip' : 'One-Way';
 
     const total = parseFloat(booking_data.total_price) || 0;
