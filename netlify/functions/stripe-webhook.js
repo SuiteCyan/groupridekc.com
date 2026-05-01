@@ -317,8 +317,7 @@ function buildCustomerConfirmationEmail(booking, isFullPayment) {
     <p style="color: #ccc;">${intro}</p>
 
     <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-      <tr><td style="padding: 8px 0; color: #aaa; width: 140px;">Vehicle</td><td style="padding: 8px 0; color: #fff;">${vehicleLabel}</td></tr>
-      <tr><td style="padding: 8px 0; color: #aaa;">Trip Type</td><td style="padding: 8px 0; color: #fff;">${tripLabel}</td></tr>
+      <tr><td style="padding: 8px 0; color: #aaa; width: 140px;">Trip Type</td><td style="padding: 8px 0; color: #fff;">${tripLabel}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Date</td><td style="padding: 8px 0; color: #fff;">${formatDate(booking.pickup_date)}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Time</td><td style="padding: 8px 0; color: #fff;">${formatTime(booking.pickup_time)}</td></tr>
       <tr><td style="padding: 8px 0; color: #aaa;">Pickup</td><td style="padding: 8px 0; color: #fff;">${booking.pickup_address}</td></tr>
