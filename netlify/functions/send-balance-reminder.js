@@ -146,7 +146,6 @@ exports.handler = async () => {
     <div style="background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 20px; margin: 24px 0;">
       <h3 style="color: #FFB81C; margin: 0 0 14px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Your Trip</h3>
       <table style="width: 100%; border-collapse: collapse;">
-        <tr><td style="padding: 6px 0; color: #aaa; width: 140px;">Vehicle</td><td style="padding: 6px 0; color: #fff;">${vehicleLabel}</td></tr>
         <tr><td style="padding: 6px 0; color: #aaa;">Date</td><td style="padding: 6px 0; color: #fff;">${pickupDateFmt}</td></tr>
         <tr><td style="padding: 6px 0; color: #aaa;">Pickup Time</td><td style="padding: 6px 0; color: #fff;">${pickupTimeFmt}</td></tr>
         <tr><td style="padding: 6px 0; color: #aaa;">Pickup</td><td style="padding: 6px 0; color: #fff;">${booking.pickup_address || 'N/A'}</td></tr>
