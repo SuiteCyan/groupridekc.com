@@ -68,7 +68,7 @@ exports.handler = async (event) => {
     const acceptUrl = `${SITE_URL}/.netlify/functions/booking-decision?token=${adminToken}&action=accept`;
     const denyUrl = `${SITE_URL}/.netlify/functions/booking-decision?token=${adminToken}&action=deny`;
 
-    const vehicleLabel = booking_data.vehicle === 'van' ? '10-Passenger Van' : 'Chevy Suburban';
+    const vehicleLabel = booking_data.vehicle === 'van' ? '10-Passenger Van' : 'GMC Yukon Denali XL';
     const tripLabel = booking_data.trip_type === 'roundtrip' ? 'Round Trip' : 'One-Way';
 
     // ── Trip cost calculator ──
