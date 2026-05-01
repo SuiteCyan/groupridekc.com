@@ -78,7 +78,7 @@ exports.handler = async () => {
       const balance = Math.max(0, total - deposit);
       const pickupDateFmt = formatDate(booking.pickup_date);
       const pickupTimeFmt = formatTime(booking.pickup_time);
-      const vehicleLabel = booking.vehicle === 'van' ? '10-Passenger Van' : 'Chevy Suburban';
+      const vehicleLabel = booking.vehicle === 'van' ? '10-Passenger Van' : 'GMC Yukon Denali XL';
 
       // ── 1. Mark reminder sent FIRST to prevent double-send if function re-runs ──
       await fetch(
