@@ -286,7 +286,7 @@ function emailHeader() {
 
 // ── Customer payment confirmation email ──
 function buildCustomerConfirmationEmail(booking, isFullPayment) {
-  const vehicleLabel = booking.vehicle === 'van' ? '10-Passenger Van' : 'Chevy Suburban';
+  const vehicleLabel = booking.vehicle === 'van' ? '10-Passenger Van' : 'GMC Yukon Denali XL';
   const tripLabel = booking.trip_type === 'roundtrip' ? 'Round Trip' : 'One-Way';
   const remaining = (booking.total_price || 0) - (booking.deposit_amount || 0);
   const headline = isFullPayment ? 'Paid in Full — You\'re All Set!' : 'Deposit Confirmed!';
@@ -343,7 +343,7 @@ function buildCustomerConfirmationEmail(booking, isFullPayment) {
 
 // ── Admin deposit-paid / balance-paid notification email ──
 function buildAdminDepositEmail(booking, isFullPayment) {
-  const vehicleLabel = booking.vehicle === 'van' ? '10-Passenger Van' : 'Chevy Suburban';
+  const vehicleLabel = booking.vehicle === 'van' ? '10-Passenger Van' : 'GMC Yukon Denali XL';
   const tripLabel = booking.trip_type === 'roundtrip' ? 'Round Trip' : 'One-Way';
   const remaining = (booking.total_price || 0) - (booking.deposit_amount || 0);
   const headline = isFullPayment ? '✅ Balance Received — Paid in Full' : '💳 Deposit Received';
