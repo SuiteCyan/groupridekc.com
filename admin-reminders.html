@@ -308,6 +308,7 @@
       <div class="chip"        data-filter="paid"     onclick="setFilter('paid')">Paid in Full</div>
       <div class="chip"        data-filter="upcoming" onclick="setFilter('upcoming')">Upcoming (7 days)</div>
       <div class="chip"        data-filter="unconfirmed" onclick="setFilter('unconfirmed')">Unconfirmed</div>
+      <div class="chip"        data-filter="cancel_requested" onclick="setFilter('cancel_requested')">Cancel Requests</div>
       <div class="chip"        data-filter="past"     onclick="setFilter('past')">Past Rides</div>
     </div>
 
@@ -317,6 +318,20 @@
       <div class="notice"><span class="spinner"></span> Loading bookings…</div>
     </div>
 
+  </div>
+</div>
+
+<!-- ── Cancel confirmation modal ── -->
+<div id="cancel-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#141414;border:1px solid #2a2a2a;border-radius:12px;padding:28px 24px;max-width:440px;width:100%;">
+    <h3 style="color:#E31837;margin-bottom:12px;">Confirm Cancellation</h3>
+    <p id="cancel-modal-body" style="color:#ccc;font-size:.88rem;line-height:1.6;margin-bottom:8px;"></p>
+    <p id="cancel-refund-note" style="color:#FFB81C;font-size:.85rem;font-weight:bold;margin-bottom:16px;"></p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-ghost" style="flex:1;" onclick="closeCancelModal()">Never Mind</button>
+      <button class="btn" style="flex:1;" id="cancel-confirm-btn" onclick="doCancel()">Yes, Cancel Ride</button>
+    </div>
+    <div id="cancel-modal-status" style="margin-top:12px;font-size:.82rem;color:#aaa;"></div>
   </div>
 </div>
 
@@ -393,8 +408,9 @@
       if (filter === 'balance')    return calcBalance(b) > 0;
       if (filter === 'paid')       return calcBalance(b) <= 0 && (b.payment_status === 'paid' || b.payment_status === 'deposit_paid');
       if (filter === 'upcoming')   return b.pickup_date >= today && b.pickup_date <= in7days;
-      if (filter === 'unconfirmed') return b.status === 'pending' || b.status === 'requested';
-      if (filter === 'past')       return b.pickup_date < today;
+      if (filter === 'unconfirmed')      return b.status === 'pending' || b.status === 'requested';
+      if (filter === 'cancel_requested') return b.cancel_requested === true;
+      if (filter === 'past')             return b.pickup_date < today;
       return true; // all
     });
 
@@ -442,6 +458,7 @@
     else            badges += `<span class="badge badge-paid">Paid in Full</span>`;
     if (!hasFuture && hasPast) badges += `<span class="badge badge-past">Past</span>`;
     if (b0.status === 'pending' || b0.status === 'requested') badges += `<span class="badge badge-pending">Unconfirmed</span>`;
+    if (bookings.some(b => b.cancel_requested)) badges += `<span class="badge" style="background:rgba(227,24,55,.15);color:#E31837;border:1px solid rgba(227,24,55,.35);">Cancel Request</span>`;
     if (bookings.length > 1) badges += `<span class="badge badge-count">${bookings.length} rides</span>`;
 
     const metaParts = [];
@@ -506,12 +523,23 @@
         ${balance <= 0 ? '✓ Paid in full' : 'Balance due: $' + balance.toFixed(2)}
       </div>
 
+      ${b.cancel_requested ? `
+      <div style="background:rgba(227,24,55,.08);border:1px solid rgba(227,24,55,.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.82rem;color:#E31837;">
+        ⚠ Customer has requested cancellation
+      </div>` : ''}
+
       <div class="card-actions">
         <button class="btn btn-sm" id="btn-${b.id}"
           onclick="sendReminder('${b.id}')"
           ${balance <= 0 ? 'disabled title="Balance is $0 — nothing to collect"' : ''}>
           Send Reminder
         </button>
+        ${b.status !== 'cancelled' ? `
+        <button class="btn btn-sm" style="background:#333;color:#ccc;border:1px solid #444;"
+          id="cancel-btn-${b.id}"
+          onclick="confirmCancel('${b.id}', '${esc(b.customer_name || '')}', '${esc(b.pickup_date || '')}', '${esc(b.pickup_time || '')}', ${balance})">
+          Cancel Ride
+        </button>` : `<span style="color:#E31837;font-size:.82rem;font-weight:bold;">Cancelled</span>`}
         <span class="send-status" id="status-${b.id}"></span>
       </div>
     `;
@@ -591,6 +619,67 @@
       status.textContent = `Network error: ${esc(err.message)}`;
       btn.disabled = false;
       btn.textContent = 'Send Reminder';
+    }
+  }
+
+  // ── Cancel ride ──
+  let cancelTargetId = null;
+
+  function confirmCancel(bookingId, customerName, pickupDate, pickupTime, balance) {
+    cancelTargetId = bookingId;
+    const hoursUntil = pickupDate && pickupTime
+      ? (new Date(`${pickupDate}T${pickupTime}:00Z`) - new Date()) / (1000 * 60 * 60)
+      : 0;
+    const deposit = parseFloat(ALL_BOOKINGS.find(b => b.id === bookingId)?.deposit_amount) || 0;
+
+    document.getElementById('cancel-modal-body').textContent =
+      `Cancel the ride for ${customerName} on ${fmtDate(pickupDate)} at ${fmtTime(pickupTime)}?`;
+
+    const refundNote = hoursUntil > 72 && deposit > 0
+      ? `Customer qualifies for a 50% deposit refund ($${(deposit * 0.5).toFixed(2)}) — will be issued automatically via Stripe.`
+      : `Within 72-hour window — no refund will be issued per cancellation policy.`;
+    document.getElementById('cancel-refund-note').textContent = refundNote;
+    document.getElementById('cancel-modal-status').textContent = '';
+    document.getElementById('cancel-modal').style.display = 'flex';
+  }
+
+  function closeCancelModal() {
+    document.getElementById('cancel-modal').style.display = 'none';
+    cancelTargetId = null;
+  }
+
+  async function doCancel() {
+    if (!cancelTargetId) return;
+    const btn = document.getElementById('cancel-confirm-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Cancelling…';
+    document.getElementById('cancel-modal-status').textContent = '';
+
+    try {
+      const data = await post({ action: 'cancel', booking_id: cancelTargetId });
+      if (data.success) {
+        const refundStr = data.results?.refund ? ` · Refund: ${data.results.refund}` : '';
+        document.getElementById('cancel-modal-status').style.color = '#22c55e';
+        document.getElementById('cancel-modal-status').textContent =
+          `Cancelled. SMS: ${data.results?.sms} · Email: ${data.results?.email}${refundStr}`;
+        btn.textContent = 'Done';
+        // Update local data and re-render
+        const idx = ALL_BOOKINGS.findIndex(b => b.id === cancelTargetId);
+        if (idx !== -1) { ALL_BOOKINGS[idx].status = 'cancelled'; ALL_BOOKINGS[idx].cancel_requested = false; }
+        renderStats(ALL_BOOKINGS);
+        // Close after short delay
+        setTimeout(() => { closeCancelModal(); renderDashboard(ALL_BOOKINGS, activeFilter); }, 2500);
+      } else {
+        document.getElementById('cancel-modal-status').style.color = '#E31837';
+        document.getElementById('cancel-modal-status').textContent = data.error || 'Something went wrong.';
+        btn.disabled = false;
+        btn.textContent = 'Yes, Cancel Ride';
+      }
+    } catch (err) {
+      document.getElementById('cancel-modal-status').style.color = '#E31837';
+      document.getElementById('cancel-modal-status').textContent = `Network error: ${err.message}`;
+      btn.disabled = false;
+      btn.textContent = 'Yes, Cancel Ride';
     }
   }
 
