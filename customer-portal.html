@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Booking | Group Ride KC</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #FFB81C;
+      --red:  #E31837;
+      --bg:   #0a0a0a;
+      --card: #141414;
+      --card2:#1a1a1a;
+      --border:#2a2a2a;
+      --text: #fff;
+      --muted:#888;
+      --green:#22c55e;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 16px 64px;
+    }
+
+    .container { max-width: 640px; margin: 0 auto; }
+
+    /* ── Logo / header ── */
+    .logo { text-align: center; margin-bottom: 20px; }
+    .logo img { width: 150px; height: auto; }
+    h1 { text-align: center; color: var(--gold); font-size: 1.45rem; margin-bottom: 4px; }
+    .subtitle { text-align: center; color: var(--muted); font-size: 0.83rem; margin-bottom: 32px; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 24px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 { color: var(--gold); font-size: 0.95rem; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 18px; }
+
+    /* ── Forms ── */
+    .field { margin-bottom: 16px; }
+    label { display: block; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+
+    input[type="text"], input[type="email"] {
+      width: 100%;
+      background: var(--card2);
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.92rem;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input[type="text"]:focus, input[type="email"]:focus { border-color: var(--gold); }
+
+    .btn {
+      display: block;
+      width: 100%;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: opacity .15s;
+      margin-top: 8px;
+    }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .4; cursor: default; }
+    .btn-gold { background: var(--gold); color: #000; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #444;
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-outline:hover { border-color: var(--red); color: var(--red); }
+    .btn-outline:disabled { opacity: .4; cursor: default; }
+
+    /* ── Booking detail table ── */
+    .detail-table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+    .detail-table tr { border-bottom: 1px solid #1f1f1f; }
+    .detail-table tr:last-child { border-bottom: none; }
+    .detail-table td { padding: 9px 0; }
+    .detail-table td:first-child { color: var(--muted); width: 130px; }
+    .detail-table td:last-child { color: #ddd; }
+
+    /* ── Balance box ── */
+    .balance-box {
+      background: var(--card2);
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      margin: 20px 0 16px;
+    }
+    .balance-box .lbl { color: var(--gold); font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; }
+    .balance-box .amt { color: #fff; font-size: 2rem; font-weight: 800; }
+
+    .paid-box {
+      background: rgba(34,197,94,.08);
+      border: 1px solid rgba(34,197,94,.3);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      margin: 20px 0 16px;
+      color: var(--green);
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    /* ── Status badge ── */
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: bold;
+    }
+    .status-confirmed { background: rgba(34,197,94,.12); color: var(--green); border: 1px solid rgba(34,197,94,.3); }
+    .status-pending   { background: rgba(156,163,175,.1); color: #9ca3af; border: 1px solid rgba(156,163,175,.25); }
+    .status-cancelled { background: rgba(227,24,55,.1); color: var(--red); border: 1px solid rgba(227,24,55,.3); }
+
+    /* ── Cancel warning ── */
+    .cancel-warning {
+      background: rgba(227,24,55,.07);
+      border: 1px solid rgba(227,24,55,.25);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 0.82rem;
+      color: #ccc;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .cancel-warning strong { color: var(--red); }
+
+    .cancel-requested-notice {
+      background: rgba(255,184,28,.08);
+      border: 1px solid rgba(255,184,28,.3);
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: var(--gold);
+      font-size: 0.87rem;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    /* ── Notices ── */
+    .notice { background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 0.87rem; padding: 16px; text-align: center; }
+    .notice.error { border-color: rgba(227,24,55,.4); color: var(--red); }
+    .notice.success { border-color: rgba(34,197,94,.3); color: var(--green); }
+
+    .hint { font-size: 0.78rem; color: var(--muted); margin-top: 10px; text-align: center; line-height: 1.5; }
+    .hint a { color: var(--gold); text-decoration: none; }
+
+    /* ── Spinner ── */
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #333; border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Modal overlay ── */
+    .modal-bg {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.75);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 24px;
+      max-width: 440px;
+      width: 100%;
+    }
+    .modal h3 { color: var(--red); margin-bottom: 12px; }
+    .modal p  { color: #ccc; font-size: 0.88rem; line-height: 1.6; margin-bottom: 14px; }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-actions .btn { margin-top: 0; flex: 1; }
+    .modal-actions .btn-outline { margin-top: 0; flex: 1; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="logo">
+    <img src="/images/grkc-logo-van.png" alt="Group Ride KC" />
+  </div>
+  <h1>My Booking</h1>
+  <p class="subtitle">View your reservation, pay your balance, or request a cancellation.</p>
+
+  <!-- ── Login screen ── -->
+  <div id="login-screen">
+    <div class="card">
+      <h2>Find Your Booking</h2>
+      <div class="field">
+        <label for="login-email">Email Address</label>
+        <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="login-id">Booking ID</label>
+        <input type="text" id="login-id" placeholder="From your confirmation email" autocomplete="off" spellcheck="false" />
+      </div>
+      <button class="btn btn-gold" onclick="doLogin()">View My Booking</button>
+      <div id="login-error" style="color:var(--red);font-size:.82rem;margin-top:12px;text-align:center;"></div>
+    </div>
+    <p class="hint">Your Booking ID is in your confirmation email.<br/>Need help? Call or text <a href="tel:+18165526669">(816) 552-6669</a></p>
+  </div>
+
+  <!-- ── Booking screen ── -->
+  <div id="booking-screen" style="display:none;">
+
+    <!-- Status header -->
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-weight:bold;font-size:1.1rem;" id="b-name"></div>
+        <div style="color:var(--muted);font-size:.82rem;margin-top:3px;" id="b-contact"></div>
+      </div>
+      <div id="b-status-badge"></div>
+    </div>
+
+    <!-- Booking details -->
+    <div class="card">
+      <h2>Trip Details</h2>
+      <table class="detail-table">
+        <tr><td>Date</td><td id="b-date"></td></tr>
+        <tr><td>Pickup Time</td><td id="b-time"></td></tr>
+        <tr><td>Pickup</td><td id="b-pickup"></td></tr>
+        <tr><td>Drop-off</td><td id="b-dropoff"></td></tr>
+        <tr><td>Passengers</td><td id="b-passengers"></td></tr>
+      </table>
+    </div>
+
+    <!-- Payment section -->
+    <div class="card" id="payment-card">
+      <h2>Payment</h2>
+      <table class="detail-table" style="margin-bottom:0;">
+        <tr><td>Total</td><td id="b-total"></td></tr>
+        <tr><td>Deposit Paid</td><td id="b-deposit" style="color:var(--green);"></td></tr>
+      </table>
+      <div id="balance-section"></div>
+      <div id="pay-btn-wrap"></div>
+    </div>
+
+    <!-- Cancellation -->
+    <div class="card" id="cancel-card">
+      <h2>Cancellation</h2>
+      <div id="cancel-section"></div>
+    </div>
+
+    <!-- Sign out -->
+    <button class="btn-outline" onclick="signOut()" style="display:block;width:100%;margin-top:4px;">Sign Out</button>
+  </div>
+
+</div>
+
+<!-- ── Cancel confirmation modal ── -->
+<div class="modal-bg" id="cancel-modal">
+  <div class="modal">
+    <h3>Request Cancellation</h3>
+    <p>Are you sure you want to request cancellation of your ride? Your request will be sent to our team for review.</p>
+    <p id="modal-refund-note" style="color:var(--gold);font-weight:bold;"></p>
+    <div class="modal-actions">
+      <button class="btn-outline" onclick="closeModal()">Never Mind</button>
+      <button class="btn" onclick="confirmCancel()">Yes, Request Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const FUNC = '/.netlify/functions/customer-portal';
+  let SESSION = null; // { email, booking_id }
+  let BOOKING  = null;
+
+  // ── Enter key on login ──
+  ['login-email','login-id'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  });
+
+  // ── Pre-fill booking ID from URL (?id=...) ──
+  const urlId = new URLSearchParams(location.search).get('id');
+  if (urlId) document.getElementById('login-id').value = urlId;
+
+  // ── Login ──
+  async function doLogin() {
+    const email      = document.getElementById('login-email').value.trim();
+    const booking_id = document.getElementById('login-id').value.trim();
+    const errEl      = document.getElementById('login-error');
+    errEl.textContent = '';
+
+    if (!email || !booking_id) { errEl.textContent = 'Please enter both your email and booking ID.'; return; }
+
+    const btn = document.querySelector('#login-screen .btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Looking up…';
+
+    try {
+      const data = await post({ action: 'login', email, booking_id });
+      if (data.error) {
+        errEl.textContent = data.error;
+        btn.disabled = false;
+        btn.textContent = 'View My Booking';
+        return;
+      }
+      SESSION = { email, booking_id };
+      BOOKING = data.booking;
+      renderBooking(BOOKING);
+    } catch (err) {
+      errEl.textContent = 'Network error — please try again.';
+      btn.disabled = false;
+      btn.textContent = 'View My Booking';
+    }
+  }
+
+  function renderBooking(b) {
+    document.getElementById('login-screen').style.display   = 'none';
+    document.getElementById('booking-screen').style.display = 'block';
+
+    // Header
+    document.getElementById('b-name').textContent    = b.customer_name || 'Your Booking';
+    document.getElementById('b-contact').textContent = [b.phone, b.email].filter(Boolean).join(' · ');
+
+    // Status badge
+    const statusEl = document.getElementById('b-status-badge');
+    const s = b.status || 'pending';
+    let cls = 'status-pending', label = 'Pending';
+    if (s === 'paid' || s === 'accepted') { cls = 'status-confirmed'; label = 'Confirmed'; }
+    if (s === 'cancelled') { cls = 'status-cancelled'; label = 'Cancelled'; }
+    statusEl.innerHTML = `<span class="status-badge ${cls}">${label}</span>`;
+
+    // Trip details
+    document.getElementById('b-date').textContent       = fmtDate(b.pickup_date);
+    document.getElementById('b-time').textContent       = fmtTime(b.pickup_time);
+    document.getElementById('b-pickup').textContent     = b.pickup_address  || 'N/A';
+    document.getElementById('b-dropoff').textContent    = b.dropoff_address || 'N/A';
+    document.getElementById('b-passengers').textContent = b.passengers      || 'N/A';
+
+    // Payment
+    const total   = parseFloat(b.total_price)    || 0;
+    const deposit = parseFloat(b.deposit_amount) || 0;
+    const balance = Math.max(0, total - deposit);
+    document.getElementById('b-total').textContent   = '$' + total.toFixed(2);
+    document.getElementById('b-deposit').textContent = '$' + deposit.toFixed(2);
+
+    const balSec  = document.getElementById('balance-section');
+    const payWrap = document.getElementById('pay-btn-wrap');
+
+    if (b.status === 'cancelled') {
+      balSec.innerHTML  = '';
+      payWrap.innerHTML = '';
+    } else if (balance <= 0) {
+      balSec.innerHTML  = '<div class="paid-box">✓ Your balance is paid in full!</div>';
+      payWrap.innerHTML = '';
+    } else {
+      balSec.innerHTML = `
+        <div class="balance-box">
+          <div class="lbl">Balance Due</div>
+          <div class="amt">$${balance.toFixed(2)}</div>
+        </div>`;
+      payWrap.innerHTML = `
+        <a class="btn btn-gold" href="/pay?id=${esc(b.id)}">Pay Balance — $${balance.toFixed(2)}</a>`;
+    }
+
+    // Cancellation section
+    const cancelSec = document.getElementById('cancel-section');
+    if (b.status === 'cancelled') {
+      cancelSec.innerHTML = '<p class="notice">This booking has been cancelled.</p>';
+    } else if (b.cancel_requested) {
+      cancelSec.innerHTML = `
+        <div class="cancel-requested-notice">
+          Your cancellation request has been received. Our team will be in touch soon.
+        </div>`;
+    } else {
+      const hoursUntil = hoursUntilPickup(b.pickup_date, b.pickup_time);
+      const refundNote = (hoursUntil > 72 && deposit > 0)
+        ? `If cancelled now, you'll receive a 50% refund on your deposit ($${(deposit * 0.5).toFixed(2)}).`
+        : 'Cancellations within 72 hours of pickup are non-refundable per our cancellation policy.';
+
+      cancelSec.innerHTML = `
+        <div class="cancel-warning">
+          <strong>Cancellation Policy:</strong> Cancellations made more than 72 hours before pickup receive a 50% deposit refund.
+          Cancellations within 72 hours forfeit the deposit.
+        </div>
+        <p style="color:var(--muted);font-size:.83rem;margin-bottom:12px;">
+          Submitting a request does not immediately cancel your ride — our team will confirm the cancellation and process any applicable refund.
+        </p>
+        <button class="btn-outline" onclick="openModal('${esc(b.id)}', ${hoursUntil}, ${deposit})">Request Cancellation</button>`;
+    }
+  }
+
+  // ── Cancel modal ──
+  let pendingCancelId = null;
+  function openModal(bookingId, hoursUntil, deposit) {
+    pendingCancelId = bookingId;
+    const note = (hoursUntil > 72 && deposit > 0)
+      ? `Based on your pickup time, you qualify for a 50% deposit refund ($${(deposit * 0.5).toFixed(2)}).`
+      : 'Based on your pickup time, this cancellation is within the 72-hour window and the deposit is non-refundable.';
+    document.getElementById('modal-refund-note').textContent = note;
+    document.getElementById('cancel-modal').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('cancel-modal').classList.remove('open');
+    pendingCancelId = null;
+  }
+
+  async function confirmCancel() {
+    if (!pendingCancelId || !SESSION) return;
+    const btn = document.querySelector('#cancel-modal .btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Sending…';
+
+    try {
+      const data = await post({ action: 'cancel_request', email: SESSION.email, booking_id: SESSION.booking_id });
+      closeModal();
+      if (data.success) {
+        // Refresh booking view
+        const refreshData = await post({ action: 'login', email: SESSION.email, booking_id: SESSION.booking_id });
+        if (refreshData.booking) {
+          BOOKING = refreshData.booking;
+          renderBooking(BOOKING);
+        }
+      } else {
+        alert(data.error || 'Something went wrong. Please call (816) 552-6669.');
+      }
+    } catch {
+      closeModal();
+      alert('Network error. Please try again or call (816) 552-6669.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Yes, Request Cancel';
+    }
+  }
+
+  function signOut() {
+    SESSION = null; BOOKING = null;
+    document.getElementById('booking-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display   = 'block';
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('login-id').value = '';
+  }
+
+  // ── Helpers ──
+  function post(payload) {
+    return fetch(FUNC, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).then(r => r.json());
+  }
+
+  function hoursUntilPickup(date, time) {
+    if (!date || !time) return 0;
+    const pickupUTC = new Date(`${date}T${time}:00Z`);
+    return (pickupUTC - new Date()) / (1000 * 60 * 60);
+  }
+
+  function fmtDate(d) {
+    if (!d) return 'N/A';
+    const p = d.split('-');
+    return p.length === 3 ? `${p[1]}/${p[2]}/${p[0]}` : d;
+  }
+  function fmtTime(t) {
+    if (!t) return 'N/A';
+    const p = t.split(':');
+    let h = parseInt(p[0]);
+    const m = p[1] || '00';
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    if (h === 0) h = 12; else if (h > 12) h -= 12;
+    return `${h}:${m} ${ampm}`;
+  }
+  function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
