@@ -27,6 +27,20 @@ exports.handler = async (event) => {
     return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 
+  // ── LIST (dashboard: all bookings 30 days past through future) ──
+  if (action === 'list') {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    const cutoffDate = cutoff.toISOString().slice(0, 10);
+
+    const r = await sbFetch(
+      `${SUPABASE_URL}/rest/v1/bookings?pickup_date=gte.${cutoffDate}&select=*&order=pickup_date.asc,pickup_time.asc&limit=200`,
+      SUPABASE_KEY
+    );
+    const bookings = await r.json();
+    return { statusCode: 200, body: JSON.stringify({ bookings: Array.isArray(bookings) ? bookings : [] }) };
+  }
+
   // ── LOOKUP ──
   if (action === 'lookup') {
     if (!query) return { statusCode: 400, body: JSON.stringify({ error: 'Missing search query' }) };
