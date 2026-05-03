@@ -12,3 +12,8 @@
   from = "/pay"
   to = "/.netlify/functions/pay"
   status = 200
+
+[[redirects]]
+  from = "/admin-reminders"
+  to = "/admin-reminders.html"
+  status = 200
