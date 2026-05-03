@@ -7,3 +7,8 @@
 
 [functions."send-balance-reminder"]
   schedule = "@hourly"
+
+[[redirects]]
+  from = "/pay"
+  to = "/.netlify/functions/pay"
+  status = 200
