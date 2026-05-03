@@ -92,10 +92,34 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           from: 'Group Ride KC <bookings@groupridekc.com>',
           to: [ADMIN_EMAIL],
-          subject: `Cancellation Request — ${booking.customer_name} (${pickupDateFmt})`,
-          html: `<p><strong>${booking.customer_name}</strong> has requested to cancel their ride on <strong>${pickupDateFmt} at ${pickupTimeFmt}</strong>.</p>
-                 <p>Phone: ${booking.phone || 'N/A'} &nbsp;·&nbsp; Email: ${booking.email || 'N/A'}</p>
-                 <p><a href="${SITE_URL}/admin-reminders">Log in to Admin Portal</a> to confirm or reject the cancellation.</p>`,
+          subject: `ACTION REQUIRED: Cancellation Request — ${booking.customer_name} (${pickupDateFmt})`,
+          html: `
+<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#f5f5f5;padding:20px;">
+  <div style="background:#0a0a0a;border-radius:12px;padding:28px;">
+    <h2 style="color:#E31837;margin-top:0;">Cancellation Request</h2>
+    <p style="color:#ddd;font-size:15px;"><strong style="color:#fff;">${booking.customer_name}</strong> has requested to cancel their ride.</p>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+      <tr><td style="color:#888;padding:6px 0;width:110px;">Date</td><td style="color:#fff;">${pickupDateFmt} at ${pickupTimeFmt}</td></tr>
+      <tr><td style="color:#888;padding:6px 0;">Phone</td><td style="color:#fff;">${booking.phone || 'N/A'}</td></tr>
+      <tr><td style="color:#888;padding:6px 0;">Email</td><td style="color:#fff;">${booking.email || 'N/A'}</td></tr>
+      <tr><td style="color:#888;padding:6px 0;">Pickup</td><td style="color:#fff;">${booking.pickup_address || 'N/A'}</td></tr>
+    </table>
+    <div style="background:#1a1a1a;border:1px solid #FFB81C;border-radius:8px;padding:16px;margin:20px 0;">
+      <p style="color:#FFB81C;font-weight:bold;margin:0 0 10px;">To cancel this ride:</p>
+      <ol style="color:#ddd;font-size:14px;margin:0;padding-left:18px;line-height:2;">
+        <li>Click the button below to open the Admin Portal</li>
+        <li>Log in with your admin password</li>
+        <li>Click the <strong style="color:#fff;">"Cancel Requests"</strong> filter at the top</li>
+        <li>Find <strong style="color:#fff;">${booking.customer_name}</strong> and expand their booking</li>
+        <li>Click <strong style="color:#fff;">"Cancel Ride"</strong> and confirm</li>
+      </ol>
+    </div>
+    <div style="text-align:center;margin:24px 0 8px;">
+      <a href="${SITE_URL}/admin-reminders" style="display:inline-block;background:#E31837;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">Open Admin Portal</a>
+    </div>
+    <p style="color:#666;font-size:12px;text-align:center;margin-top:16px;">If you do not want to approve this cancellation, simply take no action. The booking will remain active.</p>
+  </div>
+</div>`,
         }),
       }).catch(() => {});
     }
