@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin — Balance Reminders | Group Ride KC</title>
+  <title>Admin Dashboard | Group Ride KC</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,34 +15,13 @@
       padding: 24px 16px 60px;
     }
 
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
-    }
+    .container { max-width: 800px; margin: 0 auto; }
 
-    .logo {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-
-    .logo img {
-      width: 160px;
-      height: auto;
-    }
-
-    h1 {
-      color: #FFB81C;
-      font-size: 1.5rem;
-      margin-bottom: 6px;
-      text-align: center;
-    }
-
-    .subtitle {
-      color: #888;
-      font-size: 0.85rem;
-      text-align: center;
-      margin-bottom: 32px;
-    }
+    /* ── Logo / header ── */
+    .logo { text-align: center; margin-bottom: 20px; }
+    .logo img { width: 140px; height: auto; }
+    h1 { color: #FFB81C; font-size: 1.4rem; text-align: center; margin-bottom: 4px; }
+    .subtitle { color: #666; font-size: 0.82rem; text-align: center; margin-bottom: 28px; }
 
     /* ── Auth screen ── */
     #auth-screen {
@@ -53,163 +32,235 @@
       max-width: 400px;
       margin: 0 auto;
     }
+    #auth-screen h2 { color: #FFB81C; margin-bottom: 18px; font-size: 1rem; }
 
-    #auth-screen h2 {
-      color: #FFB81C;
-      margin-bottom: 20px;
-      font-size: 1.1rem;
-    }
-
-    /* ── Main app ── */
+    /* ── App screen ── */
     #app-screen { display: none; }
 
-    /* ── Shared form elements ── */
-    label {
-      display: block;
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .toolbar input[type="text"] { flex: 1; min-width: 180px; }
+
+    /* ── Filter chips ── */
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .chip {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 20px;
       color: #aaa;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+    }
+    .chip:hover { border-color: #FFB81C; color: #FFB81C; }
+    .chip.active { background: #FFB81C; border-color: #FFB81C; color: #000; font-weight: bold; }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .stat-pill {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 10px 16px;
+      flex: 1;
+      min-width: 120px;
+      text-align: center;
+    }
+    .stat-pill .num { font-size: 1.5rem; font-weight: 800; color: #FFB81C; }
+    .stat-pill .lbl { font-size: 0.72rem; color: #666; text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
+
+    /* ── Section label ── */
+    .section-head {
+      color: #555;
+      font-size: 0.72rem;
       text-transform: uppercase;
-      letter-spacing: .05em;
-      margin-bottom: 6px;
+      letter-spacing: .07em;
+      margin-bottom: 10px;
     }
 
-    input[type="text"],
-    input[type="password"] {
+    /* ── Customer rows ── */
+    .customer-row {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+    .customer-row:hover { border-color: #444; }
+
+    .customer-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .customer-avatar {
+      width: 40px; height: 40px;
+      background: #FFB81C;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem; color: #000;
+      flex-shrink: 0;
+    }
+    .customer-info { flex: 1; }
+    .customer-name { font-weight: bold; font-size: 0.97rem; margin-bottom: 2px; }
+    .customer-meta { color: #777; font-size: 0.78rem; }
+
+    .customer-badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .badge {
+      font-size: 0.72rem;
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    .badge-balance { background: rgba(255,184,28,.15); color: #FFB81C; border: 1px solid rgba(255,184,28,.35); }
+    .badge-paid    { background: rgba(34,197,94,.12); color: #22c55e; border: 1px solid rgba(34,197,94,.3); }
+    .badge-pending { background: rgba(156,163,175,.1); color: #9ca3af; border: 1px solid rgba(156,163,175,.25); }
+    .badge-past    { background: rgba(107,114,128,.1); color: #6b7280; border: 1px solid rgba(107,114,128,.2); }
+    .badge-count   { background: #1f1f1f; color: #888; border: 1px solid #333; }
+
+    .chevron { color: #444; font-size: 1rem; transition: transform .2s; }
+    .customer-row.open .chevron { transform: rotate(180deg); }
+
+    /* ── Booking cards inside ── */
+    .bookings-panel {
+      display: none;
+      padding: 0 14px 14px;
+      border-top: 1px solid #1f1f1f;
+    }
+    .customer-row.open .bookings-panel { display: block; }
+
+    .booking-card {
+      background: #0f0f0f;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 10px;
+    }
+    .booking-card .bc-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .booking-card .bc-date { font-weight: bold; color: #FFB81C; font-size: 0.95rem; }
+    .booking-card .bc-id  { color: #444; font-size: 0.7rem; font-family: monospace; }
+
+    .bc-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 12px; }
+    .bc-table td { padding: 4px 0; }
+    .bc-table td:first-child { color: #666; width: 110px; }
+    .bc-table td:last-child  { color: #ddd; }
+
+    .balance-pill {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+    .balance-pill.owed { background: rgba(255,184,28,.12); color: #FFB81C; border: 1px solid rgba(255,184,28,.35); }
+    .balance-pill.zero { background: rgba(34,197,94,.1); color: #22c55e; border: 1px solid rgba(34,197,94,.3); }
+
+    .card-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    .send-status { font-size: 0.8rem; color: #666; }
+    .send-status.ok  { color: #22c55e; }
+    .send-status.err { color: #E31837; }
+
+    /* ── Shared form ── */
+    label { display: block; color: #aaa; font-size: 0.78rem; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+
+    input[type="text"], input[type="password"] {
       width: 100%;
       background: #1a1a1a;
       border: 1px solid #333;
       border-radius: 8px;
       color: #fff;
-      font-size: 0.95rem;
-      padding: 12px 14px;
+      font-size: 0.92rem;
+      padding: 11px 14px;
       outline: none;
       transition: border-color .2s;
     }
-
-    input[type="text"]:focus,
-    input[type="password"]:focus {
-      border-color: #FFB81C;
-    }
+    input[type="text"]:focus, input[type="password"]:focus { border-color: #FFB81C; }
 
     .btn {
-      display: inline-block;
       background: #E31837;
       color: #fff;
       border: none;
       border-radius: 8px;
-      padding: 12px 28px;
-      font-size: 0.95rem;
+      padding: 11px 22px;
+      font-size: 0.9rem;
       font-weight: bold;
       cursor: pointer;
-      transition: opacity .2s;
+      transition: opacity .15s;
+      white-space: nowrap;
     }
-
     .btn:hover { opacity: .85; }
-    .btn:disabled { opacity: .45; cursor: default; }
-
-    .btn-gold {
-      background: #FFB81C;
-      color: #000;
-    }
-
-    .btn-sm {
-      padding: 8px 18px;
-      font-size: 0.85rem;
-    }
-
-    /* ── Search bar ── */
-    .search-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 24px;
-    }
-
-    .search-row input { flex: 1; }
-
-    /* ── Booking cards ── */
-    #results { margin-top: 8px; }
-
-    .booking-card {
-      background: #141414;
-      border: 1px solid #2a2a2a;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 14px;
-    }
-
-    .booking-card .name {
-      font-size: 1.1rem;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-
-    .booking-card .meta {
+    .btn:disabled { opacity: .4; cursor: default; }
+    .btn-gold { background: #FFB81C; color: #000; }
+    .btn-sm { padding: 7px 16px; font-size: 0.8rem; }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid #333;
       color: #aaa;
-      font-size: 0.85rem;
-      margin-bottom: 12px;
-      line-height: 1.6;
-    }
-
-    .booking-card .meta span {
-      color: #fff;
-    }
-
-    .balance-pill {
-      display: inline-block;
-      background: rgba(255,184,28,.12);
-      border: 1px solid rgba(255,184,28,.4);
-      color: #FFB81C;
-      font-weight: bold;
-      border-radius: 6px;
-      padding: 3px 10px;
-      font-size: 0.85rem;
-      margin-bottom: 14px;
-    }
-
-    .balance-zero {
-      background: rgba(34,197,94,.1);
-      border-color: rgba(34,197,94,.3);
-      color: #22c55e;
-    }
-
-    .card-footer {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .send-status {
+      border-radius: 8px;
+      padding: 11px 16px;
       font-size: 0.82rem;
-      color: #aaa;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+      white-space: nowrap;
     }
-
-    .send-status.ok { color: #22c55e; }
-    .send-status.err { color: #E31837; }
+    .btn-ghost:hover { border-color: #FFB81C; color: #FFB81C; }
 
     /* ── Notices ── */
     .notice {
-      background: #1a1a1a;
-      border: 1px solid #333;
+      background: #141414;
+      border: 1px solid #222;
       border-radius: 8px;
-      color: #888;
-      font-size: 0.9rem;
-      padding: 16px;
+      color: #666;
+      font-size: 0.87rem;
+      padding: 20px;
       text-align: center;
     }
+    .notice.error { border-color: rgba(227,24,55,.4); color: #E31837; }
 
-    .notice.error {
-      border-color: rgba(227,24,55,.4);
-      color: #E31837;
+    /* ── Loading spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid #333;
+      border-top-color: #FFB81C;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
     }
-
-    .section-head {
-      color: #888;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      margin-bottom: 12px;
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -218,134 +269,247 @@
   <div class="logo">
     <img src="/images/grkc-logo-van.png" alt="Group Ride KC" />
   </div>
-
-  <h1>Balance Reminder Admin</h1>
-  <p class="subtitle">Manually look up a booking and send the balance reminder.</p>
+  <h1>Admin Dashboard</h1>
+  <p class="subtitle">Group Ride KC · Balance Reminders &amp; Booking Management</p>
 
   <!-- ── Auth ── -->
   <div id="auth-screen">
     <h2>Admin Login</h2>
-    <label for="pw-input">Admin Password</label>
-    <input type="password" id="pw-input" placeholder="Enter password" autocomplete="current-password" />
-    <div style="margin-top:16px;">
+    <label for="pw-input">Password</label>
+    <input type="password" id="pw-input" placeholder="Enter admin password" autocomplete="current-password" />
+    <div style="margin-top:14px;">
       <button class="btn" onclick="login()">Log In</button>
     </div>
-    <div id="auth-error" style="color:#E31837;font-size:.85rem;margin-top:12px;"></div>
+    <div id="auth-error" style="color:#E31837;font-size:.82rem;margin-top:10px;"></div>
   </div>
 
   <!-- ── App ── -->
   <div id="app-screen">
 
-    <div class="search-row">
-      <input type="text" id="search-input" placeholder="Name, phone, email, or booking ID" />
+    <!-- Stats bar -->
+    <div class="stats-bar" id="stats-bar" style="display:none;">
+      <div class="stat-pill"><div class="num" id="stat-total">—</div><div class="lbl">Total Bookings</div></div>
+      <div class="stat-pill"><div class="num" id="stat-balance" style="color:#FFB81C;">—</div><div class="lbl">Balance Owed</div></div>
+      <div class="stat-pill"><div class="num" id="stat-paid" style="color:#22c55e;">—</div><div class="lbl">Paid in Full</div></div>
+      <div class="stat-pill"><div class="num" id="stat-upcoming">—</div><div class="lbl">Upcoming</div></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <input type="text" id="search-input" placeholder="Search by name, phone, email, or booking ID…" />
       <button class="btn btn-gold" onclick="doSearch()">Search</button>
+      <button class="btn-ghost" onclick="showDashboard()">All Bookings</button>
     </div>
 
+    <!-- Filter chips -->
+    <div class="filters" id="filter-chips">
+      <div class="chip active" data-filter="all"     onclick="setFilter('all')">All</div>
+      <div class="chip"        data-filter="balance"  onclick="setFilter('balance')">Balance Owed</div>
+      <div class="chip"        data-filter="paid"     onclick="setFilter('paid')">Paid in Full</div>
+      <div class="chip"        data-filter="upcoming" onclick="setFilter('upcoming')">Upcoming (7 days)</div>
+      <div class="chip"        data-filter="unconfirmed" onclick="setFilter('unconfirmed')">Unconfirmed</div>
+      <div class="chip"        data-filter="past"     onclick="setFilter('past')">Past Rides</div>
+    </div>
+
+    <!-- Results -->
+    <div id="results-label" class="section-head" style="display:none;"></div>
     <div id="results-wrap">
-      <p class="notice">Search above to find a booking.</p>
+      <div class="notice"><span class="spinner"></span> Loading bookings…</div>
     </div>
 
-  </div><!-- /app-screen -->
-
-</div><!-- /container -->
+  </div>
+</div>
 
 <script>
   let SECRET = '';
+  let ALL_BOOKINGS = [];
+  let activeFilter = 'all';
+  let searchMode = false;
+
   const FUNC = '/.netlify/functions/admin-reminder';
 
-  // ── pw-input: allow Enter key ──
-  document.getElementById('pw-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') login();
-  });
+  document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  document.getElementById('search-input') && document.getElementById('search-input').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
 
-  document.getElementById('search-input') && document.getElementById('search-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') doSearch();
-  });
-
+  // ── Login ──
   function login() {
     const pw = document.getElementById('pw-input').value.trim();
     if (!pw) return;
     SECRET = pw;
-    // Quick auth ping — lookup with a dummy query to verify the secret
-    fetch(FUNC, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret: SECRET, action: 'lookup', query: 'ping-auth-check' }),
-    })
-      .then(r => r.json())
+    document.getElementById('auth-error').textContent = '';
+    post({ action: 'list' })
       .then(data => {
         if (data.error === 'Unauthorized') {
           document.getElementById('auth-error').textContent = 'Incorrect password.';
           SECRET = '';
-        } else {
-          document.getElementById('auth-screen').style.display = 'none';
-          document.getElementById('app-screen').style.display = 'block';
-          document.getElementById('search-input').focus();
+          return;
         }
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'block';
+        ALL_BOOKINGS = data.bookings || [];
+        renderStats(ALL_BOOKINGS);
+        renderDashboard(ALL_BOOKINGS, activeFilter);
       })
-      .catch(() => {
+      .catch(err => {
         document.getElementById('auth-error').textContent = 'Network error — try again.';
         SECRET = '';
       });
   }
 
-  async function doSearch() {
-    const q = document.getElementById('search-input').value.trim();
-    if (!q) return;
+  // ── Dashboard (grouped by customer) ──
+  function showDashboard() {
+    searchMode = false;
+    document.getElementById('search-input').value = '';
+    renderDashboard(ALL_BOOKINGS, activeFilter);
+  }
 
-    const wrap = document.getElementById('results-wrap');
-    wrap.innerHTML = '<p class="notice">Searching...</p>';
+  function setFilter(f) {
+    activeFilter = f;
+    document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.filter === f));
+    if (searchMode) return; // don't clobber search results — just update badge highlight
+    renderDashboard(ALL_BOOKINGS, f);
+  }
 
-    try {
-      const res = await fetch(FUNC, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: SECRET, action: 'lookup', query: q }),
-      });
-      const data = await res.json();
+  function renderStats(bookings) {
+    const today = todayStr();
+    const total    = bookings.length;
+    const balance  = bookings.filter(b => calcBalance(b) > 0).length;
+    const paid     = bookings.filter(b => calcBalance(b) <= 0 && (b.payment_status === 'paid' || b.payment_status === 'deposit_paid')).length;
+    const upcoming = bookings.filter(b => b.pickup_date >= today).length;
 
-      if (!data.bookings || data.bookings.length === 0) {
-        wrap.innerHTML = '<p class="notice">No bookings found.</p>';
-        return;
-      }
+    document.getElementById('stat-total').textContent    = total;
+    document.getElementById('stat-balance').textContent  = balance;
+    document.getElementById('stat-paid').textContent     = paid;
+    document.getElementById('stat-upcoming').textContent = upcoming;
+    document.getElementById('stats-bar').style.display   = 'flex';
+  }
 
-      wrap.innerHTML = `<p class="section-head">${data.bookings.length} booking${data.bookings.length !== 1 ? 's' : ''} found</p>`;
-      data.bookings.forEach(b => wrap.appendChild(buildCard(b)));
+  function renderDashboard(bookings, filter) {
+    const today   = todayStr();
+    const in7days = daysFromNow(7);
 
-    } catch (err) {
-      wrap.innerHTML = `<p class="notice error">Error: ${err.message}</p>`;
+    // Apply filter
+    let filtered = bookings.filter(b => {
+      if (filter === 'balance')    return calcBalance(b) > 0;
+      if (filter === 'paid')       return calcBalance(b) <= 0 && (b.payment_status === 'paid' || b.payment_status === 'deposit_paid');
+      if (filter === 'upcoming')   return b.pickup_date >= today && b.pickup_date <= in7days;
+      if (filter === 'unconfirmed') return b.status === 'pending' || b.status === 'requested';
+      if (filter === 'past')       return b.pickup_date < today;
+      return true; // all
+    });
+
+    // Group by customer name (normalised)
+    const groups = {};
+    for (const b of filtered) {
+      const key = (b.customer_name || 'Unknown').trim();
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(b);
+    }
+
+    const label = document.getElementById('results-label');
+    const wrap  = document.getElementById('results-wrap');
+    const names = Object.keys(groups).sort();
+
+    if (names.length === 0) {
+      label.style.display = 'none';
+      wrap.innerHTML = '<div class="notice">No bookings match this filter.</div>';
+      return;
+    }
+
+    label.style.display = 'block';
+    label.textContent   = `${names.length} customer${names.length !== 1 ? 's' : ''} · ${filtered.length} booking${filtered.length !== 1 ? 's' : ''}`;
+
+    wrap.innerHTML = '';
+    for (const name of names) {
+      wrap.appendChild(buildCustomerRow(name, groups[name], today));
     }
   }
 
-  function buildCard(b) {
+  function buildCustomerRow(name, bookings, today) {
+    const initials   = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const totalOwed  = bookings.reduce((s, b) => s + calcBalance(b), 0);
+    const hasBalance = totalOwed > 0;
+    const hasPast    = bookings.some(b => b.pickup_date < today);
+    const hasFuture  = bookings.some(b => b.pickup_date >= today);
+    const b0         = bookings[0];
+
+    const row = document.createElement('div');
+    row.className = 'customer-row';
+
+    // Badge set
+    let badges = '';
+    if (hasBalance) badges += `<span class="badge badge-balance">Balance $${totalOwed.toFixed(2)}</span>`;
+    else            badges += `<span class="badge badge-paid">Paid in Full</span>`;
+    if (!hasFuture && hasPast) badges += `<span class="badge badge-past">Past</span>`;
+    if (b0.status === 'pending' || b0.status === 'requested') badges += `<span class="badge badge-pending">Unconfirmed</span>`;
+    if (bookings.length > 1) badges += `<span class="badge badge-count">${bookings.length} rides</span>`;
+
+    const metaParts = [];
+    if (b0.phone) metaParts.push(b0.phone);
+    if (b0.email) metaParts.push(b0.email);
+
+    row.innerHTML = `
+      <div class="customer-header" onclick="toggleRow(this)">
+        <div class="customer-avatar">${esc(initials)}</div>
+        <div class="customer-info">
+          <div class="customer-name">${esc(name)}</div>
+          <div class="customer-meta">${esc(metaParts.join(' · '))}</div>
+        </div>
+        <div class="customer-badges">${badges}</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="bookings-panel" id="panel-${slugify(name)}"></div>
+    `;
+
+    // Populate booking cards into the panel
+    const panel = row.querySelector('.bookings-panel');
+    bookings
+      .sort((a, b) => a.pickup_date > b.pickup_date ? 1 : -1)
+      .forEach(b => panel.appendChild(buildBookingCard(b, today)));
+
+    return row;
+  }
+
+  function toggleRow(header) {
+    const row = header.closest('.customer-row');
+    row.classList.toggle('open');
+  }
+
+  function buildBookingCard(b, today) {
     const total   = parseFloat(b.total_price) || 0;
     const deposit = parseFloat(b.deposit_amount) || 0;
     const balance = Math.max(0, total - deposit);
-
-    const dateStr = b.pickup_date ? fmtDate(b.pickup_date) : 'N/A';
-    const timeStr = b.pickup_time ? fmtTime(b.pickup_time) : '';
+    const isPast  = b.pickup_date < today;
 
     const card = document.createElement('div');
     card.className = 'booking-card';
     card.id = `card-${b.id}`;
 
     card.innerHTML = `
-      <div class="name">${esc(b.customer_name || 'Unknown')}</div>
-      <div class="meta">
-        <div>Date: <span>${dateStr}${timeStr ? ' at ' + timeStr : ''}</span></div>
-        <div>Phone: <span>${esc(b.phone || 'N/A')}</span></div>
-        <div>Email: <span>${esc(b.email || 'N/A')}</span></div>
-        <div>Pickup: <span>${esc(b.pickup_address || 'N/A')}</span></div>
-        <div>Drop-off: <span>${esc(b.dropoff_address || 'N/A')}</span></div>
-        <div>Status: <span>${esc(b.status || 'N/A')} / ${esc(b.payment_status || 'N/A')}</span></div>
-        <div>Total: <span>$${total.toFixed(2)}</span> &nbsp; Deposit: <span>$${deposit.toFixed(2)}</span></div>
+      <div class="bc-head">
+        <div>
+          <div class="bc-date">${fmtDate(b.pickup_date)}${b.pickup_time ? ' at ' + fmtTime(b.pickup_time) : ''}${isPast ? ' <span style="color:#555;font-size:.75rem;font-weight:normal;">(past)</span>' : ''}</div>
+        </div>
+        <div class="bc-id">ID: ${esc(b.id)}</div>
       </div>
-      <div class="balance-pill ${balance <= 0 ? 'balance-zero' : ''}">
-        ${balance <= 0 ? 'Paid in full' : 'Balance due: $' + balance.toFixed(2)}
+
+      <table class="bc-table">
+        <tr><td>Pickup</td><td>${esc(b.pickup_address || 'N/A')}</td></tr>
+        <tr><td>Drop-off</td><td>${esc(b.dropoff_address || 'N/A')}</td></tr>
+        <tr><td>Passengers</td><td>${esc(b.passengers || 'N/A')}</td></tr>
+        <tr><td>Status</td><td>${esc(b.status || 'N/A')} / ${esc(b.payment_status || 'N/A')}</td></tr>
+        <tr><td>Total</td><td>$${total.toFixed(2)}</td></tr>
+        <tr><td>Deposit Paid</td><td style="color:#22c55e;">$${deposit.toFixed(2)}</td></tr>
+      </table>
+
+      <div class="balance-pill ${balance <= 0 ? 'zero' : 'owed'}">
+        ${balance <= 0 ? '✓ Paid in full' : 'Balance due: $' + balance.toFixed(2)}
       </div>
-      <div class="card-footer">
-        <button class="btn btn-sm" onclick="sendReminder('${b.id}')" id="btn-${b.id}"
-          ${balance <= 0 ? 'disabled title="Balance is already $0"' : ''}>
+
+      <div class="card-actions">
+        <button class="btn btn-sm" id="btn-${b.id}"
+          onclick="sendReminder('${b.id}')"
+          ${balance <= 0 ? 'disabled title="Balance is $0 — nothing to collect"' : ''}>
           Send Reminder
         </button>
         <span class="send-status" id="status-${b.id}"></span>
@@ -354,32 +518,67 @@
     return card;
   }
 
+  // ── Search ──
+  async function doSearch() {
+    const q = document.getElementById('search-input').value.trim();
+    if (!q) { showDashboard(); return; }
+
+    searchMode = true;
+    const label = document.getElementById('results-label');
+    const wrap  = document.getElementById('results-wrap');
+    wrap.innerHTML = '<div class="notice"><span class="spinner"></span> Searching…</div>';
+    label.style.display = 'none';
+
+    try {
+      const data = await post({ action: 'lookup', query: q });
+      const bookings = data.bookings || [];
+      const today = todayStr();
+
+      if (bookings.length === 0) {
+        wrap.innerHTML = '<div class="notice">No bookings found.</div>';
+        return;
+      }
+
+      // Group by customer, same as dashboard
+      const groups = {};
+      for (const b of bookings) {
+        const key = (b.customer_name || 'Unknown').trim();
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(b);
+      }
+
+      const names = Object.keys(groups).sort();
+      label.style.display = 'block';
+      label.textContent = `${bookings.length} result${bookings.length !== 1 ? 's' : ''} for "${q}"`;
+      wrap.innerHTML = '';
+      for (const name of names) {
+        const row = buildCustomerRow(name, groups[name], today);
+        row.classList.add('open'); // auto-expand search results
+        wrap.appendChild(row);
+      }
+    } catch (err) {
+      wrap.innerHTML = `<div class="notice error">Error: ${esc(err.message)}</div>`;
+    }
+  }
+
+  // ── Send reminder ──
   async function sendReminder(bookingId) {
     const btn    = document.getElementById(`btn-${bookingId}`);
     const status = document.getElementById(`status-${bookingId}`);
 
     btn.disabled = true;
-    btn.textContent = 'Sending...';
+    btn.textContent = 'Sending…';
     status.textContent = '';
     status.className = 'send-status';
 
     try {
-      const res  = await fetch(FUNC, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: SECRET, action: 'send', booking_id: bookingId }),
-      });
-      const data = await res.json();
-
+      const data = await post({ action: 'send', booking_id: bookingId });
       if (data.success) {
         const sms   = data.results?.sms   || '?';
         const email = data.results?.email || '?';
-        const smsOk   = sms   === 'sent';
-        const emailOk = email === 'sent';
-        const allOk   = smsOk && emailOk;
-
-        status.className = 'send-status ' + (allOk ? 'ok' : 'err');
-        status.textContent = `SMS: ${sms} | Email: ${email}`;
+        const ok    = sms === 'sent' && email === 'sent';
+        status.className = 'send-status ' + (ok ? 'ok' : 'err');
+        status.textContent = `SMS: ${sms} · Email: ${email}`;
         btn.textContent = 'Sent!';
       } else {
         status.className = 'send-status err';
@@ -389,34 +588,52 @@
       }
     } catch (err) {
       status.className = 'send-status err';
-      status.textContent = `Network error: ${err.message}`;
+      status.textContent = `Network error: ${esc(err.message)}`;
       btn.disabled = false;
       btn.textContent = 'Send Reminder';
     }
   }
 
   // ── Helpers ──
+  function post(payload) {
+    return fetch(FUNC, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: SECRET, ...payload }),
+    }).then(r => r.json());
+  }
+
+  function calcBalance(b) {
+    const total   = parseFloat(b.total_price) || 0;
+    const deposit = parseFloat(b.deposit_amount) || 0;
+    return Math.max(0, total - deposit);
+  }
+
+  function todayStr() { return new Date().toISOString().slice(0, 10); }
+  function daysFromNow(n) {
+    const d = new Date();
+    d.setDate(d.getDate() + n);
+    return d.toISOString().slice(0, 10);
+  }
+
   function fmtDate(d) {
+    if (!d) return 'N/A';
     const p = d.split('-');
     return p.length === 3 ? `${p[1]}/${p[2]}/${p[0]}` : d;
   }
-
   function fmtTime(t) {
+    if (!t) return '';
     const p = t.split(':');
     let h = parseInt(p[0]);
     const m = p[1] || '00';
     const ampm = h >= 12 ? 'PM' : 'AM';
-    if (h === 0) h = 12;
-    else if (h > 12) h -= 12;
+    if (h === 0) h = 12; else if (h > 12) h -= 12;
     return `${h}:${m} ${ampm}`;
   }
-
+  function slugify(s) { return s.replace(/[^a-z0-9]/gi, '-').toLowerCase(); }
   function esc(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+    return String(str ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 </script>
 </body>
