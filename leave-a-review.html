@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leave a Review | Group Ride KC</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .container { width: 100%; max-width: 520px; }
+
+    .logo { text-align: center; margin-bottom: 24px; }
+    .logo img { width: 150px; height: auto; }
+
+    .card {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      padding: 32px 28px;
+    }
+
+    h1 {
+      color: #FFB81C;
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .sub {
+      color: #888;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+
+    /* ── Star rating ── */
+    .star-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-direction: row-reverse; /* for CSS-only hover trick */
+    }
+
+    .star-row input[type="radio"] { display: none; }
+
+    .star-row label {
+      font-size: 2.4rem;
+      color: #333;
+      cursor: pointer;
+      transition: color .1s;
+      line-height: 1;
+    }
+
+    /* Highlight hovered star and all stars to its right (which are to the left in DOM due to row-reverse) */
+    .star-row label:hover,
+    .star-row label:hover ~ label,
+    .star-row input[type="radio"]:checked ~ label {
+      color: #FFB81C;
+    }
+
+    /* ── Form fields ── */
+    .field { margin-bottom: 16px; }
+
+    label.field-label {
+      display: block;
+      color: #888;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.92rem;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .2s;
+      font-family: Arial, sans-serif;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    textarea:focus { border-color: #FFB81C; }
+
+    textarea { resize: vertical; min-height: 120px; }
+
+    .btn {
+      display: block;
+      width: 100%;
+      background: #FFB81C;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .45; cursor: default; }
+
+    /* ── Success screen ── */
+    #success-screen {
+      display: none;
+      text-align: center;
+      padding: 16px 0;
+    }
+
+    #success-screen .checkmark {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+
+    #success-screen h2 { color: #FFB81C; margin-bottom: 10px; }
+    #success-screen p  { color: #aaa; font-size: .9rem; line-height: 1.6; }
+
+    .error-msg {
+      color: #E31837;
+      font-size: .82rem;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .hint {
+      text-align: center;
+      color: #555;
+      font-size: .78rem;
+      margin-top: 20px;
+      line-height: 1.5;
+    }
+    .hint a { color: #FFB81C; text-decoration: none; }
+
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid #333;
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="logo">
+    <img src="/images/grkc-logo-van.png" alt="Group Ride KC" />
+  </div>
+
+  <div class="card">
+
+    <!-- ── Review form ── -->
+    <div id="form-screen">
+      <h1>Leave Us a Review</h1>
+      <p class="sub">How was your experience with Group Ride KC?<br/>We'd love to hear from you.</p>
+
+      <!-- Stars -->
+      <div class="star-row" id="star-row">
+        <input type="radio" name="rating" id="s5" value="5" />
+        <label for="s5" title="5 stars">★</label>
+        <input type="radio" name="rating" id="s4" value="4" />
+        <label for="s4" title="4 stars">★</label>
+        <input type="radio" name="rating" id="s3" value="3" />
+        <label for="s3" title="3 stars">★</label>
+        <input type="radio" name="rating" id="s2" value="2" />
+        <label for="s2" title="2 stars">★</label>
+        <input type="radio" name="rating" id="s1" value="1" />
+        <label for="s1" title="1 star">★</label>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="r-name">Your Name</label>
+        <input type="text" id="r-name" placeholder="Jane Smith" autocomplete="name" />
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="r-email">Email <span style="color:#555;font-weight:normal;">(optional)</span></label>
+        <input type="email" id="r-email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="r-review">Your Review</label>
+        <textarea id="r-review" placeholder="Tell us about your experience…"></textarea>
+      </div>
+
+      <button class="btn" id="submit-btn" onclick="submitReview()">Submit Review</button>
+      <div class="error-msg" id="form-error"></div>
+    </div>
+
+    <!-- ── Success ── -->
+    <div id="success-screen">
+      <div class="checkmark">🌟</div>
+      <h2>Thank You!</h2>
+      <p>Your review means a lot to us.<br/>We look forward to riding with you again!</p>
+    </div>
+
+  </div>
+
+  <p class="hint">Questions? Call or text us at <a href="tel:+18165526669">(816) 552-6669</a></p>
+
+</div>
+
+<script>
+  async function submitReview() {
+    const rating = document.querySelector('input[name="rating"]:checked')?.value;
+    const name   = document.getElementById('r-name').value.trim();
+    const email  = document.getElementById('r-email').value.trim();
+    const review = document.getElementById('r-review').value.trim();
+    const errEl  = document.getElementById('form-error');
+
+    errEl.textContent = '';
+
+    if (!rating) { errEl.textContent = 'Please select a star rating.'; return; }
+    if (!name)   { errEl.textContent = 'Please enter your name.'; return; }
+    if (!review) { errEl.textContent = 'Please write a short review.'; return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Submitting…';
+
+    try {
+      const res  = await fetch('/.netlify/functions/submit-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: parseInt(rating), name, email, review }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById('form-screen').style.display    = 'none';
+        document.getElementById('success-screen').style.display = 'block';
+      } else {
+        errEl.textContent = data.error || 'Something went wrong. Please try again.';
+        btn.disabled = false;
+        btn.textContent = 'Submit Review';
+      }
+    } catch {
+      errEl.textContent = 'Network error — please try again.';
+      btn.disabled = false;
+      btn.textContent = 'Submit Review';
+    }
+  }
+</script>
+</body>
+</html>
