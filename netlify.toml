@@ -8,6 +8,9 @@
 [functions."send-balance-reminder"]
   schedule = "@hourly"
 
+[functions."send-review-request"]
+  schedule = "@hourly"
+
 [[redirects]]
   from = "/pay"
   to = "/.netlify/functions/pay"
