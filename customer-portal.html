@@ -443,7 +443,9 @@
 
   function hoursUntilPickup(date, time) {
     if (!date || !time) return 0;
-    return (new Date(`${date}T${time}:00Z`) - new Date()) / (1000 * 60 * 60);
+    // Supabase TIME columns return HH:MM:SS — strip to HH:MM to avoid invalid date strings
+    const t = time.slice(0, 5);
+    return (new Date(`${date}T${t}:00Z`) - new Date()) / (1000 * 60 * 60);
   }
 
   function fmtDate(d) {
