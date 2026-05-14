@@ -263,7 +263,11 @@ exports.handler = async (event) => {
           }),
         });
         const emailData = await emailRes.json();
-        results.email = emailData.error ? `error: ${emailData.error.message}` : 'sent';
+        if (emailData.error) {
+          results.email = `error: ${emailData.error.message || JSON.stringify(emailData.error)}`;
+        } else {
+          results.email = `sent (id:${emailData.id || 'unknown'}) → ${email}`;
+        }
       } catch (e) { results.email = `error: ${e.message}`; }
     } else { results.email = email ? 'skipped — missing Resend config' : 'skipped — no email provided'; }
 
