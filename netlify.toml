@@ -25,3 +25,8 @@
   from = "/customer-portal"
   to = "/customer-portal.html"
   status = 200
+
+[[redirects]]
+  from = "/leave-a-review"
+  to = "/leave-a-review.html"
+  status = 200
