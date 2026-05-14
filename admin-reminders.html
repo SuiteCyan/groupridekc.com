@@ -294,6 +294,37 @@
       <div class="stat-pill"><div class="num" id="stat-upcoming">—</div><div class="lbl">Upcoming</div></div>
     </div>
 
+    <!-- Manual review request -->
+    <div id="manual-review-wrap" style="margin-bottom:20px;">
+      <div style="background:#141414;border:1px solid #2a2a2a;border-radius:10px;overflow:hidden;">
+        <button onclick="toggleManualReview()"
+          style="width:100%;background:none;border:none;color:#FFB81C;font-size:.85rem;font-weight:bold;padding:12px 18px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+          <span>★ Send Review Request to Unlisted Customer</span>
+          <span id="manual-chevron" style="color:#555;font-size:1rem;">▾</span>
+        </button>
+        <div id="manual-review-form" style="display:none;padding:0 18px 18px;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <div style="flex:1;min-width:150px;">
+              <label>Name</label>
+              <input type="text" id="mr-name" placeholder="Jane Smith" />
+            </div>
+            <div style="flex:1;min-width:150px;">
+              <label>Phone</label>
+              <input type="text" id="mr-phone" placeholder="8165551234" />
+            </div>
+            <div style="flex:1;min-width:200px;">
+              <label>Email</label>
+              <input type="text" id="mr-email" placeholder="jane@email.com" />
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <button class="btn btn-sm" style="background:#FFB81C;color:#000;" id="mr-send-btn" onclick="sendManualReview()">Send Review Request</button>
+            <span class="send-status" id="mr-status"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Toolbar -->
     <div class="toolbar">
       <input type="text" id="search-input" placeholder="Search by name, phone, email, or booking ID…" />
@@ -625,6 +656,56 @@
       status.textContent = `Network error: ${esc(err.message)}`;
       btn.disabled = false;
       btn.textContent = 'Send Reminder';
+    }
+  }
+
+  // ── Manual review (no booking) ──
+  function toggleManualReview() {
+    const form    = document.getElementById('manual-review-form');
+    const chevron = document.getElementById('manual-chevron');
+    const open    = form.style.display === 'none';
+    form.style.display    = open ? 'block' : 'none';
+    chevron.style.transform = open ? 'rotate(180deg)' : '';
+  }
+
+  async function sendManualReview() {
+    const name   = document.getElementById('mr-name').value.trim();
+    const phone  = document.getElementById('mr-phone').value.trim();
+    const email  = document.getElementById('mr-email').value.trim();
+    const btn    = document.getElementById('mr-send-btn');
+    const status = document.getElementById('mr-status');
+
+    if (!phone && !email) { status.className = 'send-status err'; status.textContent = 'Enter a phone or email.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    status.textContent = '';
+    status.className = 'send-status';
+
+    try {
+      const data = await post({ action: 'send_review_manual', name, phone, email });
+      if (data.success) {
+        const sms   = data.results?.sms   || '?';
+        const email = data.results?.email || '?';
+        const ok    = (sms === 'sent' || sms.startsWith('skipped')) && (email === 'sent' || email.startsWith('skipped'));
+        status.className = 'send-status ' + (ok ? 'ok' : 'err');
+        status.textContent = `SMS: ${sms} · Email: ${email}`;
+        btn.textContent = 'Sent!';
+        // Clear fields
+        document.getElementById('mr-name').value = '';
+        document.getElementById('mr-phone').value = '';
+        document.getElementById('mr-email').value = '';
+      } else {
+        status.className = 'send-status err';
+        status.textContent = data.error || 'Unknown error';
+        btn.disabled = false;
+        btn.textContent = 'Send Review Request';
+      }
+    } catch (err) {
+      status.className = 'send-status err';
+      status.textContent = `Network error: ${esc(err.message)}`;
+      btn.disabled = false;
+      btn.textContent = 'Send Review Request';
     }
   }
 
