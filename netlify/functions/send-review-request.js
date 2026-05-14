@@ -22,7 +22,7 @@ exports.handler = async () => {
   const SITE_URL        = process.env.URL || 'https://groupridekc.com';
   const LOGO_URL        = 'https://groupridekc.netlify.app/images/grkc-logo-van.png';
   // Update GMB_REVIEW_URL in Netlify env vars once Google My Business is verified
-  const REVIEW_URL      = process.env.GMB_REVIEW_URL || 'https://g.page/r/groupridekc/review';
+  const REVIEW_URL      = process.env.GMB_REVIEW_URL || 'https://groupridekc.com/leave-a-review';
 
   try {
     const now = new Date();
