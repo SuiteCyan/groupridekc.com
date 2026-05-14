@@ -199,7 +199,7 @@
       </div>
 
       <div class="field">
-        <label class="field-label" for="r-email">Email <span style="color:#555;font-weight:normal;">(optional)</span></label>
+        <label class="field-label" for="r-email">Email</label>
         <input type="email" id="r-email" placeholder="you@example.com" autocomplete="email" />
       </div>
 
@@ -237,6 +237,7 @@
 
     if (!rating) { errEl.textContent = 'Please select a star rating.'; return; }
     if (!name)   { errEl.textContent = 'Please enter your name.'; return; }
+    if (!email)  { errEl.textContent = 'Please enter your email address.'; return; }
     if (!review) { errEl.textContent = 'Please write a short review.'; return; }
 
     const btn = document.getElementById('submit-btn');
