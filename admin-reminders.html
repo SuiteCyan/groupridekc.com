@@ -311,11 +311,11 @@
             </div>
             <div style="flex:1;min-width:150px;">
               <label>Phone</label>
-              <input type="text" id="mr-phone" placeholder="8165551234" />
+              <input type="text" id="mr-phone" placeholder="(816) 555-1234" maxlength="14" oninput="formatMrPhone(this)" inputmode="numeric" />
             </div>
             <div style="flex:1;min-width:200px;">
               <label>Email</label>
-              <input type="text" id="mr-email" placeholder="jane@email.com" />
+              <input type="email" id="mr-email" placeholder="jane@email.com" />
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -708,8 +708,11 @@
 
   function selectMrCustomer(name, phone, email) {
     document.getElementById('mr-name').value  = name;
-    document.getElementById('mr-phone').value = phone;
-    document.getElementById('mr-email').value = email;
+    document.getElementById('mr-email').value = email || '';
+    // Format the phone when auto-filled
+    const phoneEl = document.getElementById('mr-phone');
+    phoneEl.value = phone || '';
+    formatMrPhone(phoneEl);
     hideMrDropdown();
   }
 
@@ -718,6 +721,16 @@
   }
 
   // ── Manual review (no booking) ──
+  function formatMrPhone(input) {
+    // Strip everything except digits
+    let digits = input.value.replace(/\D/g, '').slice(0, 10);
+    let formatted = '';
+    if (digits.length > 0) formatted = '(' + digits.slice(0, 3);
+    if (digits.length >= 4) formatted += ') ' + digits.slice(3, 6);
+    if (digits.length >= 7) formatted += '-' + digits.slice(6, 10);
+    input.value = formatted;
+  }
+
   function toggleManualReview() {
     const form    = document.getElementById('manual-review-form');
     const chevron = document.getElementById('manual-chevron');
@@ -734,6 +747,8 @@
     const status = document.getElementById('mr-status');
 
     if (!phone && !email) { status.className = 'send-status err'; status.textContent = 'Enter a phone or email.'; return; }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { status.className = 'send-status err'; status.textContent = 'Please enter a valid email address.'; return; }
+    if (phone && phone.replace(/\D/g, '').length !== 10) { status.className = 'send-status err'; status.textContent = 'Phone must be a 10-digit number.'; return; }
 
     btn.disabled = true;
     btn.textContent = 'Sending…';
@@ -743,11 +758,12 @@
     try {
       const data = await post({ action: 'send_review_manual', name, phone, email });
       if (data.success) {
-        const sms   = data.results?.sms   || '?';
-        const email = data.results?.email || '?';
-        const ok    = (sms === 'sent' || sms.startsWith('skipped')) && (email === 'sent' || email.startsWith('skipped'));
-        status.className = 'send-status ' + (ok ? 'ok' : 'err');
-        status.textContent = `SMS: ${sms} · Email: ${email}`;
+        const sms      = data.results?.sms   || '?';
+        const emailRes = data.results?.email || '?';
+        const smsOk    = sms === 'sent' || sms.startsWith('skipped');
+        const emailOk  = emailRes.startsWith('sent') || emailRes.startsWith('skipped');
+        status.className = 'send-status ' + (smsOk && emailOk ? 'ok' : 'err');
+        status.textContent = `SMS: ${sms} · Email: ${emailRes}`;
         btn.textContent = 'Sent!';
         // Clear fields
         document.getElementById('mr-name').value = '';
