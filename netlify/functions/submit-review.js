@@ -17,7 +17,7 @@ exports.handler = async (event) => {
 
   const { rating, name, email, review } = body;
 
-  if (!rating || !name || !review) {
+  if (!rating || !name || !email || !review) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Missing required fields' }) };
   }
 
