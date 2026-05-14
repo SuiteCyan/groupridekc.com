@@ -200,7 +200,7 @@ exports.handler = async (event) => {
     const { name, phone, email } = body;
     if (!phone && !email) return { statusCode: 400, body: JSON.stringify({ error: 'Provide at least a phone or email' }) };
 
-    const REVIEW_URL = process.env.GMB_REVIEW_URL || 'https://g.page/r/groupridekc/review';
+    const REVIEW_URL = process.env.GMB_REVIEW_URL || 'https://groupridekc.com/leave-a-review';
     const firstName  = (name || 'there').split(' ')[0];
     const results    = { sms: null, email: null };
 
@@ -274,7 +274,7 @@ exports.handler = async (event) => {
   if (action === 'send_review') {
     if (!booking_id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing booking_id' }) };
 
-    const REVIEW_URL = process.env.GMB_REVIEW_URL || 'https://g.page/r/groupridekc/review';
+    const REVIEW_URL = process.env.GMB_REVIEW_URL || 'https://groupridekc.com/leave-a-review';
 
     const r = await sbFetch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${booking_id}&select=*`, SUPABASE_KEY);
     const bookings = await r.json();
