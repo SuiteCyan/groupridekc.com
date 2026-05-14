@@ -220,59 +220,19 @@
         <label for="login-email">Email Address</label>
         <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" />
       </div>
-      <div class="field">
-        <label for="login-id">Booking ID</label>
-        <input type="text" id="login-id" placeholder="From your confirmation email" autocomplete="off" spellcheck="false" />
-      </div>
       <button class="btn btn-gold" onclick="doLogin()">View My Booking</button>
       <div id="login-error" style="color:var(--red);font-size:.82rem;margin-top:12px;text-align:center;"></div>
     </div>
-    <p class="hint">Your Booking ID is in your confirmation email.<br/>Need help? Call or text <a href="tel:+18165526669">(816) 552-6669</a></p>
+    <p class="hint">Use the email address you booked with.<br/>Need help? Call or text <a href="tel:+18165526669">(816) 552-6669</a></p>
   </div>
 
   <!-- ── Booking screen ── -->
   <div id="booking-screen" style="display:none;">
-
-    <!-- Status header -->
-    <div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-      <div>
-        <div style="font-weight:bold;font-size:1.1rem;" id="b-name"></div>
-        <div style="color:var(--muted);font-size:.82rem;margin-top:3px;" id="b-contact"></div>
-      </div>
-      <div id="b-status-badge"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <div id="b-name" style="font-weight:bold;font-size:1.05rem;color:#fff;"></div>
+      <button class="btn-outline" onclick="signOut()" style="width:auto;padding:8px 18px;font-size:.82rem;">Sign Out</button>
     </div>
-
-    <!-- Booking details -->
-    <div class="card">
-      <h2>Trip Details</h2>
-      <table class="detail-table">
-        <tr><td>Date</td><td id="b-date"></td></tr>
-        <tr><td>Pickup Time</td><td id="b-time"></td></tr>
-        <tr><td>Pickup</td><td id="b-pickup"></td></tr>
-        <tr><td>Drop-off</td><td id="b-dropoff"></td></tr>
-        <tr><td>Passengers</td><td id="b-passengers"></td></tr>
-      </table>
-    </div>
-
-    <!-- Payment section -->
-    <div class="card" id="payment-card">
-      <h2>Payment</h2>
-      <table class="detail-table" style="margin-bottom:0;">
-        <tr><td>Total</td><td id="b-total"></td></tr>
-        <tr><td>Deposit Paid</td><td id="b-deposit" style="color:var(--green);"></td></tr>
-      </table>
-      <div id="balance-section"></div>
-      <div id="pay-btn-wrap"></div>
-    </div>
-
-    <!-- Cancellation -->
-    <div class="card" id="cancel-card">
-      <h2>Cancellation</h2>
-      <div id="cancel-section"></div>
-    </div>
-
-    <!-- Sign out -->
-    <button class="btn-outline" onclick="signOut()" style="display:block;width:100%;margin-top:4px;">Sign Out</button>
+    <div id="bookings-list"></div>
   </div>
 
 </div>
@@ -292,42 +252,35 @@
 
 <script>
   const FUNC = '/.netlify/functions/customer-portal';
-  let SESSION = null; // { email, booking_id }
-  let BOOKING  = null;
+  let SESSION_EMAIL = '';
+  let BOOKINGS = [];
 
   // ── Enter key on login ──
-  ['login-email','login-id'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-  });
-
-  // ── Pre-fill booking ID from URL (?id=...) ──
-  const urlId = new URLSearchParams(location.search).get('id');
-  if (urlId) document.getElementById('login-id').value = urlId;
+  document.getElementById('login-email').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
   // ── Login ──
   async function doLogin() {
-    const email      = document.getElementById('login-email').value.trim();
-    const booking_id = document.getElementById('login-id').value.trim();
-    const errEl      = document.getElementById('login-error');
+    const email = document.getElementById('login-email').value.trim();
+    const errEl = document.getElementById('login-error');
     errEl.textContent = '';
 
-    if (!email || !booking_id) { errEl.textContent = 'Please enter both your email and booking ID.'; return; }
+    if (!email) { errEl.textContent = 'Please enter your email address.'; return; }
 
     const btn = document.querySelector('#login-screen .btn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Looking up…';
 
     try {
-      const data = await post({ action: 'login', email, booking_id });
+      const data = await post({ action: 'login', email });
       if (data.error) {
         errEl.textContent = data.error;
         btn.disabled = false;
         btn.textContent = 'View My Booking';
         return;
       }
-      SESSION = { email, booking_id };
-      BOOKING = data.booking;
-      renderBooking(BOOKING);
+      SESSION_EMAIL = email;
+      BOOKINGS = data.bookings || [];
+      renderBookings();
     } catch (err) {
       errEl.textContent = 'Network error — please try again.';
       btn.disabled = false;
@@ -335,84 +288,92 @@
     }
   }
 
-  function renderBooking(b) {
+  function renderBookings() {
     document.getElementById('login-screen').style.display   = 'none';
     document.getElementById('booking-screen').style.display = 'block';
 
-    // Header
-    document.getElementById('b-name').textContent    = b.customer_name || 'Your Booking';
-    document.getElementById('b-contact').textContent = [b.phone, b.email].filter(Boolean).join(' · ');
+    const name = BOOKINGS[0]?.customer_name || 'Your Bookings';
+    document.getElementById('b-name').textContent = `Hi, ${name.split(' ')[0]}!`;
 
-    // Status badge
-    const statusEl = document.getElementById('b-status-badge');
-    const s = b.status || 'pending';
-    let cls = 'status-pending', label = 'Pending';
-    if (s === 'paid' || s === 'accepted') { cls = 'status-confirmed'; label = 'Confirmed'; }
-    if (s === 'cancelled') { cls = 'status-cancelled'; label = 'Cancelled'; }
-    statusEl.innerHTML = `<span class="status-badge ${cls}">${label}</span>`;
+    const list = document.getElementById('bookings-list');
+    list.innerHTML = '';
 
-    // Trip details
-    document.getElementById('b-date').textContent       = fmtDate(b.pickup_date);
-    document.getElementById('b-time').textContent       = fmtTime(b.pickup_time);
-    document.getElementById('b-pickup').textContent     = b.pickup_address  || 'N/A';
-    document.getElementById('b-dropoff').textContent    = b.dropoff_address || 'N/A';
-    document.getElementById('b-passengers').textContent = b.passengers      || 'N/A';
+    if (BOOKINGS.length === 0) {
+      list.innerHTML = '<div class="notice">No bookings found.</div>';
+      return;
+    }
 
-    // Payment
+    BOOKINGS.forEach(b => list.appendChild(buildBookingCard(b)));
+  }
+
+  function buildBookingCard(b) {
     const total   = parseFloat(b.total_price)    || 0;
     const deposit = parseFloat(b.deposit_amount) || 0;
     const balance = Math.max(0, total - deposit);
-    document.getElementById('b-total').textContent   = '$' + total.toFixed(2);
-    document.getElementById('b-deposit').textContent = '$' + deposit.toFixed(2);
+    const hoursUntil = hoursUntilPickup(b.pickup_date, b.pickup_time);
 
-    const balSec  = document.getElementById('balance-section');
-    const payWrap = document.getElementById('pay-btn-wrap');
+    // Status badge
+    const s = b.status || 'pending';
+    let badgeCls = 'status-pending', badgeLbl = 'Pending';
+    if (s === 'paid' || s === 'accepted') { badgeCls = 'status-confirmed'; badgeLbl = 'Confirmed'; }
+    if (s === 'cancelled') { badgeCls = 'status-cancelled'; badgeLbl = 'Cancelled'; }
 
-    if (b.status === 'cancelled') {
-      balSec.innerHTML  = '';
-      payWrap.innerHTML = '';
-    } else if (balance <= 0) {
-      balSec.innerHTML  = '<div class="paid-box">✓ Your balance is paid in full!</div>';
-      payWrap.innerHTML = '';
-    } else {
-      balSec.innerHTML = `
-        <div class="balance-box">
-          <div class="lbl">Balance Due</div>
-          <div class="amt">$${balance.toFixed(2)}</div>
-        </div>`;
-      payWrap.innerHTML = `
-        <a class="btn btn-gold" href="/pay?id=${esc(b.id)}">Pay Balance — $${balance.toFixed(2)}</a>`;
+    // Balance section
+    let balanceHtml = '';
+    let payBtnHtml  = '';
+    if (s !== 'cancelled') {
+      if (balance <= 0) {
+        balanceHtml = '<div class="paid-box">✓ Paid in full</div>';
+      } else {
+        balanceHtml = `
+          <div class="balance-box">
+            <div class="lbl">Balance Due</div>
+            <div class="amt">$${balance.toFixed(2)}</div>
+          </div>`;
+        payBtnHtml = `<a class="btn btn-gold" href="/pay?id=${esc(b.id)}">Pay Balance — $${balance.toFixed(2)}</a>`;
+      }
     }
 
-    // Cancellation section
-    const cancelSec = document.getElementById('cancel-section');
-    if (b.status === 'cancelled') {
-      cancelSec.innerHTML = '<p class="notice">This booking has been cancelled.</p>';
+    // Cancel section
+    let cancelHtml = '';
+    if (s === 'cancelled') {
+      cancelHtml = '<p class="notice" style="font-size:.83rem;">This booking has been cancelled.</p>';
     } else if (b.cancel_requested) {
-      cancelSec.innerHTML = `
-        <div class="cancel-requested-notice">
-          Your cancellation request has been received. Our team will be in touch soon.
-        </div>`;
+      cancelHtml = `<div class="cancel-requested-notice">Your cancellation request has been received. Our team will be in touch soon.</div>`;
     } else {
-      const hoursUntil = hoursUntilPickup(b.pickup_date, b.pickup_time);
-      const refundNote = (hoursUntil > 72 && deposit > 0)
-        ? `If cancelled now, you'll receive a 50% refund on your deposit ($${(deposit * 0.5).toFixed(2)}).`
-        : 'Cancellations within 72 hours of pickup are non-refundable per our cancellation policy.';
-
-      cancelSec.innerHTML = `
+      cancelHtml = `
         <div class="cancel-warning">
-          <strong>Cancellation Policy:</strong> Cancellations made more than 72 hours before pickup receive a 50% deposit refund.
-          Cancellations within 72 hours forfeit the deposit.
+          <strong>Cancellation Policy:</strong> Cancellations more than 72 hours before pickup receive a 50% deposit refund. Within 72 hours, the deposit is non-refundable.
         </div>
-        <p style="color:var(--muted);font-size:.83rem;margin-bottom:12px;">
-          Submitting a request does not immediately cancel your ride — our team will confirm the cancellation and process any applicable refund.
-        </p>
         <button class="btn-outline" onclick="openModal('${esc(b.id)}', ${hoursUntil}, ${deposit})">Request Cancellation</button>`;
     }
+
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+          <div style="font-weight:bold;font-size:1rem;color:var(--gold);">${fmtDate(b.pickup_date)}${b.pickup_time ? ' at ' + fmtTime(b.pickup_time) : ''}</div>
+          <span class="status-badge ${badgeCls}">${badgeLbl}</span>
+        </div>
+        <table class="detail-table">
+          <tr><td>Pickup</td><td>${esc(b.pickup_address || 'N/A')}</td></tr>
+          <tr><td>Drop-off</td><td>${esc(b.dropoff_address || 'N/A')}</td></tr>
+          <tr><td>Passengers</td><td>${esc(b.passengers || 'N/A')}</td></tr>
+          <tr><td>Total</td><td>$${total.toFixed(2)}</td></tr>
+          <tr><td>Deposit Paid</td><td style="color:var(--green);">$${deposit.toFixed(2)}</td></tr>
+        </table>
+        ${balanceHtml}
+        ${payBtnHtml}
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid #1f1f1f;">
+          ${cancelHtml}
+        </div>
+      </div>`;
+    return wrap;
   }
 
   // ── Cancel modal ──
   let pendingCancelId = null;
+
   function openModal(bookingId, hoursUntil, deposit) {
     pendingCancelId = bookingId;
     const note = (hoursUntil > 72 && deposit > 0)
@@ -421,27 +382,25 @@
     document.getElementById('modal-refund-note').textContent = note;
     document.getElementById('cancel-modal').classList.add('open');
   }
+
   function closeModal() {
     document.getElementById('cancel-modal').classList.remove('open');
     pendingCancelId = null;
   }
 
   async function confirmCancel() {
-    if (!pendingCancelId || !SESSION) return;
+    if (!pendingCancelId) return;
     const btn = document.querySelector('#cancel-modal .btn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Sending…';
 
     try {
-      const data = await post({ action: 'cancel_request', email: SESSION.email, booking_id: SESSION.booking_id });
+      const data = await post({ action: 'cancel_request', email: SESSION_EMAIL, booking_id: pendingCancelId });
       closeModal();
       if (data.success) {
-        // Refresh booking view
-        const refreshData = await post({ action: 'login', email: SESSION.email, booking_id: SESSION.booking_id });
-        if (refreshData.booking) {
-          BOOKING = refreshData.booking;
-          renderBooking(BOOKING);
-        }
+        // Refresh all bookings
+        const refreshData = await post({ action: 'login', email: SESSION_EMAIL });
+        if (refreshData.bookings) { BOOKINGS = refreshData.bookings; renderBookings(); }
       } else {
         alert(data.error || 'Something went wrong. Please call (816) 552-6669.');
       }
@@ -455,11 +414,11 @@
   }
 
   function signOut() {
-    SESSION = null; BOOKING = null;
+    SESSION_EMAIL = ''; BOOKINGS = [];
     document.getElementById('booking-screen').style.display = 'none';
     document.getElementById('login-screen').style.display   = 'block';
     document.getElementById('login-error').textContent = '';
-    document.getElementById('login-id').value = '';
+    document.getElementById('login-email').value = '';
   }
 
   // ── Helpers ──
@@ -473,8 +432,7 @@
 
   function hoursUntilPickup(date, time) {
     if (!date || !time) return 0;
-    const pickupUTC = new Date(`${date}T${time}:00Z`);
-    return (pickupUTC - new Date()) / (1000 * 60 * 60);
+    return (new Date(`${date}T${time}:00Z`) - new Date()) / (1000 * 60 * 60);
   }
 
   function fmtDate(d) {
