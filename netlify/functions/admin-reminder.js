@@ -195,6 +195,81 @@ exports.handler = async (event) => {
     return { statusCode: 200, body: JSON.stringify({ success: true, results }) };
   }
 
+  // ── SEND REVIEW (manual — no booking required, just name/phone/email) ──
+  if (action === 'send_review_manual') {
+    const { name, phone, email } = body;
+    if (!phone && !email) return { statusCode: 400, body: JSON.stringify({ error: 'Provide at least a phone or email' }) };
+
+    const REVIEW_URL = process.env.GMB_REVIEW_URL || 'https://g.page/r/groupridekc/review';
+    const firstName  = (name || 'there').split(' ')[0];
+    const results    = { sms: null, email: null };
+
+    // ── SMS ──
+    if (QUO_API_KEY && QUO_PHONE_NUMBER_ID && phone) {
+      try {
+        let p = phone.replace(/\D/g, '');
+        if (p.length === 10) p = '1' + p;
+        if (!p.startsWith('+')) p = '+' + p;
+        const smsRes = await fetch('https://api.openphone.com/v1/messages', {
+          method: 'POST',
+          headers: { Authorization: QUO_API_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: QUO_PHONE_NUMBER_ID,
+            to: [p],
+            content: `Hi ${firstName}! Thank you for riding with Group Ride KC. If you have a minute, we would love a review: ${REVIEW_URL}`,
+          }),
+        });
+        const smsData = await smsRes.json();
+        results.sms = smsRes.ok ? 'sent' : `error: ${JSON.stringify(smsData)}`;
+      } catch (e) { results.sms = `error: ${e.message}`; }
+    } else { results.sms = phone ? 'skipped — missing QUO config' : 'skipped — no phone provided'; }
+
+    // ── Email ──
+    if (RESEND_API_KEY && email) {
+      try {
+        const emailHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f5f5f5;padding:20px;">
+  <div style="background:#0a0a0a;color:#fff;border-radius:12px;padding:30px;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <img src="${LOGO_URL}" alt="Group Ride KC" style="width:180px;height:auto;" />
+    </div>
+    <h1 style="color:#FFB81C;margin-top:0;text-align:center;">Thank You for Riding with Us!</h1>
+    <p style="color:#ddd;font-size:15px;line-height:1.6;">Hi ${firstName},</p>
+    <p style="color:#ddd;font-size:15px;line-height:1.6;">
+      We hope you had a great experience riding with Group Ride KC! It was a pleasure serving you and your group.
+    </p>
+    <p style="color:#ddd;font-size:15px;line-height:1.6;">
+      If you have a minute, we'd love to hear about your experience. Reviews help other groups find us and mean the world to our small team.
+    </p>
+    <div style="text-align:center;margin:32px 0;">
+      <a href="${REVIEW_URL}" style="display:inline-block;background:#FFB81C;color:#000;padding:16px 48px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:18px;">
+        Leave Us a Review ★
+      </a>
+    </div>
+    <p style="color:#ddd;font-size:15px;line-height:1.6;">We hope to ride with you again soon!</p>
+    <p style="text-align:center;color:#888;font-size:13px;margin-top:24px;">
+      Questions? Call or text us at <a href="tel:+18165526669" style="color:#FFB81C;">(816) 552-6669</a>
+    </p>
+  </div>
+</body></html>`;
+        const emailRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'Group Ride KC <bookings@groupridekc.com>',
+            to: [email],
+            subject: `Thank you for riding with us, ${firstName}! Leave us a review`,
+            html: emailHtml,
+          }),
+        });
+        const emailData = await emailRes.json();
+        results.email = emailData.error ? `error: ${emailData.error.message}` : 'sent';
+      } catch (e) { results.email = `error: ${e.message}`; }
+    } else { results.email = email ? 'skipped — missing Resend config' : 'skipped — no email provided'; }
+
+    return { statusCode: 200, body: JSON.stringify({ success: true, results }) };
+  }
+
   // ── SEND REVIEW REQUEST (manual trigger from admin dashboard) ──
   if (action === 'send_review') {
     if (!booking_id) return { statusCode: 400, body: JSON.stringify({ error: 'Missing booking_id' }) };
