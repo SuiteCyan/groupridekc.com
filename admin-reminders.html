@@ -534,6 +534,12 @@
           ${balance <= 0 ? 'disabled title="Balance is $0 — nothing to collect"' : ''}>
           Send Reminder
         </button>
+        <button class="btn btn-sm" style="background:#1a1a1a;color:#FFB81C;border:1px solid #FFB81C;"
+          id="review-btn-${b.id}"
+          onclick="sendReview('${b.id}')">
+          Send Review Request
+        </button>
+        <span class="send-status" id="review-status-${b.id}"></span>
         ${b.status !== 'cancelled' ? `
         <button class="btn btn-sm" style="background:#333;color:#ccc;border:1px solid #444;"
           id="cancel-btn-${b.id}"
@@ -619,6 +625,38 @@
       status.textContent = `Network error: ${esc(err.message)}`;
       btn.disabled = false;
       btn.textContent = 'Send Reminder';
+    }
+  }
+
+  // ── Send review request ──
+  async function sendReview(bookingId) {
+    const btn    = document.getElementById(`review-btn-${bookingId}`);
+    const status = document.getElementById(`review-status-${bookingId}`);
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    status.textContent = '';
+    status.className = 'send-status';
+
+    try {
+      const data = await post({ action: 'send_review', booking_id: bookingId });
+      if (data.success) {
+        const sms   = data.results?.sms   || '?';
+        const email = data.results?.email || '?';
+        const ok    = sms === 'sent' && email === 'sent';
+        status.className = 'send-status ' + (ok ? 'ok' : 'err');
+        status.textContent = `SMS: ${sms} · Email: ${email}`;
+        btn.textContent = 'Sent!';
+      } else {
+        status.className = 'send-status err';
+        status.textContent = data.error || 'Unknown error';
+        btn.disabled = false;
+        btn.textContent = 'Send Review Request';
+      }
+    } catch (err) {
+      status.className = 'send-status err';
+      status.textContent = `Network error: ${esc(err.message)}`;
+      btn.disabled = false;
+      btn.textContent = 'Send Review Request';
     }
   }
 
