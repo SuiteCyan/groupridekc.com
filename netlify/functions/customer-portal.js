@@ -1,7 +1,7 @@
 // Netlify Function: Customer Portal
 // Handles:
-//   action=login        — verify email + booking ID, return booking data
-//   action=cancel_request — flag booking for admin cancellation review
+//   action=login          — find all bookings by email
+//   action=cancel_request — flag a specific booking for admin cancellation review
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -20,49 +20,61 @@ exports.handler = async (event) => {
 
   const { action, email, booking_id } = body;
 
-  // Both actions require email + booking_id
-  if (!email || !booking_id) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Missing email or booking_id' }) };
+  if (!email) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Missing email address' }) };
   }
 
-  // Look up booking — must match both email AND id
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/bookings?id=eq.${encodeURIComponent(booking_id)}&email=ilike.${encodeURIComponent(email.trim())}&select=*`,
-    { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
-  );
-  const rows = await res.json();
-  const booking = rows?.[0];
-
-  // Generic auth failure — don't reveal which field was wrong
-  if (!booking) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'No booking found with that email and booking ID.' }) };
-  }
-
-  // ── LOGIN — return safe booking data ──
+  // ── LOGIN — find all bookings by email ──
   if (action === 'login') {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/bookings?email=ilike.${encodeURIComponent(email.trim())}&select=*&order=pickup_date.asc`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    const rows = await res.json();
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return { statusCode: 404, body: JSON.stringify({ error: 'No bookings found for that email address. Please check your email or call us at (816) 552-6669.' }) };
+    }
+
     // Strip sensitive internal fields before sending to customer
-    const safe = {
-      id:               booking.id,
-      customer_name:    booking.customer_name,
-      email:            booking.email,
-      phone:            booking.phone,
-      pickup_date:      booking.pickup_date,
-      pickup_time:      booking.pickup_time,
-      pickup_address:   booking.pickup_address,
-      dropoff_address:  booking.dropoff_address,
-      passengers:       booking.passengers,
-      total_price:      booking.total_price,
-      deposit_amount:   booking.deposit_amount,
-      payment_status:   booking.payment_status,
-      status:           booking.status,
-      cancel_requested: booking.cancel_requested,
-      notes:            booking.notes,
-    };
-    return { statusCode: 200, body: JSON.stringify({ booking: safe }) };
+    const bookings = rows.map(b => ({
+      id:               b.id,
+      customer_name:    b.customer_name,
+      email:            b.email,
+      phone:            b.phone,
+      pickup_date:      b.pickup_date,
+      pickup_time:      b.pickup_time,
+      pickup_address:   b.pickup_address,
+      dropoff_address:  b.dropoff_address,
+      passengers:       b.passengers,
+      total_price:      b.total_price,
+      deposit_amount:   b.deposit_amount,
+      payment_status:   b.payment_status,
+      status:           b.status,
+      cancel_requested: b.cancel_requested,
+      notes:            b.notes,
+    }));
+
+    return { statusCode: 200, body: JSON.stringify({ bookings }) };
   }
 
-  // ── CANCEL REQUEST ──
+  // ── CANCEL REQUEST — requires both email + booking_id ──
   if (action === 'cancel_request') {
+    if (!booking_id) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Missing booking ID' }) };
+    }
+
+    // Verify booking belongs to this email
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/bookings?id=eq.${encodeURIComponent(booking_id)}&email=ilike.${encodeURIComponent(email.trim())}&select=*`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    const rows = await res.json();
+    const booking = rows?.[0];
+
+    if (!booking) {
+      return { statusCode: 401, body: JSON.stringify({ error: 'Booking not found.' }) };
+    }
     if (booking.status === 'cancelled') {
       return { statusCode: 400, body: JSON.stringify({ error: 'This booking is already cancelled.' }) };
     }
