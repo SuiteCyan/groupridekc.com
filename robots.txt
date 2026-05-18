@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Keep admin and portal pages out of search results
+Disallow: /admin-reminders
+Disallow: /admin-reminders.html
+Disallow: /customer-portal
+Disallow: /customer-portal.html
+Disallow: /.netlify/
+
+Sitemap: https://groupridekc.com/sitemap.xml
