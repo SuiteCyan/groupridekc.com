@@ -3,6 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0JDRHEC2H0"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-0JDRHEC2H0');
+  </script>
+
   <title>Group Ride KC – Kansas City Group Shuttle & Transportation Service</title>
   <meta name="description" content="Premium group shuttle service in Kansas City. Private GMC Yukon Denali XL or 10-passenger van — door to door for corporate groups, stadium events, airport transfers, and KC 2026 soccer. Book online." />
   <meta name="keywords" content="group shuttle Kansas City, Kansas City group transportation, private shuttle KC, group ride Kansas City, KC 2026 shuttle, stadium shuttle Kansas City, airport group transfer KC, party bus alternative Kansas City" />
@@ -959,6 +969,34 @@
       alert('Payment was cancelled. Your booking is still saved — you can pay the deposit anytime using the link in your email, or call us at (816) 552-6669.');
       window.history.replaceState({}, '', window.location.pathname);
     }
+  })();
+</script>
+
+<!-- Cookie notice -->
+<div id="grk-cookie" class="grk-cookie" role="dialog" aria-live="polite" aria-label="Cookie notice" hidden>
+  <p class="grk-cookie-text">We use cookies to keep this site running, process your booking, and improve your experience. See our <a href="terms.html#cookies">Cookie Policy</a>.</p>
+  <div class="grk-cookie-actions">
+    <button type="button" class="grk-cookie-btn" onclick="grkAcceptCookies()">Got it</button>
+  </div>
+</div>
+<style>
+  .grk-cookie{position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;display:flex;flex-wrap:wrap;align-items:center;gap:14px;justify-content:space-between;max-width:760px;margin:0 auto;background:#141414;border:1px solid rgba(253,185,19,.35);border-radius:14px;padding:16px 20px;box-shadow:0 12px 40px rgba(0,0,0,.5);font-family:'Inter',sans-serif}
+  .grk-cookie-text{margin:0;color:#e8e8e8;font-size:13.5px;line-height:1.55;flex:1 1 320px}
+  .grk-cookie-text a{color:#FDB913;text-decoration:underline}
+  .grk-cookie-actions{display:flex;gap:10px;flex-shrink:0}
+  .grk-cookie-btn{background:#E31837;color:#fff;border:none;border-radius:9px;padding:10px 22px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s,transform .15s}
+  .grk-cookie-btn:hover{background:#b8102a;transform:translateY(-1px)}
+  @media(max-width:560px){.grk-cookie{flex-direction:column;align-items:stretch;text-align:center}.grk-cookie-actions{justify-content:center}}
+</style>
+<script>
+  function grkAcceptCookies(){
+    try{localStorage.setItem('grk_cookie_consent','accepted');}catch(e){}
+    var el=document.getElementById('grk-cookie');
+    if(el){el.style.transition='opacity .25s,transform .25s';el.style.opacity='0';el.style.transform='translateY(12px)';setTimeout(function(){el.hidden=true;},260);}
+  }
+  (function(){
+    var ok;try{ok=localStorage.getItem('grk_cookie_consent');}catch(e){}
+    if(!ok){var el=document.getElementById('grk-cookie');if(el)el.hidden=false;}
   })();
 </script>
 
