@@ -762,6 +762,16 @@
         console.warn('Admin email notification failed (non-critical):', err);
       });
 
+      // Fire GA4 generate_lead event for conversion tracking (Google Ads imports this)
+      if (typeof gtag === 'function') {
+        gtag('event', 'generate_lead', {
+          currency: 'USD',
+          value: total,
+          booking_id: data[0].id,
+          source_page: window.location.pathname
+        });
+      }
+
       // Show confirmation modal and reset form
       document.getElementById('qe-confirmationModal').classList.add('active');
       document.getElementById('bookingForm').reset();
