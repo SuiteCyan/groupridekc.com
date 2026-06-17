@@ -329,7 +329,7 @@
         <div class="price-breakdown">
           <div class="pb-row">
             <span>Base fare</span>
-            <span id="pb-base">$95</span>
+            <span id="pb-base">$249</span>
           </div>
           <div class="pb-row" id="pb-dist-row" style="display:none;">
             <span id="pb-dist-label">Distance (-- mi × $2.25)</span>
@@ -350,7 +350,7 @@
           <hr class="pb-divider" />
           <div class="pb-total">
             <span>Estimated Total</span>
-            <span id="price-display">$95</span>
+            <span id="price-display">$249</span>
           </div>
           <div class="pb-note">This is an estimate. Final price will be confirmed by Group Ride KC. Prices are subject to change based on availability. All rides are first come, first served. <a href="terms.html" target="_blank" style="color:var(--gold); text-decoration:underline;">Full terms →</a></div>
           <div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,.08);">
@@ -437,6 +437,10 @@
     suburban: { base: 95,  perMile: 2.25, label: 'GMC Yukon Denali XL' },
     van:      { base: 95,  perMile: 3.00, label: '10-Pass Van' }
   };
+  // One-way trips use a higher flat base ($249) so two one-ways can't undercut a
+  // round trip. Round trips keep the $95 vehicle base and earn via the on-site
+  // hourly rate. Applies to both vehicles.
+  const ONEWAY_BASE = 249;
   const SURGE_PRICING = { base: 145, perMile: 5.00 };
   const DEPOSIT_PCT = 0.50;
   const KC_ONSITE_HOURLY_RATE = 95;
@@ -614,9 +618,14 @@
     const date  = document.getElementById('pickup-date').value;
     const time  = document.getElementById('pickup-time').value;
     const surge = isSurge(date, time);
+    const isRoundTrip = kcTripType === 'roundtrip';
 
-    const base    = surge ? SURGE_PRICING.base    : p.base;
     const perMile = surge ? SURGE_PRICING.perMile : p.perMile;
+    // One-ways use the flat $249 base (never dropping below it, even on surge days).
+    // Round trips use the $95 vehicle base (or surge base) and monetize the wait via hours.
+    const base = isRoundTrip
+      ? (surge ? SURGE_PRICING.base : p.base)
+      : (surge ? Math.max(ONEWAY_BASE, SURGE_PRICING.base) : ONEWAY_BASE);
 
     document.getElementById('pb-base').textContent = '$' + base;
 
@@ -642,7 +651,6 @@
     }
 
     const oneWayTotal = Math.ceil(base + distCost);
-    const isRoundTrip = kcTripType === 'roundtrip';
     const rtRow = document.getElementById('pb-roundtrip-row');
     if (isRoundTrip) {
       rtRow.style.display = 'flex';
