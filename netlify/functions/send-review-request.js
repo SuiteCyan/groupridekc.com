@@ -58,9 +58,15 @@ exports.handler = async () => {
     let sent = 0;
 
     for (const booking of bookings) {
-      // Build exact pickup datetime and check it's in the 2–4 hour window
-      const pickupUTC      = new Date(`${booking.pickup_date}T${booking.pickup_time || '00:00'}:00Z`);
-      const hoursAfterPickup = (now - pickupUTC) / (1000 * 60 * 60);
+      // Build exact pickup datetime in Central Time (pickup_time is stored as America/Chicago).
+      // Determine the correct UTC offset for this date — handles CDT vs CST automatically.
+      const sampleUtc = new Date(`${booking.pickup_date}T12:00:00Z`);
+      const tzOffset = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Chicago',
+        timeZoneName: 'longOffset',
+      }).formatToParts(sampleUtc).find(p => p.type === 'timeZoneName').value.replace('GMT', '');
+      const pickup = new Date(`${booking.pickup_date}T${booking.pickup_time || '00:00'}:00${tzOffset}`);
+      const hoursAfterPickup = (now - pickup) / (1000 * 60 * 60);
 
       if (hoursAfterPickup < 2 || hoursAfterPickup > 4) {
         console.log(`Booking ${booking.id}: ${hoursAfterPickup.toFixed(1)} hrs since pickup — skipping`);
