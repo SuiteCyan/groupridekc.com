@@ -442,12 +442,15 @@ exports.handler = async (event) => {
     let refundAmountCents = 0;
     let refundNote = 'no refund — within 72-hour window';
     if (booking.pickup_date && booking.pickup_time) {
-      // TODO (timezone bug, deferred Jun 20): pickup parsed as UTC but stored as Central Time.
-      // hoursUntil is off by 5h (CDT) / 6h (CST). Customers cancelling 72-77h before pickup get
-      // wrongly denied their 50% refund. Low frequency, Tracy can issue manually via Stripe.
-      // Apply same Intl.DateTimeFormat fix as send-review-request.js when batching timezone work.
-      const pickupUTC  = new Date(`${booking.pickup_date}T${booking.pickup_time}:00Z`);
-      const hoursUntil = (pickupUTC - new Date()) / (1000 * 60 * 60);
+      // Parse pickup in Central Time (pickup_time is stored as America/Chicago).
+      // Same Intl.DateTimeFormat pattern as send-review-request.js — handles CDT vs CST automatically.
+      const sampleUtc = new Date(`${booking.pickup_date}T12:00:00Z`);
+      const tzOffset = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Chicago',
+        timeZoneName: 'longOffset',
+      }).formatToParts(sampleUtc).find(p => p.type === 'timeZoneName').value.replace('GMT', '');
+      const pickup = new Date(`${booking.pickup_date}T${booking.pickup_time}:00${tzOffset}`);
+      const hoursUntil = (pickup - new Date()) / (1000 * 60 * 60);
       if (hoursUntil > 72 && deposit > 0) {
         refundAmountCents = Math.round(deposit * 0.5 * 100);
         refundNote = `50% deposit refund ($${(refundAmountCents / 100).toFixed(2)})`;
