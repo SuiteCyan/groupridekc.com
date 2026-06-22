@@ -11,6 +11,9 @@ exports.handler = async (event) => {
   const ADMIN_SECRET    = process.env.ADMIN_SECRET;
   const SUPABASE_URL    = process.env.SUPABASE_URL    || 'https://nysoddktcdzynktrddte.supabase.co';
   const SUPABASE_KEY    = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55c29kZGt0Y2R6eW5rdHJkZHRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTYyMzAsImV4cCI6MjA4ODk5MjIzMH0.uj4aEhQ0fWog_6OA6ypx5N8Kou871hw7eipgKPIiIDU';
+  // Service-role key bypasses Supabase Row Level Security — required for admin UPDATE/DELETE.
+  // Falls back to anon key if not set, but writes will fail (visible in PATCH response now that sbPatch throws on non-2xx).
+  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_KEY;
   const RESEND_API_KEY  = process.env.RESEND_API_KEY;
   const QUO_API_KEY     = process.env.QUO_API_KEY;
   const QUO_PHONE_NUMBER_ID = process.env.QUO_PHONE_NUMBER_ID;
@@ -366,8 +369,8 @@ exports.handler = async (event) => {
     const booking = bookings?.[0];
     if (!booking) return { statusCode: 404, body: JSON.stringify({ error: 'Booking not found' }) };
 
-    // Mark cancel requested in Supabase
-    await sbPatch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${booking_id}`, SUPABASE_KEY, { cancel_requested: true });
+    // Mark cancel requested in Supabase (uses service-role key — anon key blocked by RLS)
+    await sbPatch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${booking_id}`, SUPABASE_SERVICE_KEY, { cancel_requested: true });
 
     // Notify admin by email
     const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'GroupRideKC@gmail.com';
@@ -439,6 +442,10 @@ exports.handler = async (event) => {
     let refundAmountCents = 0;
     let refundNote = 'no refund — within 72-hour window';
     if (booking.pickup_date && booking.pickup_time) {
+      // TODO (timezone bug, deferred Jun 20): pickup parsed as UTC but stored as Central Time.
+      // hoursUntil is off by 5h (CDT) / 6h (CST). Customers cancelling 72-77h before pickup get
+      // wrongly denied their 50% refund. Low frequency, Tracy can issue manually via Stripe.
+      // Apply same Intl.DateTimeFormat fix as send-review-request.js when batching timezone work.
       const pickupUTC  = new Date(`${booking.pickup_date}T${booking.pickup_time}:00Z`);
       const hoursUntil = (pickupUTC - new Date()) / (1000 * 60 * 60);
       if (hoursUntil > 72 && deposit > 0) {
@@ -447,9 +454,9 @@ exports.handler = async (event) => {
       }
     }
 
-    // ── 1. Mark cancelled in Supabase ──
+    // ── 1. Mark cancelled in Supabase (service-role key required — RLS blocks anon UPDATE) ──
     try {
-      await sbPatch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${booking_id}`, SUPABASE_KEY, {
+      await sbPatch(`${SUPABASE_URL}/rest/v1/bookings?id=eq.${booking_id}`, SUPABASE_SERVICE_KEY, {
         status: 'cancelled',
         cancel_requested: false,
       });
@@ -544,6 +551,16 @@ exports.handler = async (event) => {
     return { statusCode: 200, body: JSON.stringify({ success: true, results, refund_note: refundNote }) };
   }
 
+  // ── LIST REVIEWS ──
+  if (action === 'list_reviews') {
+    const r = await sbFetch(
+      `${SUPABASE_URL}/rest/v1/reviews?select=*&order=created_at.desc&limit=200`,
+      SUPABASE_KEY
+    );
+    const reviews = await r.json();
+    return { statusCode: 200, body: JSON.stringify({ reviews: Array.isArray(reviews) ? reviews : [] }) };
+  }
+
   return { statusCode: 400, body: JSON.stringify({ error: 'Invalid action' }) };
 };
 
@@ -552,12 +569,18 @@ function sbFetch(url, key) {
   return fetch(url, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
 }
 
-function sbPatch(url, key, data) {
-  return fetch(url, {
+async function sbPatch(url, key, data) {
+  const r = await fetch(url, {
     method: 'PATCH',
     headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
     body: JSON.stringify(data),
   });
+  // Throw on non-2xx so silent RLS / auth failures actually surface in the calling try/catch.
+  if (!r.ok) {
+    const errText = await r.text().catch(() => '');
+    throw new Error(`Supabase PATCH ${r.status}: ${errText || r.statusText}`);
+  }
+  return r;
 }
 
 function formatDate(dateStr) {
