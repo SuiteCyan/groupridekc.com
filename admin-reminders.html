@@ -903,9 +903,18 @@
 
   function confirmCancel(bookingId, customerName, pickupDate, pickupTime, balance) {
     cancelTargetId = bookingId;
-    const hoursUntil = pickupDate && pickupTime
-      ? (new Date(`${pickupDate}T${pickupTime}:00Z`) - new Date()) / (1000 * 60 * 60)
-      : 0;
+    // Parse pickup in Central Time (pickup_time is stored as America/Chicago).
+    // Same Intl.DateTimeFormat pattern as send-review-request.js — handles CDT vs CST automatically.
+    let hoursUntil = 0;
+    if (pickupDate && pickupTime) {
+      const sampleUtc = new Date(`${pickupDate}T12:00:00Z`);
+      const tzOffset = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Chicago',
+        timeZoneName: 'longOffset',
+      }).formatToParts(sampleUtc).find(p => p.type === 'timeZoneName').value.replace('GMT', '');
+      const pickupCT = new Date(`${pickupDate}T${pickupTime}:00${tzOffset}`);
+      hoursUntil = (pickupCT - new Date()) / (1000 * 60 * 60);
+    }
     const deposit = parseFloat(ALL_BOOKINGS.find(b => b.id === bookingId)?.deposit_amount) || 0;
 
     document.getElementById('cancel-modal-body').textContent =
@@ -922,6 +931,12 @@
   function closeCancelModal() {
     document.getElementById('cancel-modal').style.display = 'none';
     cancelTargetId = null;
+    // Reset the confirm button so subsequent cancels in the same session work
+    const btn = document.getElementById('cancel-confirm-btn');
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Yes, Cancel Ride';
+    }
   }
 
   async function doCancel() {
