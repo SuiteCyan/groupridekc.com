@@ -141,7 +141,7 @@ exports.handler = async (event) => {
             route_miles: booking.route_miles,
             total_price: booking.total_price,
             deposit_amount: booking.deposit_amount,
-            payment_status: 'deposit_paid',
+            payment_status: newPaymentStatus,
             source_page: booking.source_page,
           }),
         });
