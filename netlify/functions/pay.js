@@ -1,7 +1,10 @@
-// Netlify Function: Balance Payment Redirect
-// URL: groupridekc.com/pay?id=[booking_id]
-// Looks up the booking, generates a fresh Stripe checkout for the remaining balance,
-// and redirects the customer directly to Stripe — no interstitial pages.
+// Netlify Function: Payment Redirect
+// URL: groupridekc.com/pay?id=[booking_id]&mode=deposit|full
+// Looks up the booking, decides what is actually owed right now (deposit, full
+// payment, or remaining balance), generates a fresh Stripe checkout for that
+// amount, and redirects the customer directly to Stripe — no interstitial pages.
+// Because the amount is derived from the booking's live payment status, links
+// never expire and can't double-charge.
 
 exports.handler = async (event) => {
   const bookingId = event.queryStringParameters?.id;
@@ -36,10 +39,33 @@ exports.handler = async (event) => {
 
     const total = parseFloat(booking.total_price) || 0;
     const deposit = parseFloat(booking.deposit_amount) || 0;
-    const balance = Math.max(0, total - deposit);
 
-    // If already paid in full, show a friendly message instead of a $0 checkout
-    if (balance <= 0) {
+    // Decide what this link should charge based on where the booking stands:
+    // - Deposit already paid → remaining balance (balance reminder links land here)
+    // - Nothing paid + mode=full → full total
+    // - Nothing paid + pickup within 72 hrs → full total (payment policy)
+    // - Nothing paid otherwise → deposit
+    const mode = event.queryStringParameters?.mode;
+    const pickupDateTime = new Date(`${booking.pickup_date}T${booking.pickup_time || '00:00'}:00`);
+    const within72 = (pickupDateTime - new Date()) / (1000 * 60 * 60) <= 72;
+
+    let chargeAmount, chargeLabel;
+    if (booking.payment_status === 'fully_paid') {
+      chargeAmount = 0;
+      chargeLabel = '';
+    } else if (booking.payment_status === 'deposit_paid') {
+      chargeAmount = Math.max(0, total - deposit);
+      chargeLabel = 'Group Ride KC — Remaining Balance';
+    } else if (mode === 'full' || within72 || deposit >= total) {
+      chargeAmount = total;
+      chargeLabel = 'Group Ride KC — Full Payment';
+    } else {
+      chargeAmount = deposit || total * 0.5;
+      chargeLabel = 'Group Ride KC — Deposit';
+    }
+
+    // If nothing is owed, show a friendly message instead of a $0 checkout
+    if (chargeAmount <= 0) {
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'text/html' },
@@ -61,12 +87,12 @@ a{color:#FDB913;}</style>
       };
     }
 
-    // Generate a fresh Stripe Checkout session for the remaining balance
+    // Generate a fresh Stripe Checkout session for whatever is owed
     const params = new URLSearchParams({
       'payment_method_types[]': 'card',
       'line_items[0][price_data][currency]': 'usd',
-      'line_items[0][price_data][product_data][name]': 'Group Ride KC — Remaining Balance',
-      'line_items[0][price_data][unit_amount]': String(Math.round(balance * 100)),
+      'line_items[0][price_data][product_data][name]': chargeLabel,
+      'line_items[0][price_data][unit_amount]': String(Math.round(chargeAmount * 100)),
       'line_items[0][quantity]': '1',
       'mode': 'payment',
       'success_url': `${SITE_URL}?payment=success&booking_id=${bookingId}&type=kc&session_id={CHECKOUT_SESSION_ID}`,
