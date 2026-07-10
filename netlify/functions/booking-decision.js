@@ -83,35 +83,18 @@ exports.handler = async (event) => {
         ? (booking.total_price || 0)
         : (booking.deposit_amount || booking.total_price * 0.5);
 
-      // Build Stripe payment link via the create-checkout function
-      const checkoutPayload = {
-        amount_cents: Math.round(chargeAmount * 100),
-        booking_id: booking.id,
-        booking_type: 'kc',
-        customer_email: booking.email,
-        description: chargeFullPayment
-          ? `Group Ride KC — ${vehicleLabel} (full payment — ride within 72 hrs)`
-          : `Group Ride KC — ${vehicleLabel} deposit`,
-      };
-
-      let paymentUrl = SITE_URL; // fallback
-      try {
-        const checkoutRes = await fetch(`${SITE_URL}/.netlify/functions/create-checkout`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(checkoutPayload),
-        });
-        const checkoutData = await checkoutRes.json();
-        if (checkoutData.url) paymentUrl = checkoutData.url;
-      } catch (e) {
-        console.error('Failed to create checkout session:', e.message);
-      }
+      // Payment links route through /pay, which checks the booking's live
+      // payment status before creating a Stripe session. Links never expire
+      // and can't double-charge (once the deposit is paid, the full-payment
+      // link automatically charges only the remaining balance).
+      const depositUrl = `${SITE_URL}/pay?id=${booking.id}&mode=deposit`;
+      const fullPaymentUrl = `${SITE_URL}/pay?id=${booking.id}&mode=full`;
 
       // Send acceptance email via Resend
       if (RESEND_API_KEY && booking.email) {
         await sendEmail(RESEND_API_KEY, booking.email, customerName, {
           subject: `✅ Your Group Ride KC Request is Approved!`,
-          html: buildAcceptanceEmail(booking, vehicleLabel, paymentUrl, chargeAmount, chargeFullPayment),
+          html: buildAcceptanceEmail(booking, vehicleLabel, { depositUrl, fullPaymentUrl }, chargeAmount, chargeFullPayment),
         });
       }
 
@@ -251,14 +234,26 @@ async function sendEmail(apiKey, to, customerName, { subject, html }) {
 
 
 // ── Helper: Build acceptance email HTML ──
-function buildAcceptanceEmail(booking, vehicleLabel, paymentUrl, chargeAmount, chargeFullPayment) {
+function buildAcceptanceEmail(booking, vehicleLabel, payUrls, chargeAmount, chargeFullPayment) {
   const deposit = chargeAmount || booking.deposit_amount || (booking.total_price * 0.5);
+  const total = parseFloat(booking.total_price) || deposit;
+  const fmt = (n) => parseFloat(n).toFixed(2).replace(/\.00$/, '');
   const tripLabel = booking.trip_type === 'roundtrip' ? 'Round Trip' : 'One-Way';
   const paymentLabel = chargeFullPayment ? 'Full Payment Due' : 'Deposit Due';
-  const payBtnLabel = chargeFullPayment ? `Pay in Full — $${deposit}` : `Pay Deposit — $${deposit}`;
   const paymentNote = chargeFullPayment
     ? 'Because your ride is within 72 hours, <strong style="color:#fff;">full payment is required</strong> to confirm your booking.'
-    : 'To secure your ride, please pay the 50% deposit below. The remaining balance is due 72 hours prior to your pickup time.';
+    : 'To secure your ride, please pay the 50% deposit below. The remaining balance is due 72 hours prior to your pickup time. Prefer to take care of everything now? You can pay in full instead and nothing more will be owed.';
+  const paymentButtons = chargeFullPayment
+    ? `<a href="${payUrls.fullPaymentUrl}" style="display: inline-block; background: #E31837; color: #fff; padding: 16px 48px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 18px;">
+        Pay in Full — $${fmt(deposit)}
+      </a>`
+    : `<a href="${payUrls.depositUrl}" style="display: inline-block; background: #E31837; color: #fff; padding: 16px 48px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 18px;">
+        Pay Deposit — $${fmt(deposit)}
+      </a>
+      <br>
+      <a href="${payUrls.fullPaymentUrl}" style="display: inline-block; background: transparent; border: 2px solid #FFB81C; color: #FFB81C; padding: 12px 36px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px; margin-top: 14px;">
+        Pay in Full — $${fmt(total)}
+      </a>`;
   return `
 <!DOCTYPE html>
 <html>
@@ -296,9 +291,7 @@ function buildAcceptanceEmail(booking, vehicleLabel, paymentUrl, chargeAmount, c
     </div>
 
     <div style="text-align: center; margin: 30px 0;">
-      <a href="${paymentUrl}" style="display: inline-block; background: #E31837; color: #fff; padding: 16px 48px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 18px;">
-        ${payBtnLabel}
-      </a>
+      ${paymentButtons}
     </div>
 
     <p style="font-size: 12px; color: #666; text-align: center; margin-top: 20px;">
