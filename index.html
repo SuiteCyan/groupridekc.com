@@ -947,9 +947,10 @@
     if (!payment || !bookingId) return;
 
     if (payment === 'success') {
-      // Update payment status in Supabase (webhook also handles this as backup)
+      // Mark the booking paid (the Stripe webhook sets the precise payment_status —
+      // deposit vs full — so we don't set it here and risk overwriting a full payment)
       supabaseClient.from('bookings')
-        .update({ status: 'paid', payment_status: 'deposit_paid', stripe_session_id: sessionId })
+        .update({ status: 'paid', stripe_session_id: sessionId })
         .eq('id', bookingId)
         .then(() => {
           // Show success message via the confirmation modal
@@ -958,7 +959,7 @@
             const heading = modal.querySelector('h2');
             const msg = modal.querySelector('p');
             if (heading) heading.textContent = 'Payment Successful!';
-            if (msg) msg.textContent = 'Your deposit has been received and your ride is confirmed! You will receive a confirmation email and text shortly. We look forward to driving you!';
+            if (msg) msg.textContent = 'Your payment has been received and your ride is confirmed! You will receive a confirmation email and text shortly. We look forward to driving you!';
             modal.classList.add('active');
           }
         });
