@@ -61,7 +61,7 @@ exports.handler = async (event) => {
 
     // 1. Fetch the booking first so we can compare amount paid vs total
     const preCheckRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/bookings?id=eq.${bookingId}&select=total_price,deposit_amount,full_payment_required,payment_status`,
+      `${SUPABASE_URL}/rest/v1/bookings?id=eq.${bookingId}&select=total_price,deposit_amount,payment_status`,
       {
         headers: {
           apikey: SUPABASE_KEY,
@@ -73,10 +73,10 @@ exports.handler = async (event) => {
     const preBooking = preCheckData?.[0] || {};
     const totalPrice = parseFloat(preBooking.total_price) || 0;
     // isFullPayment is true if:
-    // - booking requires full payment upfront, OR
     // - deposit was already paid (so this payment is the balance), OR
     // - amount paid is within $0.50 of the total (full payment in one shot)
-    const isFullPayment = preBooking.full_payment_required === true ||
+    // (Note: removed full_payment_required check — column doesn't exist in Supabase, was breaking the SELECT.)
+    const isFullPayment =
       preBooking.payment_status === 'deposit_paid' ||
       (totalPrice > 0 && Math.abs(amountPaidDollars - totalPrice) < 0.50);
     const newPaymentStatus = isFullPayment ? 'fully_paid' : 'deposit_paid';
